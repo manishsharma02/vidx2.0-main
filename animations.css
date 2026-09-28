@@ -1,0 +1,492 @@
+/* ==========================================================
+   VidX — Cyntexa-Inspired Motion & Design System (Clean Light Theme)
+   Pure CSS animation layer, design tokens & transitions
+   ========================================================== */
+
+:root {
+  --vidx-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --vidx-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --vidx-transition-fast: 0.2s var(--vidx-ease);
+  --vidx-transition-normal: 0.35s var(--vidx-ease);
+  --vidx-transition-slow: 0.6s var(--vidx-ease);
+
+  /* Light Theme Glass & Surfaces */
+  --vidx-glass-bg: rgba(255, 255, 255, 0.92);
+  --vidx-glass-bg-hover: #ffffff;
+  --vidx-glass-border: rgba(0, 0, 0, 0.08);
+  --vidx-glass-border-hover: rgba(124, 58, 237, 0.35);
+  --vidx-glass-blur: blur(16px);
+
+  /* Elevation Shadows */
+  --vidx-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --vidx-shadow-md: 0 10px 30px -6px rgba(0, 0, 0, 0.07);
+  --vidx-shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.09);
+  --vidx-shadow-glow: 0 0 30px rgba(124, 58, 237, 0.12);
+  --vidx-shadow-cyan-glow: 0 0 25px rgba(6, 182, 212, 0.12);
+  --vidx-shadow-gold: 0 0 25px rgba(245, 158, 11, 0.15);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Background ambient orbs with soft pastel tones */
+.vidx-bg-float {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+}
+
+/* Page entrance animation */
+.vidx-page-enter {
+  /* disabled: caused flicker and broke position:fixed children */
+}
+
+@keyframes vidxPageIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Card tilt & elevation */
+.vidx-card-tilt {
+  transform-style: preserve-3d;
+  transition: transform var(--vidx-transition-normal), box-shadow var(--vidx-transition-normal), border-color var(--vidx-transition-normal);
+  will-change: transform;
+}
+
+.vidx-card-tilt:hover {
+  box-shadow: var(--vidx-shadow-glow), var(--vidx-shadow-md);
+  border-color: var(--vidx-glass-border-hover);
+}
+
+/* Button glow */
+.vidx-btn-glow {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s var(--vidx-ease), box-shadow 0.35s var(--vidx-ease), border-color 0.25s ease;
+}
+
+.vidx-btn-glow::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(59, 130, 246, 0.3));
+  opacity: 0;
+  z-index: -1;
+  filter: blur(14px);
+  transition: opacity 0.35s ease;
+}
+
+.vidx-btn-glow:hover {
+  transform: translateY(-2px);
+}
+
+.vidx-btn-glow:hover::after {
+  opacity: 0.85;
+}
+
+/* Hero reveal states */
+.vidx-reveal-left,
+.vidx-reveal-right,
+.vidx-reveal-up {
+  opacity: 0;
+  transition: opacity 0.65s var(--vidx-ease), transform 0.65s var(--vidx-ease);
+}
+
+.vidx-revealed {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.hero-content,
+.hero-content.vidx-reveal-left,
+.hero-content.vidx-reveal-right {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.vidx-hero-float {
+  will-change: transform;
+}
+
+/* Live beacon pulse */
+@keyframes vidxBeaconPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4);
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.85;
+    box-shadow: 0 0 0 6px rgba(124, 58, 237, 0);
+  }
+}
+
+/* Pill badge */
+.vidx-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(124, 58, 237, 0.22);
+  color: #6d28d9;
+  transition: border-color var(--vidx-transition-fast), transform var(--vidx-transition-fast);
+}
+
+.vidx-pill:hover {
+  border-color: rgba(124, 58, 237, 0.5);
+  transform: translateY(-1px);
+}
+
+/* ==========================================================
+   CYNTEXA SIGNATURE COMPONENTS
+   ========================================================== */
+
+/* 1. Cyntexa Editorial Kicker Tag */
+.cyntexa-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #6d28d9;
+  margin-bottom: 1.25rem;
+  padding: 0.35rem 1rem;
+  background: rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  border-radius: 9999px;
+  backdrop-filter: blur(8px);
+}
+
+.cyntexa-kicker .kicker-dot,
+.cyntexa-kicker-dot {
+  width: 7px;
+  height: 7px;
+  min-width: 7px;
+  min-height: 7px;
+  border-radius: 50%;
+  background: #7c3aed;
+  box-shadow: 0 0 8px #7c3aed;
+  animation: vidxBeaconPulse 2s infinite ease-in-out;
+  display: inline-block;
+}
+
+/* 2. Signature Circular Arrow Button */
+.cyntexa-explore-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: #0f172a;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 0.92rem;
+  position: relative;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0.4rem 0;
+  transition: color 0.3s var(--vidx-ease);
+}
+
+.cyntexa-explore-btn .circle-badge,
+.cyntexa-explore-btn .arrow-circle {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: 50%;
+  background: rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.35s var(--vidx-ease);
+  overflow: hidden;
+  color: #7c3aed;
+  flex-shrink: 0;
+}
+
+.cyntexa-explore-btn .circle-badge svg,
+.cyntexa-explore-btn .arrow-circle svg {
+  width: 15px !important;
+  height: 15px !important;
+  min-width: 15px !important;
+  min-height: 15px !important;
+  max-width: 15px !important;
+  max-height: 15px !important;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  transition: transform 0.35s var(--vidx-ease);
+  display: block;
+}
+
+.cyntexa-explore-btn:hover {
+  color: #6d28d9;
+}
+
+.cyntexa-explore-btn:hover .circle-badge,
+.cyntexa-explore-btn:hover .arrow-circle {
+  border-color: rgba(124, 58, 237, 0.8);
+  background: #7c3aed;
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(124, 58, 237, 0.35);
+  transform: scale(1.06);
+}
+
+.cyntexa-explore-btn:hover .circle-badge svg,
+.cyntexa-explore-btn:hover .arrow-circle svg {
+  transform: translateX(2px);
+  stroke: #ffffff;
+}
+
+/* 3. Kinetic Marquee Tape Ribbon */
+.cyntexa-marquee-strip {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  padding: 1.1rem 0;
+  background: #ffffff;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  display: flex;
+  white-space: nowrap;
+  user-select: none;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+}
+
+.cyntexa-marquee-track {
+  display: flex;
+  gap: 3rem;
+  align-items: center;
+  animation: cyntexaMarqueeScroll 28s linear infinite;
+  will-change: transform;
+}
+
+.cyntexa-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+.cyntexa-marquee-item {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.cyntexa-marquee-item span.accent {
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.cyntexa-marquee-item .sep {
+  color: #7c3aed;
+  font-size: 0.85rem;
+}
+
+@keyframes cyntexaMarqueeScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* 4. Asymmetric Story / Feature Card */
+.cyntexa-story-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  overflow: hidden;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  transition: all 0.35s var(--vidx-ease);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.cyntexa-story-card:hover {
+  border-color: rgba(124, 58, 237, 0.4);
+  transform: translateY(-5px);
+  box-shadow: 0 16px 36px rgba(124, 58, 237, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.cyntexa-story-header {
+  padding: 2rem 2rem 1.25rem;
+}
+
+.cyntexa-story-body {
+  padding: 0 2rem 2rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* 5. Terminal Code Mockup for Editorial Showcase */
+.cyntexa-terminal-mock {
+  background: #0f172a;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.22), 0 4px 12px rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+
+.cyntexa-terminal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  background: #1e293b;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cyntexa-terminal-dots {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.cyntexa-terminal-dots span {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.cyntexa-terminal-dots span:nth-child(1) { background: #ef4444; }
+.cyntexa-terminal-dots span:nth-child(2) { background: #f59e0b; }
+.cyntexa-terminal-dots span:nth-child(3) { background: #10b981; }
+
+.cyntexa-terminal-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.cyntexa-terminal-body {
+  padding: 1.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.86rem;
+  line-height: 1.7;
+  color: #e2e8f0;
+}
+
+/* 6. FAQ Accordion Item & Interactive States */
+.cyntexa-faq-item {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  margin-bottom: 0.9rem;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+  transition: all 0.3s var(--vidx-ease);
+}
+
+.cyntexa-faq-item:hover {
+  border-color: rgba(124, 58, 237, 0.3);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.06);
+}
+
+.cyntexa-faq-item.active {
+  border-color: rgba(124, 58, 237, 0.45);
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.08);
+}
+
+.cyntexa-faq-trigger {
+  width: 100%;
+  padding: 1.25rem 1.6rem;
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  text-align: left;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 1.02rem;
+  color: #0f172a;
+  cursor: pointer;
+  transition: color 0.2s ease, background-color 0.2s ease;
+  outline: none;
+}
+
+.cyntexa-faq-trigger:hover {
+  color: #6d28d9;
+}
+
+.cyntexa-faq-chevron {
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  min-height: 20px !important;
+  max-width: 20px !important;
+  max-height: 20px !important;
+  transition: transform 0.3s var(--vidx-ease);
+  color: #7c3aed;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.cyntexa-faq-item.active .cyntexa-faq-chevron {
+  transform: rotate(180deg);
+}
+
+.cyntexa-faq-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s var(--vidx-ease), padding 0.3s var(--vidx-ease);
+  padding: 0 1.6rem;
+  color: #64748b;
+  font-size: 0.95rem;
+  line-height: 1.75;
+}
+
+.cyntexa-faq-item.active .cyntexa-faq-content {
+  max-height: 400px;
+  padding: 0 1.6rem 1.4rem;
+}
+
+/* App pages: never hide content behind scroll-reveal (prevents flicker / blank cards) */
+html.vidx-app [data-aos] {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+  pointer-events: auto !important;
+}

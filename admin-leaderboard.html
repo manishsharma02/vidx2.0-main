@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Leaderboard — VidX Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+  <link rel="stylesheet" href="animations.css">
+  <style>
+    :root {
+      --bg: #03040a;
+      --bg-surface: #080c14;
+      --bg-card: rgba(13, 18, 32, 0.72);
+      --bg-card-hover: rgba(18, 24, 43, 0.85);
+      --bg-card: rgba(13, 18, 32, 0.78);
+      --bg-card-hover: rgba(18, 24, 43, 0.9);
+      --bg-input: #0d1220;
+      --bg: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-card: #ffffff;
+      --bg-card-hover: #ffffff;
+      --bg-input: #f8fafc;
+      --neon-red: #ef4444;
+      --neon-cyan: #06b6d4;
+      --neon-purple: #8b5cf6;
+      --neon-blue: #3b82f6;
+      --glow-red: rgba(239, 68, 68, 0.35);
+      --text: #f1f5f9;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(239, 68, 68, 0.35);
+      --sidebar-w: 260px;
+      --neon-cyan: #0891b2;
+      --neon-purple: #7c3aed;
+      --neon-blue: #2563eb;
+      --glow-red: rgba(239, 68, 68, 0.2);
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --dim: #94a3b8;
+      --border: #e2e8f0;
+      --border-glow: rgba(239, 68, 68, 0.25);
+      --sidebar-w: 264px;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: rgba(239, 68, 68, 0.5); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(239, 68, 68, 0.4); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--neon-red); }
+
+    .layout { display: flex; min-height: 100vh; position: relative; }
+
+    /* SIDEBAR */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: var(--sidebar-w);
+      background: rgba(8, 12, 20, 0.88);
+      background: rgba(8, 12, 20, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: #ffffff;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 0;
+      padding: 1.75rem 0;
+      z-index: 100;
+      overflow-y: auto;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: transform 0.3s var(--ease);
+      transition: transform 0.35s var(--ease);
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.02);
+    }
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0 1.5rem 1.5rem;
+      padding: 0 1.5rem 1.4rem;
+      gap: 0.85rem;
+      padding: 0 1.75rem 1.75rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.35rem;
+      font-size: 1.4rem;
+      text-decoration: none;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+      letter-spacing: -0.02em;
+    }
+    .logo-icon {
+      width: 34px;
+      height: 34px;
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--neon-red), #f97316);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 0 15px var(--glow-red);
+      box-shadow: 0 0 18px var(--glow-red);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    .admin-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.75rem;
+      gap: 0.45rem;
+      padding: 0.35rem 0.8rem;
+      font-size: 0.72rem;
+      color: #fca5a5;
+      background: rgba(239, 68, 68, 0.12);
+      color: #dc2626;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: 9999px;
+      font-weight: 700;
+      margin: 1rem 1.5rem 0.5rem;
+      border: 1px solid rgba(239, 68, 68, 0.28);
+      border-radius: 100px;
+      font-weight: 800;
+      margin: 1.2rem 1.5rem 0.5rem;
+      margin: 1.2rem 1.75rem 0.5rem;
+      width: fit-content;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      letter-spacing: 0.08em;
+    }
+    .nav-section { padding: 0.75rem 0; }
+    .nav-label {
+      padding: 0 1.5rem;
+      font-size: 0.7rem;
+      padding: 0 1.75rem;
+      font-size: 0.68rem;
+      font-weight: 700;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      color: var(--dim);
+      margin-bottom: 0.5rem;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.75rem 1.5rem;
+      padding: 0.72rem 1.5rem;
+      padding: 0.72rem 1.75rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      font-size: 0.88rem;
+      border-left: 3px solid transparent;
+      transition: all 0.25s ease;
+      transition: all 0.2s ease;
+    }
+    .nav-item:hover {
+      color: var(--text);
+      background: rgba(239, 68, 68, 0.06);
+      padding-left: 1.7rem;
+      background: #f8fafc;
+      padding-left: 1.95rem;
+    }
+    .nav-item.active {
+      color: #fff;
+      color: var(--neon-red);
+      border-left-color: var(--neon-red);
+      background: linear-gradient(90deg, rgba(239, 68, 68, 0.12), transparent);
+      background: linear-gradient(90deg, rgba(239, 68, 68, 0.14) 0%, transparent 100%);
+      background: linear-gradient(90deg, rgba(239, 68, 68, 0.08) 0%, transparent 100%);
+      font-weight: 700;
+    }
+    .sidebar-user {
+      margin-top: auto;
+      padding: 1.25rem 1.5rem;
+      padding: 1.25rem 1.75rem;
+      border-top: 1px solid var(--border);
+      background: rgba(3, 4, 10, 0.5);
+      background: rgba(3, 4, 10, 0.4);
+      background: #f8fafc;
+    }
+
+    /* MAIN */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 2.5rem;
+      padding: 2.5rem 3.5rem 4rem;
+      padding: 2.75rem 3.5rem 4rem;
+      max-width: 1440px;
+    }
+    .mobile-topbar {
+      display: none;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+      background: rgba(8, 12, 20, 0.9);
+      padding: 1rem 1.25rem;
+      background: rgba(8, 12, 20, 0.85);
+      backdrop-filter: blur(16px);
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      z-index: 90;
+      margin: -2.5rem -3.5rem 1.75rem -3.5rem;
+      margin: -2.75rem -3.5rem 2rem -3.5rem;
+    }
+    .hamburger {
+      background: none;
+      border: none;
+      background: rgba(255, 255, 255, 0.05);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 1.5rem;
+      font-size: 1.25rem;
+      cursor: pointer;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .page-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.75rem;
+      font-size: 2.4rem;
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+      color: #fff;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.4rem;
+      color: var(--text);
+      line-height: 1.15;
+    }
+    .page-subtitle {
+      color: var(--text-muted);
+      margin-bottom: 1.75rem;
+      font-size: 0.92rem;
+      margin-top: 0.4rem;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+
+    /* TABLE */
+    .table-wrap {
+      background: var(--bg-card);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      border-radius: 20px;
+      overflow-x: auto;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+    }
+    table { width: 100%; border-collapse: collapse; min-width: 750px; }
+    th, td {
+      padding: 1rem 1.25rem;
+      padding: 1.1rem 1.25rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    th {
+      background: rgba(255, 255, 255, 0.02);
+      background: #f8fafc;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+    }
+    tbody tr {
+      transition: background 0.2s ease;
+    }
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    tbody tr:hover { background: #f8fafc; }
+
+    /* INPUTS & BUTTONS */
+    .xp-input {
+      width: 100px;
+      padding: 0.45rem 0.75rem;
+      width: 105px;
+      padding: 0.5rem 0.85rem;
+      background: var(--bg-input);
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+    .rank-input {
+      width: 70px;
+      padding: 0.45rem 0.75rem;
+      width: 75px;
+      padding: 0.5rem 0.85rem;
+      background: var(--bg-input);
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+    .xp-input:focus, .rank-input:focus {
+      outline: none;
+      border-color: var(--neon-purple);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+      box-shadow: 0 0 14px rgba(139, 92, 246, 0.25);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+      background: #ffffff;
+    }
+    .save-btn {
+      padding: 0.45rem 1rem;
+      padding: 0.5rem 1.1rem;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Syne', sans-serif;
+      border-radius: 10px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+      font-size: 0.82rem;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--neon-red), #f97316);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+      transition: all 0.2s ease;
+    }
+    .save-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(239, 68, 68, 0.45);
+      box-shadow: 0 6px 18px rgba(239, 68, 68, 0.45);
+      box-shadow: 0 6px 18px rgba(239, 68, 68, 0.35);
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 999;
+    }
+    .overlay.show { display: block; }
+
+    @media(max-width: 768px) {
+      .sidebar { transform: translateX(-100%); z-index: 1000; }
+      .sidebar.open { transform: translateX(0); }
+      .main { margin-left: 0; padding: 1.5rem 1rem; }
+      .mobile-topbar { display: flex; }
+      .sidebar.open { transform: translateX(0); z-index: 1001; }
+      .main { margin-left: 0; padding: 1.25rem 1rem 2.5rem; }
+      .mobile-topbar { display: flex; margin: -1.25rem -1rem 1.25rem -1rem; }
+      .page-title { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <a href="admin-dashboard.html" class="sidebar-logo" onclick="closeSidebar()"><div class="logo-icon">VX</div>VidX</a>
+      <div class="admin-badge">🔴 Command System</div>
+      <div class="nav-section">
+        <div class="nav-label">Control Center</div>
+        <a href="admin-dashboard.html" class="nav-item">📊 Dashboard</a>
+        <a href="admin-problems.html" class="nav-item">📝 Manage Problems</a>
+        <a href="admin-students.html" class="nav-item">👥 Manage Students</a>
+        <a href="admin-battles.html" class="nav-item">⚔️ Manage Battles</a>
+        <a href="admin-leaderboard.html" class="nav-item active" onclick="closeSidebar()">🏆 Manage Leaderboard</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Student View</div>
+        <a href="index.html" class="nav-item" onclick="closeSidebar()">🌐 Landing Page</a>
+        <a href="dashboard.html" class="nav-item" onclick="closeSidebar()">👁 Campus Terminal</a>
+      </div>
+      <div class="sidebar-user">
+        <div style="font-weight:700;color:var(--text)">Administrator</div>
+        <div style="font-size:.8rem;color:var(--neon-red);font-weight:600">Super Admin Access</div>
+      </div>
+    </aside>
+    <div class="main">
+      <div class="mobile-topbar"><button class="hamburger" onclick="toggleSidebar()">☰</button><strong>Manage Leaderboard</strong></div>
+      
+      <div data-aos="fade-up">
+        <div class="cyntexa-kicker" style="color:var(--neon-red)"><span class="cyntexa-kicker-dot" style="background:var(--neon-red)"></span>RANKING CONTROLLER</div>
+        <h1 class="page-title">Manage <span style="font-style:italic;font-weight:400;color:var(--neon-purple)">Leaderboard.</span></h1>
+        <p class="page-subtitle">Edit student XP inline and commit modifications per row. Rank titles automatically update according to milestone thresholds.</p>
+      </div>
+
+      <div class="table-wrap" data-aos="fade-up">
+        <table>
+          <thead>
+            <tr><th>Rank</th><th>Student</th><th>XP (edit)</th><th>Streak</th><th>Rank Title</th><th>Override</th><th>Action</th></tr>
+          </thead>
+          <tbody id="lbTable"><tr><td colspan="7" style="text-align:center;color:var(--text-muted)">Loading leaderboard records...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <script src="supabase.js"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.css"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="animations.js"></script>
+  <script>
+    function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show');}
+    function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');}
+    let students=[];
+    function onDbReady(){ if(!requireAdmin())return; loadLeaderboard(); }
+    async function loadLeaderboard(){
+      students=await getLeaderboard(100);
+      document.getElementById('lbTable').innerHTML=students.length?students.map((s,i)=>{
+        const name=`${s.first_name||''} ${s.last_name||''}`.trim()||s.email;
+        return `<tr id="row-${s.id}">
+          <td class="mono" style="font-weight:700;color:${i === 0 ? '#d97706' : i === 1 ? '#64748b' : i === 2 ? '#b45309' : 'var(--text-muted)'}">#${i+1}</td>
+          <td style="font-weight:600;color:var(--text)">${esc(name)}</td>
+          <td><input type="number" class="xp-input" id="xp-${s.id}" value="${s.xp||0}"></td>
+          <td>${(s.streak||0) > 0 ? `🔥 <span class="mono" style="color:#d97706;font-weight:700">${s.streak}</span>` : '<span style="color:var(--text-muted)">0</span>'}</td>
+          <td><span style="display:inline-block;padding:0.2rem 0.6rem;border-radius:9999px;font-size:0.75rem;font-weight:700;background:rgba(124,58,237,0.08);color:var(--neon-purple);border:1px solid rgba(124,58,237,0.2)">${esc(s.rank_title||'Newbie')}</span></td>
+          <td><input type="number" class="rank-input" id="rank-${s.id}" placeholder="#" value="${i+1}"></td>
+          <td><button class="save-btn" onclick="saveRow('${s.id}')">💾 Save</button></td>
+        </tr>`;
+      }).join(''):'<tr><td colspan="7" style="text-align:center;color:var(--text-muted)">No students recorded</td></tr>';
+    }
+    async function saveRow(id){
+      const xp=parseInt(document.getElementById('xp-'+id).value);
+      if(isNaN(xp)){alert('Invalid XP');return;}
+      const result=await adminUpdateXP(id,xp);
+      if(result.success){
+        alert('Saved! Rank title: '+result.rankTitle);
+        loadLeaderboard();
+      }else alert(result.error);
+    }
+  </script>
+</body>
+</html>

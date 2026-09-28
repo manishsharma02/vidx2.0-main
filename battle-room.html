@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Battle Room — VidX</title>
+  <link rel="stylesheet" href="animations.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+    :root {
+      --bg:           #03040a;
+      --bg2:          #080c14;
+      --bg3:          #0d1220;
+      --card-bg:      rgba(13, 18, 32, 0.76);
+      --neon-blue:    #3b82f6;
+      --neon-purple:  #8b5cf6;
+      --neon-cyan:    #06b6d4;
+      --neon-pink:    #ec4899;
+      --neon-green:   #10b981;
+      --neon-yellow:  #f59e0b;
+      --glow-purple:  rgba(139,92,246,0.3);
+      --text:         #f8fafc;
+      --muted:        #94a3b8;
+      --dim:          #475569;
+      --border:       rgba(255,255,255,0.08);
+      --border-hover: rgba(139,92,246,0.38);
+      --border-glow:  rgba(139,92,246,0.4);
+      --bg:           #f8fafc;
+      --bg2:          #ffffff;
+      --bg3:          #f1f5f9;
+      --bg4:          #e2e8f0;
+      --card-bg:      #ffffff;
+      --card-hover:   #ffffff;
+      --neon-blue:    #2563eb;
+      --neon-purple:  #7c3aed;
+      --neon-cyan:    #0891b2;
+      --neon-pink:    #db2777;
+      --neon-green:   #059669;
+      --neon-yellow:  #d97706;
+      --glow-purple:  rgba(124, 58, 237, 0.15);
+      --text:         #0f172a;
+      --muted:        #64748b;
+      --dim:          #94a3b8;
+      --border:       #e2e8f0;
+      --border-hover: rgba(124, 58, 237, 0.35);
+      --border-glow:  rgba(124, 58, 237, 0.25);
+      --ease:         cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4, .font-display {
+      font-family: 'Syne', sans-serif;
+      letter-spacing: -0.02em;
+    }
+
+    h1, h2, h3, h4, .font-display { font-family: 'Syne', sans-serif; letter-spacing: -0.02em; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.4); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.35); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(124, 58, 237, 0.25); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--neon-purple); }
+
+    /* Top Bar */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1.75rem;
+      background: rgba(8, 12, 20, 0.88);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      padding: 0.9rem 2rem;
+      background: rgba(8, 12, 20, 0.94);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      gap: 1rem;
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+    }
+
+    .topbar-left { display: flex; align-items: center; gap: 1rem; }
+    .topbar-left { display: flex; align-items: center; gap: 1.1rem; }
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.05);
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.4rem 0.85rem;
+      border-radius: 10px;
+      padding: 0.45rem 1rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 600;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .back-btn:hover {
+      color: var(--text);
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.25);
+      color: var(--neon-purple);
+      border-color: var(--border-hover);
+      transform: translateX(-2px);
+    }
+
+    .battle-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.05rem;
+      max-width: 250px;
+      font-size: 1.15rem;
+      max-width: 280px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+
+    .live-badge {
+      padding: 0.25rem 0.75rem;
+      padding: 0.3rem 0.85rem;
+      background: rgba(236, 72, 153, 0.15);
+      border: 1px solid rgba(236, 72, 153, 0.35);
+      border: 1px solid rgba(236, 72, 153, 0.4);
+      background: #fce7f3;
+      border: 1px solid #fbcfe8;
+      border-radius: 100px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      font-weight: 800;
+      color: var(--neon-pink);
+      animation: livePulse 1.4s infinite;
+      box-shadow: 0 0 12px rgba(236, 72, 153, 0.2);
+      box-shadow: 0 0 14px rgba(236, 72, 153, 0.25);
+    }
+
+    .ended-badge {
+      padding: 0.25rem 0.75rem;
+      padding: 0.3rem 0.85rem;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      background: #dcfce7;
+      border: 1px solid #bbf7d0;
+      border-radius: 100px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      font-weight: 800;
+      color: var(--neon-green);
+    }
+
+    @keyframes livePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+    @keyframes livePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    .topbar-center {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.25rem;
+      font-weight: 700;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--neon-cyan);
+      letter-spacing: 0.08em;
+      padding: 0.25rem 0.85rem;
+      padding: 0.35rem 1.1rem;
+      background: rgba(6, 182, 212, 0.08);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      border-radius: 8px;
+      border: 1px solid rgba(6, 182, 212, 0.25);
+      background: rgba(8, 145, 178, 0.08);
+      border: 1px solid rgba(8, 145, 178, 0.25);
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.15);
+    }
+    .topbar-center.warning {
+      color: var(--neon-pink);
+      background: rgba(236, 72, 153, 0.1);
+      border-color: rgba(236, 72, 153, 0.3);
+      background: rgba(236, 72, 153, 0.12);
+      border-color: rgba(236, 72, 153, 0.35);
+      background: #fce7f3;
+      border-color: #fbcfe8;
+      animation: livePulse 0.8s infinite;
+    }
+
+    .topbar-right { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+    .topbar-right { display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap; }
+
+    .score-badge {
+      padding: 0.4rem 0.95rem;
+      padding: 0.45rem 1.1rem;
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      background: rgba(124, 58, 237, 0.08);
+      border: 1px solid rgba(124, 58, 237, 0.25);
+      border-radius: 100px;
+      font-size: 0.84rem;
+      font-size: 0.86rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: #c4b5fd;
+      color: var(--neon-purple);
+    }
+
+    .rank-badge {
+      padding: 0.4rem 0.95rem;
+      padding: 0.45rem 1.1rem;
+      background: rgba(6, 182, 212, 0.12);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      background: rgba(8, 145, 178, 0.08);
+      border: 1px solid rgba(8, 145, 178, 0.25);
+      border-radius: 100px;
+      font-size: 0.84rem;
+      font-size: 0.86rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--neon-cyan);
+    }
+
+    /* Arena Grid */
+    /* Arena Layout */
+    .room-layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      min-height: calc(100vh - 61px);
+      grid-template-columns: 1fr 340px;
+      min-height: calc(100vh - 65px);
+    }
+
+    .room-main {
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .room-side {
+      overflow-y: auto;
+      background: rgba(8, 12, 20, 0.75);
+      backdrop-filter: blur(16px);
+      background: rgba(8, 12, 20, 0.85);
+      backdrop-filter: blur(20px);
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .problem-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      flex-shrink: 0;
+      background: rgba(13, 18, 32, 0.5);
+      background: rgba(13, 18, 32, 0.6);
+      background: #ffffff;
+    }
+
+    .problem-tab {
+      padding: 0.8rem 1.3rem;
+      font-size: 0.86rem;
+      padding: 0.9rem 1.5rem;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--muted);
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .problem-tab:hover { color: var(--text); background: rgba(255, 255, 255, 0.02); }
+    .problem-tab:hover { color: var(--text); background: rgba(255, 255, 255, 0.03); }
+    .problem-tab:hover { color: var(--text); background: rgba(124, 58, 237, 0.03); }
+    .problem-tab.active {
+      color: #fff;
+      color: var(--neon-purple);
+      border-bottom-color: var(--neon-purple);
+      background: rgba(139, 92, 246, 0.08);
+      background: rgba(139, 92, 246, 0.12);
+      background: rgba(124, 58, 237, 0.08);
+    }
+    .problem-tab.solved { color: var(--neon-green); }
+    .problem-tab.solved.active { border-bottom-color: var(--neon-green); }
+
+    .problem-panel {
+      padding: 1.6rem 2rem;
+      padding: 1.85rem 2.25rem;
+      overflow-y: auto;
+      height: 42vh;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      background: rgba(3, 4, 10, 0.3);
+      background: rgba(3, 4, 10, 0.4);
+      background: #ffffff;
+    }
+
+    .problem-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.35rem;
+      font-size: 1.45rem;
+      font-weight: 800;
+      margin-bottom: 0.65rem;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+
+    .problem-meta {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      margin-bottom: 1.4rem;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      padding: 0.28rem 0.8rem;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+    .tag-easy { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .tag-med { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .tag-hard { background: rgba(236, 72, 153, 0.15); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.3); }
+    .tag-easy { background: rgba(16, 185, 129, 0.12); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .tag-med { background: rgba(245, 158, 11, 0.12); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .tag-hard { background: rgba(236, 72, 153, 0.12); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.3); }
+    .tag-pts { background: rgba(6, 182, 212, 0.12); color: var(--neon-cyan); border: 1px solid rgba(6, 182, 212, 0.3); }
+    .tag-easy { background: rgba(5, 150, 105, 0.1); color: var(--neon-green); border: 1px solid rgba(5, 150, 105, 0.25); }
+    .tag-med { background: rgba(217, 119, 6, 0.1); color: var(--neon-yellow); border: 1px solid rgba(217, 119, 6, 0.25); }
+    .tag-hard { background: rgba(219, 39, 119, 0.1); color: var(--neon-pink); border: 1px solid rgba(219, 39, 119, 0.25); }
+    .tag-pts { background: rgba(8, 145, 178, 0.08); color: var(--neon-cyan); border: 1px solid rgba(8, 145, 178, 0.25); }
+
+    .problem-desc {
+      font-size: 0.92rem;
+      font-size: 0.95rem;
+      color: #cbd5e1;
+      color: #334155;
+      line-height: 1.8;
+      margin-bottom: 1.25rem;
+      margin-bottom: 1.5rem;
+      white-space: pre-wrap;
+    }
+
+    .sample-box {
+      background: rgba(13, 18, 32, 0.75);
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+      border-radius: 14px;
+      padding: 1.1rem 1.4rem;
+      margin-bottom: 1.1rem;
+    }
+
+    .sample-label {
+      font-size: 0.74rem;
+      font-weight: 700;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.45rem;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+
+    .sample-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-size: 0.88rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: #e2e8f0;
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    /* Editor */
+    /* Editor Panel */
+    .editor-panel { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+
+    .editor-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.65rem 1.25rem;
+      background: rgba(8, 12, 20, 0.9);
+      gap: 1rem;
+      padding: 0.75rem 1.5rem;
+      background: rgba(8, 12, 20, 0.95);
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    .lang-select {
+      padding: 0.4rem 0.85rem;
+      padding: 0.45rem 1rem;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-size: 0.86rem;
+      font-weight: 700;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+    .lang-select:focus { border-color: var(--neon-purple); }
+    .lang-select option { background: var(--bg3); }
+
+    .editor-wrap { flex: 1; min-height: 160px; position: relative; }
+    /* Code Area Developer Anchor */
+    .editor-wrap { flex: 1; min-height: 170px; position: relative; }
+    .editor-wrap textarea {
+      width: 100%;
+      height: 100%;
+      min-height: 160px;
+      background: #020307;
+      min-height: 170px;
+      background: #03050c;
+      background: #0f172a;
+      color: #f8fafc;
+      border: none;
+      padding: 1.2rem;
+      padding: 1.35rem 1.6rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      font-size: 0.92rem;
+      resize: none;
+      outline: none;
+      line-height: 1.65;
+      line-height: 1.7;
+      display: block;
+    }
+
+    .editor-footer {
+      padding: 0.75rem 1.25rem;
+      background: rgba(8, 12, 20, 0.9);
+      padding: 0.85rem 1.5rem;
+      background: rgba(8, 12, 20, 0.95);
+      background: #ffffff;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 0.55rem 1.2rem;
+      padding: 0.6rem 1.35rem;
+      border: none;
+      border-radius: 10px;
+      border-radius: 12px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+      gap: 0.45rem;
+      transition: all 0.2s var(--ease);
+      text-decoration: none;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .btn-purple {
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+      color: #fff;
+      box-shadow: 0 4px 15px var(--glow-purple);
+      box-shadow: 0 4px 18px var(--glow-purple);
+    }
+    .btn-green {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      font-weight: 800;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+      box-shadow: 0 4px 18px rgba(16, 185, 129, 0.35);
+    }
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.05);
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-pink {
+      background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+      color: #fff;
+    }
+
+    .submit-status {
+      font-size: 0.8rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
+      padding: 0.4rem 0.85rem;
+      border-radius: 10px;
+    }
+    .submit-status.accepted { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .submit-status.wrong { background: rgba(236, 72, 153, 0.15); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.3); }
+    .submit-status.pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .submit-status.accepted { background: #dcfce7; color: var(--neon-green); border: 1px solid #bbf7d0; }
+    .submit-status.wrong { background: #fce7f3; color: var(--neon-pink); border: 1px solid #fbcfe8; }
+    .submit-status.pending { background: #fef3c7; color: var(--neon-yellow); border: 1px solid #fde68a; }
+
+    .output-box {
+      padding: 0.85rem 1.25rem;
+      padding: 1rem 1.5rem;
+      background: #020307;
+      border-top: 1px solid var(--border);
+      background: #020617;
+      border-top: 1px solid #1e293b;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      min-height: 60px;
+      max-height: 120px;
+      font-size: 0.85rem;
+      min-height: 70px;
+      max-height: 130px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      color: var(--muted);
+      color: #38bdf8;
+      flex-shrink: 0;
+      line-height: 1.55;
+    }
+    .output-box.success { color: var(--neon-green); }
+    .output-box.error { color: var(--neon-pink); }
+    .output-box.success { color: #10b981; }
+    .output-box.error { color: #f43f5e; }
+
+    /* Side Panel */
+    .side-section { padding: 1.1rem 1.25rem; border-bottom: 1px solid var(--border); }
+    .side-section { padding: 1.25rem 1.4rem; border-bottom: 1px solid var(--border); }
+    .side-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-size: 0.74rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .lb-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 0.5rem;
+      gap: 0.6rem;
+      padding: 0.55rem 0.6rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-size: 0.84rem;
+      border-radius: 6px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.86rem;
+      border-radius: 8px;
+      transition: background 0.15s ease;
+    }
+    .lb-row:last-child { border: none; }
+    .lb-row.me {
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      background: rgba(124, 58, 237, 0.08);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+    }
+
+    .lb-pos {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-weight: 800;
+      color: var(--muted);
+      width: 24px;
+      font-size: 0.78rem;
+      width: 26px;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+
+    .lb-av {
+      width: 26px;
+      height: 26px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .lb-name {
+      flex: 1;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 0.82rem;
+      font-size: 0.84rem;
+      color: var(--text);
+    }
+
+    .lb-info { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; }
+    .lb-score { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--neon-cyan); font-weight: 700; }
+    .lb-solved { font-size: 0.72rem; color: var(--muted); }
+    .lb-score { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--neon-cyan); font-weight: 700; }
+    .lb-score { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--neon-purple); font-weight: 700; }
+    .lb-solved { font-size: 0.74rem; color: var(--muted); }
+
+    .sub-row { padding: 0.5rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.04); font-size: 0.8rem; }
+    .sub-row { padding: 0.6rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.04); font-size: 0.82rem; }
+    .sub-row { padding: 0.6rem 0; border-bottom: 1px solid #f1f5f9; font-size: 0.82rem; }
+    .sub-row:last-child { border: none; }
+
+    .verdict-accepted { color: var(--neon-green); font-weight: 700; }
+    .verdict-wrong { color: var(--neon-pink); font-weight: 700; }
+    .verdict-error { color: var(--neon-yellow); font-weight: 700; }
+    .verdict-accepted { color: var(--neon-green); font-weight: 800; }
+    .verdict-wrong { color: var(--neon-pink); font-weight: 800; }
+    .verdict-error { color: var(--neon-yellow); font-weight: 800; }
+
+    .penalty-badge {
+      display: inline-block;
+      padding: 0.1rem 0.4rem;
+      padding: 0.15rem 0.45rem;
+      background: rgba(236, 72, 153, 0.12);
+      background: rgba(219, 39, 119, 0.1);
+      color: var(--neon-pink);
+      border-radius: 4px;
+      border-radius: 5px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      font-weight: 800;
+    }
+
+    /* Results Celebration */
+    .results-view { padding: 2.5rem 1.5rem; max-width: 860px; margin: 0 auto; }
+    .results-view { padding: 3rem 2rem; max-width: 900px; margin: 0 auto; }
+    .results-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem;
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      text-align: center;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    .results-subtitle { font-size: 0.95rem; color: var(--muted); text-align: center; margin-bottom: 2rem; }
+    .results-subtitle { font-size: 1rem; color: var(--muted); text-align: center; margin-bottom: 2.5rem; }
+
+    .my-result-card {
+      background: rgba(13, 18, 32, 0.85);
+      background: rgba(13, 18, 32, 0.9);
+      border: 1px solid var(--border-glow);
+      border-radius: 20px;
+      padding: 1.75rem 2rem;
+      margin-bottom: 2rem;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2.2rem 2.5rem;
+      margin-bottom: 2.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      gap: 1.8rem;
+      flex-wrap: wrap;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 0 25px rgba(139, 92, 246, 0.15);
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4), 0 0 30px rgba(139, 92, 246, 0.2);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    }
+
+    .my-result-rank {
+      font-size: 3rem;
+      font-size: 3.5rem;
+      font-weight: 800;
+      color: var(--neon-purple);
+      font-family: 'JetBrains Mono', monospace;
+      line-height: 1;
+    }
+
+    .my-result-details { flex: 1; }
+    .my-result-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.15rem;
+      margin-bottom: 0.35rem;
+      font-size: 1.3rem;
+      margin-bottom: 0.45rem;
+      color: var(--text);
+    }
+    .my-result-stats { font-size: 0.9rem; color: var(--muted); display: flex; gap: 1.25rem; flex-wrap: wrap; }
+    .my-result-stats span { color: var(--text); font-weight: 600; }
+    .my-result-stats { font-size: 0.95rem; color: var(--muted); display: flex; gap: 1.5rem; flex-wrap: wrap; }
+    .my-result-stats span { color: var(--text); font-weight: 700; }
+
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.25rem;
+      background: rgba(13, 18, 32, 0.72);
+      margin-top: 1.5rem;
+      background: rgba(13, 18, 32, 0.74);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+    }
+    .results-table th, .results-table td {
+      padding: 0.9rem 1.2rem;
+      padding: 1.1rem 1.35rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.88rem;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+    .results-table th {
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: rgba(8, 12, 20, 0.6);
+      font-weight: 700;
+      background: rgba(8, 12, 20, 0.7);
+      background: #f8fafc;
+      font-weight: 800;
+    }
+    .results-table tr:hover td { background: rgba(139, 92, 246, 0.04); }
+    .results-table tr:hover td { background: rgba(139, 92, 246, 0.05); }
+    .results-table tr:hover td { background: rgba(124, 58, 237, 0.04); }
+
+    .zero-xp { color: var(--muted); font-style: italic; }
+    .not-registered-view { text-align: center; padding: 5rem 2rem; }
+    .not-registered-view { text-align: center; padding: 6rem 2rem; }
+
+    @media (max-width: 900px) {
+      .room-layout { grid-template-columns: 1fr; }
+      .room-side { display: none; }
+      .topbar { padding: 0.65rem 1rem; }
+      .topbar-center { font-size: 0.95rem; }
+      .battle-name { max-width: 140px; }
+      .problem-panel { height: 36vh; padding: 1.25rem; }
+      .topbar { padding: 0.75rem 1.25rem; }
+      .topbar-center { font-size: 1rem; }
+      .battle-name { max-width: 160px; }
+      .problem-panel { height: 36vh; padding: 1.35rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="battles.html" class="back-btn">← Battles</a>
+      <span class="battle-name" id="battleName">Loading...</span>
+      <span id="statusBadge" class="live-badge">LIVE</span>
+    </div>
+    <div class="topbar-center mono" id="battleTimer">--:--:--</div>
+    <div class="topbar-right">
+      <span class="score-badge">Score: <span id="myScore">0</span></span>
+      <span class="rank-badge">Rank: <span id="myRank">—</span></span>
+    </div>
+  </div>
+ 
+
+  <div id="notRegisteredView" style="display:none">
+    <div class="not-registered-view">
+      <div style="font-size:3.5rem;margin-bottom:1.25rem">🔒</div>
+      <h2 style="font-size:1.8rem;margin-bottom:0.6rem">Not Registered</h2>
+      <p style="color:var(--muted);margin-bottom:1.75rem">You are not registered for this live battle session.</p>
+      <a href="battles.html" class="btn btn-purple">← Return to Battles</a>
+    </div>
+  </div>
+ 
+
+  <div id="resultsView" style="display:none">
+    <div class="results-view">
+      <div class="results-title">🏁 Battle Concluded</div>
+      <div class="results-subtitle" id="resultsBattleName"></div>
+      <div class="my-result-card" id="myResultCard" style="display:none">
+        <div class="my-result-rank" id="myResultRank">—</div>
+        <div class="my-result-details">
+          <div class="my-result-name" id="myResultName">—</div>
+          <div class="my-result-stats">
+            <span>Problems Solved: <span id="myResultSolved">0</span></span>
+            <span>Total Score: <span id="myResultScore">0</span></span>
+            <span style="color:var(--neon-yellow)">XP Earned: +<span id="myResultXP">0</span> XP</span>
+            <span id="myResultBadge"></span>
+          </div>
+        </div>
+      </div>
+      <div style="overflow-x:auto;border:1px solid var(--border);border-radius:16px">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Competitor</th>
+              <th>Solved</th>
+              <th>Score</th>
+              <th>Penalty</th>
+              <th>XP Earned</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+      </div>
+      <div style="text-align:center;margin-top:2rem">
+        <a href="battles.html" class="btn btn-purple">← Back to Battles</a>
+      </div>
+    </div>
+  </div>
+ 
+
+  <div class="room-layout" id="battleRoom" style="display:none">
+    <div class="room-main">
+      <div class="problem-tabs" id="problemTabs"></div>
+      <div class="problem-panel" id="problemPanel"><p style="color:var(--muted)">Loading problem details...</p></div>
+      <div class="editor-panel">
+        <div class="editor-toolbar">
+          <select class="lang-select" id="langSelect" onchange="saveDraft()">
+            <option value="python">Python 3</option>
+            <option value="javascript">JavaScript</option>
+            <option value="cpp">C++</option>
+            <option value="java">Java</option>
+          </select>
+          <span style="font-size:.78rem;color:var(--muted);margin-left:auto" id="draftStatus"></span>
+        </div>
+        <div class="editor-wrap"><textarea id="codeEditor" placeholder="// Write your solution here..." oninput="saveDraft()"></textarea></div>
+        <div class="editor-footer">
+          <button class="btn btn-ghost" onclick="runCode()" id="runBtn">▶ Run Test</button>
+          <button class="btn btn-green" onclick="submitCode()" id="submitBtn">⚡ Submit Solution</button>
+          <span class="submit-status" id="submitStatus" style="display:none"></span>
+        </div>
+        <div class="output-box" id="outputBox">Test execution output will appear here...</div>
+      </div>
+    </div>
+    <div class="room-side">
+      <div class="side-section">
+        <div class="side-title">🏆 Live Standings</div>
+        <div id="lbList"><p style="color:var(--muted);font-size:.8rem">Loading live standings...</p></div>
+      </div>
+      <div class="side-section">
+        <div class="side-title">📋 My Submissions</div>
+        <div id="mySubsList"><p style="color:var(--muted);font-size:.8rem">No submissions yet</p></div>
+      </div>
+      <div class="side-section">
+        <div class="side-title">📊 Session Progress</div>
+        <div id="myProgress"><p style="color:var(--muted);font-size:.8rem">Loading metrics...</p></div>
+      </div>
+    </div>
+  </div>
+ 
+
+  <script src="supabase.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const battleId = params.get('id');
+    const isResultsView = params.get('view') === 'results';
+    const DRAFT_KEY = 'vidx_battle_draft_' + battleId;
+    const SESSION_KEY = 'vidx_battle_session_' + battleId;
+ 
+
+    let currentUser = null;
+    let battle = null;
+    let battleProblems = [];
+    let currentProblemIdx = 0;
+    let solvedProblems = new Set();
+    let timerInterval = null;
+    let lbInterval = null;
+    let myParticipantData = { score: 0, problems_solved: 0, penalty: 0 };
+ 
+
+    function saveBattleSession() {
+      try {
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+          battleId, problemIdx: currentProblemIdx,
+          lang: document.getElementById('langSelect')?.value || 'python',
+          timestamp: Date.now()
+        }));
+      } catch(e) {}
+    }
+ 
+
+    function restoreBattleSession() {
+      try {
+        const saved = sessionStorage.getItem(SESSION_KEY);
+        if (!saved) return null;
+        return JSON.parse(saved);
+      } catch(e) { return null; }
+    }
+ 
+
+    function saveDraft() {
+      try {
+        const code = document.getElementById('codeEditor').value;
+        const lang = document.getElementById('langSelect').value;
+        const drafts = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
+        drafts[currentProblemIdx] = { code, lang };
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(drafts));
+        document.getElementById('draftStatus').textContent = 'Draft saved';
+        document.getElementById('draftStatus').textContent = 'Draft auto-saved';
+        setTimeout(() => { const el = document.getElementById('draftStatus'); if (el) el.textContent = ''; }, 1500);
+      } catch(e) {}
+    }
+ 
+
+    function loadDraft(idx) {
+      try {
+        const drafts = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
+        const d = drafts[idx];
+        if (d) { document.getElementById('codeEditor').value = d.code || ''; document.getElementById('langSelect').value = d.lang || 'python'; return true; }
+      } catch(e) {}
+      document.getElementById('codeEditor').value = '';
+      return false;
+    }
+ 
+
+    async function onDbReady() {
+      try {
+        const { data: sessionData } = await window.db.auth.getSession();
+        if (sessionData?.session) { currentUser = sessionData.session.user; }
+        else { currentUser = await requireAuth(); }
+      } catch(e) { currentUser = await requireAuth(); }
+      if (!currentUser) return;
+      if (!battleId) { window.location.href = 'battles.html'; return; }
+ 
+
+      try {
+        const { data: b, error } = await window.db.from('battles').select('*').eq('id', battleId).single();
+        if (error || !b) { window.location.href = 'battles.html'; return; }
+        battle = b;
+      } catch(e) { window.location.href = 'battles.html'; return; }
+ 
+
+      document.getElementById('battleName').textContent = battle.title;
+ 
+
+      if (isResultsView || battle.status === 'completed') { showResults(); return; }
+ 
+
+      const now = new Date();
+      const isLive = new Date(battle.start_time) <= now && new Date(battle.end_time) > now;
+      if (!isLive && battle.status !== 'live') {
+        if (new Date(battle.end_time) <= now) { showResults(); }
+        else {
+          document.getElementById('battleRoom').innerHTML = '<div style="text-align:center;padding:4rem;color:var(--muted)"><p style="font-size:1.2rem;margin-bottom:1rem">⏳ Battle hasn\'t started yet</p><p style="margin-bottom:1.5rem">Starts: <strong style="color:var(--neon-cyan)">' + new Date(battle.start_time).toLocaleString('en-IN') + '</strong></p><a href="battles.html" class="btn btn-purple">← Back to Battles</a></div>';
+          document.getElementById('battleRoom').innerHTML = '<div style="text-align:center;padding:4rem;color:var(--muted)"><p style="font-size:1.2rem;margin-bottom:1rem">⏳ Battle has not commenced yet</p><p style="margin-bottom:1.5rem">Scheduled start: <strong style="color:var(--neon-cyan)">' + new Date(battle.start_time).toLocaleString('en-IN') + '</strong></p><a href="battles.html" class="btn btn-purple">← Back to Battles</a></div>';
+          document.getElementById('battleRoom').style.display = 'block';
+        }
+        return;
+      }
+ 
+
+      const { data: regCheck } = await window.db.from('battle_participants').select('*').eq('battle_id', battleId).eq('user_id', currentUser.id).single();
+      if (!regCheck) {
+        document.getElementById('notRegisteredView').style.display = 'block';
+        const badge = document.getElementById('statusBadge');
+        badge.textContent = 'NOT REGISTERED'; badge.className = 'ended-badge';
+        return;
+      }
+ 
+
+      myParticipantData = { score: regCheck.score || 0, problems_solved: regCheck.problems_solved || 0, penalty: regCheck.penalty || 0 };
+ 
+
+      const { data: bp } = await window.db.from('battle_problems').select('*, problems(*)').eq('battle_id', battleId).order('problem_order');
+      battleProblems = (bp || []).map(x => ({ ...x.problems, _points: x.points || 100, _bpid: x.id }));
+ 
+
+      if (battleProblems.length > 0) {
+        const problemIds = battleProblems.map(p => p.id);
+        const { data: freshProblems } = await window.db.from('problems').select('id, test_cases, sample_input, sample_output').in('id', problemIds);
+        if (freshProblems && freshProblems.length) {
+          const freshMap = {};
+          freshProblems.forEach(p => freshMap[p.id] = p);
+          battleProblems = battleProblems.map(p => ({
+            ...p,
+            test_cases: freshMap[p.id]?.test_cases || p.test_cases || null,
+            sample_input: freshMap[p.id]?.sample_input || p.sample_input || '',
+            sample_output: freshMap[p.id]?.sample_output || p.sample_output || ''
+          }));
+        }
+      }
+ 
+
+      const { data: mySubs } = await window.db.from('battle_submissions').select('problem_id, verdict').eq('battle_id', battleId).eq('user_id', currentUser.id);
+      (mySubs || []).forEach(s => { if (s.verdict === 'Accepted') solvedProblems.add(s.problem_id); });
+ 
+
+      document.getElementById('battleRoom').style.display = 'grid';
+      renderProblemTabs();
+ 
+
+      const savedSession = restoreBattleSession();
+      const startIdx = (savedSession && savedSession.problemIdx < battleProblems.length) ? savedSession.problemIdx : 0;
+ 
+
+      loadProblem(startIdx);
+      startTimer();
+      updateMyScore();
+      loadLeaderboard();
+      loadMySubmissions();
+ 
+
+      lbInterval = setInterval(() => { loadLeaderboard(); loadMySubmissions(); updateMyScore(); }, 15000);
+    }
+ 
+
+    function startTimer() {
+      function update() {
+        const diff = new Date(battle.end_time) - new Date();
+        const el = document.getElementById('battleTimer');
+        if (diff <= 0) {
+          el.textContent = 'Battle Ended';
+          clearInterval(timerInterval);
+          if (lbInterval) clearInterval(lbInterval);
+          document.getElementById('submitBtn').disabled = true;
+          document.getElementById('runBtn').disabled = true;
+          const badge = document.getElementById('statusBadge');
+          badge.textContent = 'ENDED'; badge.className = 'ended-badge';
+          setTimeout(() => showResults(), 3000);
+          return;
+        }
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        el.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+        if (diff < 600000) el.className = 'topbar-center mono warning';
+        else el.className = 'topbar-center mono';
+      }
+      update();
+      timerInterval = setInterval(update, 1000);
+    }
+ 
+
+    function renderProblemTabs() {
+      document.getElementById('problemTabs').innerHTML = battleProblems.map((p, i) => {
+        const solved = solvedProblems.has(p.id);
+        return '<div class="problem-tab ' + (i === 0 ? 'active' : '') + ' ' + (solved ? 'solved' : '') + '" id="ptab-' + i + '" onclick="loadProblem(' + i + ')">' + (i + 1) + '. ' + esc(p.title || 'Problem ' + (i + 1)) + ' ' + (solved ? '✓' : '') + '</div>';
+      }).join('');
+    }
+ 
+
+    function loadProblem(idx) {
+      currentProblemIdx = idx;
+      saveBattleSession();
+      document.querySelectorAll('.problem-tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+      const p = battleProblems[idx];
+      if (!p) { document.getElementById('problemPanel').innerHTML = '<p style="color:var(--muted)">No problem loaded</p>'; return; }
+      const diff = p.difficulty || 'Intermediate';
+      const diffCls = diff === 'Advanced' || diff === 'Hard' ? 'tag-hard' : diff === 'Intermediate' || diff === 'Medium' ? 'tag-med' : 'tag-easy';
+      document.getElementById('problemPanel').innerHTML =
+        '<div class="problem-title">' + esc(p.title) + '</div>'
+        + '<div class="problem-meta">'
+        + '<span class="tag ' + diffCls + '">' + diff + '</span>'
+        + '<span class="tag" style="background:rgba(124,58,237,.08);color:var(--neon-purple)">' + esc(p.topic || 'General') + '</span>'
+        + '<span class="tag tag-pts">⭐ ' + p._points + ' pts</span>'
+        + (solvedProblems.has(p.id) ? '<span class="tag" style="background:rgba(16,185,129,.15);color:var(--neon-green)">✓ Solved</span>' : '')
+        + '</div>'
+        + '<div class="problem-desc">' + (p.description || '') + '</div>'
+        + (p.sample_input ? '<div class="sample-box"><div class="sample-label">Sample Input</div><div class="sample-code">' + esc(p.sample_input) + '</div></div>' : '')
+        + (p.sample_output ? '<div class="sample-box"><div class="sample-label">Sample Output</div><div class="sample-code">' + esc(p.sample_output) + '</div></div>' : '')
+        + (p.constraints ? '<div class="sample-box"><div class="sample-label">Constraints</div><div class="sample-code">' + esc(p.constraints) + '</div></div>' : '');
+      loadDraft(idx);
+      document.getElementById('outputBox').textContent = 'Output will appear here...';
+      document.getElementById('outputBox').textContent = 'Test execution output will appear here...';
+      document.getElementById('outputBox').className = 'output-box';
+      const ss = document.getElementById('submitStatus');
+      ss.style.display = 'none'; ss.textContent = '';
+    }
+ 
+
+    async function runCode() {
+      const btn = document.getElementById('runBtn');
+      const code = document.getElementById('codeEditor').value.trim();
+      const lang = document.getElementById('langSelect').value;
+      const p = battleProblems[currentProblemIdx];
+      if (!code) { alert('Write some code first!'); return; }
+      btn.disabled = true; btn.textContent = 'Running...';
+      document.getElementById('outputBox').textContent = 'Executing...';
+      document.getElementById('outputBox').textContent = 'Executing tests...';
+      document.getElementById('outputBox').className = 'output-box';
+      try {
+        const result = await executeCode(lang, code, p?.sample_input || '');
+        const out = formatExecutionOutput(result);
+        document.getElementById('outputBox').textContent = out;
+        document.getElementById('outputBox').className = result.code === 0 ? 'output-box success' : 'output-box error';
+      } catch(e) {
+        document.getElementById('outputBox').textContent = 'Error: ' + e.message;
+        document.getElementById('outputBox').className = 'output-box error';
+      }
+      btn.disabled = false; btn.textContent = '▶ Run';
+      btn.disabled = false; btn.textContent = '▶ Run Test';
+    }
+ 
+
+    async function submitCode() {
+      const btn = document.getElementById('submitBtn');
+      const code = document.getElementById('codeEditor').value.trim();
+      const lang = document.getElementById('langSelect').value;
+      const p = battleProblems[currentProblemIdx];
+ 
+
+      if (!code) { alert('Write some code first!'); return; }
+      if (!p) { alert('No problem selected!'); return; }
+ 
+
+      btn.disabled = true; btn.textContent = 'Judging...';
+      const ss = document.getElementById('submitStatus');
+      ss.style.display = 'inline-flex';
+      ss.className = 'submit-status pending';
+ 
+
+      try {
+        let testCases = [];
+        if (Array.isArray(p.test_cases) && p.test_cases.length > 0) {
+          testCases = p.test_cases;
+        } else if (p.sample_input && p.sample_output) {
+          testCases = [{ input: p.sample_input, expected: p.sample_output }];
+        } else {
+          ss.innerHTML = '❌ No test cases configured.';
+          ss.className = 'submit-status wrong';
+          btn.disabled = false; btn.textContent = '⚡ Submit';
+          btn.disabled = false; btn.textContent = '⚡ Submit Solution';
+          return;
+        }
+ 
+
+        ss.textContent = 'Running ' + testCases.length + ' test case(s)...';
+ 
+
+        const judgeResult = await judgeSubmission(lang, code, testCases, 8000, (done, total) => {
+          ss.textContent = 'Testing ' + done + '/' + total + '...';
+        });
+ 
+
+        const verdict = judgeResult.verdict;
+        const isAccepted = verdict === 'Accepted';
+        const alreadySolved = solvedProblems.has(p.id);
+        const pts = (isAccepted && !alreadySolved) ? (p._points || 100) : 0;
+ 
+
+        let newPenalty = myParticipantData.penalty;
+        if (!isAccepted && !alreadySolved) newPenalty += 1;
+ 
+
+        const _subIns = await insertResilient('battle_submissions', {
+          battle_id: battleId,
+          user_id: currentUser.id,
+          problem_id: p.id,
+          code,
+          language: lang,
+          verdict,
+          score: pts,
+          passed_cases: judgeResult.passed,
+          total_cases: judgeResult.total,
+          runtime_ms: judgeResult.runtimeMs || 0
+        });
+        if (_subIns.error) throw new Error('Could not save submission: ' + _subIns.error.message);
+ 
+
+        if (isAccepted && !alreadySolved) {
+          solvedProblems.add(p.id);
+          const newScore = myParticipantData.score + pts;
+          const newSolved = myParticipantData.problems_solved + 1;
+          myParticipantData = { score: newScore, problems_solved: newSolved, penalty: newPenalty };
+          await updateResilient('battle_participants', {
+            score: newScore, problems_solved: newSolved, penalty: newPenalty,
+            last_submission_at: new Date().toISOString()
+          }, q => q.eq('battle_id', battleId).eq('user_id', currentUser.id));
+          document.getElementById('myScore').textContent = newScore;
+          ss.textContent = '✓ Accepted! +' + pts + ' pts';
+          ss.className = 'submit-status accepted';
+          document.getElementById('outputBox').textContent = 'Accepted!\nPassed: ' + judgeResult.passed + '/' + judgeResult.total + ' test cases\nPoints: +' + pts;
+          document.getElementById('outputBox').className = 'output-box success';
+          renderProblemTabs();
+          loadProblem(currentProblemIdx);
+        } else if (isAccepted && alreadySolved) {
+          ss.textContent = 'Accepted (already solved)';
+          ss.className = 'submit-status accepted';
+          document.getElementById('outputBox').textContent = 'Accepted!\nPassed: ' + judgeResult.passed + '/' + judgeResult.total + ' test cases\n(Already solved)';
+          document.getElementById('outputBox').className = 'output-box success';
+        } else {
+          myParticipantData.penalty = newPenalty;
+          await window.db.from('battle_participants').update({ penalty: newPenalty }).eq('battle_id', battleId).eq('user_id', currentUser.id);
+          let details = verdict + '\nPassed: ' + judgeResult.passed + '/' + judgeResult.total + ' test cases';
+          const reason = judgeResult.failedCase;
+          if (reason?.actual !== undefined) details += '\nExpected: ' + reason.expected + '\nGot: ' + reason.actual;
+          if (reason?.stderr) details += '\nError: ' + reason.stderr;
+          ss.innerHTML = verdict + ' <span class="penalty-badge">Penalty +1</span>';
+          ss.className = 'submit-status wrong';
+          document.getElementById('outputBox').textContent = details;
+          document.getElementById('outputBox').className = 'output-box error';
+        }
+ 
+
+        loadLeaderboard();
+        loadMySubmissions();
+        updateMyScore();
+ 
+
+      } catch(e) {
+        ss.textContent = 'Error: ' + e.message;
+        ss.className = 'submit-status wrong';
+      }
+      btn.disabled = false; btn.textContent = '⚡ Submit';
+      btn.disabled = false; btn.textContent = '⚡ Submit Solution';
+    }
+ 
+
+    async function updateMyScore() {
+      try {
+        const { data } = await window.db.from('battle_participants').select('score, problems_solved, penalty').eq('battle_id', battleId).eq('user_id', currentUser.id).single();
+        if (data) {
+          myParticipantData = { score: data.score || 0, problems_solved: data.problems_solved || 0, penalty: data.penalty || 0 };
+          document.getElementById('myScore').textContent = data.score || 0;
+        }
+      } catch(e) {}
+    }
+ 
+
+    async function loadLeaderboard() {
+      try {
+        const { data: parts } = await window.db.from('battle_participants').select('user_id, score, problems_solved, penalty, last_submission_at').eq('battle_id', battleId);
+        if (!parts || !parts.length) { document.getElementById('lbList').innerHTML = '<p style="color:var(--muted);font-size:.8rem">No participants yet</p>'; return; }
+        const sorted = [...parts].sort((a, b) => {
+          if ((b.problems_solved || 0) !== (a.problems_solved || 0)) return (b.problems_solved || 0) - (a.problems_solved || 0);
+          if ((b.score || 0) !== (a.score || 0)) return (b.score || 0) - (a.score || 0);
+          if ((a.penalty || 0) !== (b.penalty || 0)) return (a.penalty || 0) - (b.penalty || 0);
+          const tA = a.last_submission_at ? new Date(a.last_submission_at) : new Date(8640000000000000);
+          const tB = b.last_submission_at ? new Date(b.last_submission_at) : new Date(8640000000000000);
+          return tA - tB;
+        });
+        const ids = sorted.map(p => p.user_id);
+        const { data: profiles } = await window.db.from('users').select('id,first_name,last_name').in('id', ids);
+        const pm = {}; (profiles || []).forEach(u => pm[u.id] = u);
+        let myRankVal = '—';
+        document.getElementById('lbList').innerHTML = sorted.map((p, i) => {
+          const u = pm[p.user_id] || {};
+          const name = ((u.first_name || '') + ' ' + (u.last_name || '')).trim() || 'Student';
+          const isMe = p.user_id === currentUser.id;
+          if (isMe) myRankVal = '#' + (i + 1);
+          const trophy = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i + 1);
+          return '<div class="lb-row ' + (isMe ? 'me' : '') + '">'
+            + '<span class="lb-pos">' + trophy + '</span>'
+            + '<div class="lb-av">' + esc((name[0] || '?').toUpperCase()) + '</div>'
+            + '<span class="lb-name">' + (isMe ? '<strong>' + esc(name) + '</strong>' : esc(name)) + '</span>'
+            + '<div class="lb-info"><span class="lb-score">' + (p.score || 0) + 'pts</span><span class="lb-solved">' + (p.problems_solved || 0) + '✓ P:' + (p.penalty || 0) + '</span></div>'
+            + '</div>';
+        }).join('');
+        document.getElementById('myRank').innerHTML = myRankVal;
+      } catch(e) { console.error('loadLeaderboard:', e); }
+    }
+ 
+
+    function renderMyProgress() {
+        const total = battleProblems.length;
+        const solved = solvedProblems.size;
+        document.getElementById('myProgress').innerHTML =
+          '<div style="font-size:.84rem;margin-bottom:.5rem">Problems Solved: <strong style="color:var(--neon-green)">' + solved + '/' + total + '</strong></div>'
+          + '<div style="font-size:.84rem;margin-bottom:.5rem">Live Score: <strong style="color:var(--neon-cyan)">' + myParticipantData.score + '</strong></div>'
+          + '<div style="font-size:.84rem">Penalties Incurred: <span style="color:var(--neon-pink)">' + myParticipantData.penalty + '</span></div>';
+    }
+
+    async function loadMySubmissions() {
+      try {
+        const { data: subs } = await window.db.from('battle_submissions').select('*').eq('battle_id', battleId).eq('user_id', currentUser.id).order('submitted_at', { ascending: false }).limit(20);
+        if (!subs || !subs.length) { document.getElementById('mySubsList').innerHTML = '<p style="color:var(--muted);font-size:.8rem">No submissions yet</p>'; renderMyProgress(); return; }
+        const pMap = {}; battleProblems.forEach(p => pMap[p.id] = p);
+        document.getElementById('mySubsList').innerHTML = subs.map(s => {
+          const pName = pMap[s.problem_id]?.title || 'Problem';
+          const vCls = s.verdict === 'Accepted' ? 'verdict-accepted' : s.verdict?.includes('Error') ? 'verdict-error' : 'verdict-wrong';
+          const time = new Date(s.submitted_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+          const xpShow = s.verdict === 'Accepted' ? '+' + (s.score || 0) : '0';
+          return '<div class="sub-row">'
+            + '<div><strong style="font-size:.82rem">' + pName + '</strong> <span class="' + vCls + '">' + s.verdict + '</span></div>'
+            + '<div style="color:var(--muted);font-size:.74rem">' + s.language + ' · ' + time + ' · <span style="color:var(--neon-yellow)">' + xpShow + ' pts</span></div>'
+            + '</div>';
+        }).join('');
+        renderMyProgress();
+      } catch(e) {}
+    }
+ 
+
+    async function showResults() {
+      document.getElementById('battleRoom').style.display = 'none';
+      document.getElementById('resultsView').style.display = 'block';
+      if (timerInterval) clearInterval(timerInterval);
+      if (lbInterval) clearInterval(lbInterval);
+      const badge = document.getElementById('statusBadge');
+      badge.textContent = 'ENDED'; badge.className = 'ended-badge';
+      document.getElementById('battleTimer').textContent = 'Battle Ended';
+      document.getElementById('resultsBattleName').textContent = battle?.title || '';
+ 
+
+      try {
+        // STEP 1: Load all participants
+        const { data: participants } = await window.db.from('battle_participants').select('*').eq('battle_id', battleId);
+        if (!participants || !participants.length) {
+          document.getElementById('resultsBody').innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:2rem">No participants</td></tr>';
+          document.getElementById('resultsBody').innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:2.5rem">No participants</td></tr>';
+          return;
+        }
+ 
+
+        const baseXP = battle?.xp_reward || 200;
+        const totalProblems = battleProblems.length || 1;
+ 
+        // Sort by problems solved desc, score desc, penalty asc, time asc
+
+        const sorted = [...participants].sort((a, b) => {
+          if ((b.problems_solved || 0) !== (a.problems_solved || 0)) return (b.problems_solved || 0) - (a.problems_solved || 0);
+          if ((b.score || 0) !== (a.score || 0)) return (b.score || 0) - (a.score || 0);
+          if ((a.penalty || 0) !== (b.penalty || 0)) return (a.penalty || 0) - (b.penalty || 0);
+          const tA = a.last_submission_at ? new Date(a.last_submission_at) : new Date(8640000000000000);
+          const tB = b.last_submission_at ? new Date(b.last_submission_at) : new Date(8640000000000000);
+          return tA - tB;
+        });
+ 
+        // STEP 2: Check existing results
+
+        const { data: existingResults } = await window.db.from('battle_results').select('user_id, final_rank, xp_awarded').eq('battle_id', battleId);
+        const existingMap = {};
+        (existingResults || []).forEach(r => existingMap[r.user_id] = r);
+        let alreadyPublished = (existingResults || []).length > 0 || battle?.results_published === true;
+        if (!alreadyPublished) {
+          // atomically "claim" publishing so XP is awarded exactly once, even if several students open the results together
+          const claim = await window.db.from('battles').update({ results_published: true }).eq('id', battleId).or('results_published.is.null,results_published.eq.false').select('id');
+          if (claim.error) { if (!_missingColumn(claim.error)) alreadyPublished = true; }
+          else if (!claim.data || !claim.data.length) alreadyPublished = true;
+        }
+ 
+        // STEP 3: Calculate XP and save results for each participant
+        // FIX: Always upsert results so they show even if re-viewed
+        // FIX: Only call giveXP once per user (check existingMap)
+
+        for (let i = 0; i < sorted.length; i++) {
+          const p = sorted[i];
+          const rank = i + 1;
+ 
+          // Calculate XP
+
+          let xp = 0;
+          if ((p.problems_solved || 0) > 0) {
+            xp = Math.floor(baseXP * 0.1); // participation XP
+            xp = Math.floor(baseXP * 0.1);
+            if (rank === 1) xp += baseXP;
+            else if (rank === 2) xp += Math.floor(baseXP * 0.7);
+            else if (rank === 3) xp += Math.floor(baseXP * 0.5);
+            else if (rank <= 10) xp += Math.floor(baseXP * 0.25);
+            xp += Math.floor(baseXP * ((p.problems_solved || 0) / totalProblems) * 0.3);
+          }
+ 
+
+          let badgeType = null;
+          if (rank === 1) badgeType = 'champion';
+          else if (rank <= 3) badgeType = 'top3';
+          else if (rank <= 10) badgeType = 'top10';
+ 
+
+          try {
+            // Always upsert so results are always available when viewing
+            await window.db.from('battle_results').upsert({
+              battle_id: battleId,
+              user_id: p.user_id,
+              final_rank: rank,
+              final_score: p.score || 0,
+              problems_solved: p.problems_solved || 0,
+              xp_awarded: xp,
+              badge: badgeType
+            }, { onConflict: 'battle_id,user_id' });
+ 
+            // FIX: Only give XP and send notification if not already published
+
+            if (!alreadyPublished) {
+              if (xp > 0) {
+                try { await giveXP(p.user_id, xp); } catch(e) { console.error('giveXP error:', e); }
+              }
+              if (badgeType) {
+                try { await window.db.from('battle_badges').insert({ user_id: p.user_id, battle_id: battleId, badge_type: badgeType }); } catch(e) {}
+              }
+              try {
+                await window.db.from('notifications').insert({
+                  user_id: p.user_id,
+                  title: 'Battle Results',
+                  message: 'You finished #' + rank + ' in "' + (battle?.title || 'Battle') + '". ' + (xp > 0 ? 'You earned ' + xp + ' XP!' : 'Keep practicing!'),
+                  type: 'system',
+                  is_read: false
+                });
+              } catch(e) {}
+            }
+          } catch(e) { console.error('result save error:', e); }
+        }
+ 
+        // FIX: Mark battle completed and results published
+
+        if (!alreadyPublished) {
+          try {
+            await window.db.from('battles').update({
+              results_published: true,
+              winner_id: sorted[0]?.user_id || null,
+              status: 'completed'
+            }).eq('id', battleId);
+          } catch(e) {}
+        }
+ 
+        // STEP 4: Load final results from battle_results table
+
+        const { data: finalResults } = await window.db.from('battle_results').select('*').eq('battle_id', battleId).order('final_rank');
+ 
+        // Load user profiles
+
+        const ids = (finalResults || sorted).map(r => r.user_id);
+        const { data: profiles } = await window.db.from('users').select('id,first_name,last_name,email').in('id', ids);
+        const pm = {}; (profiles || []).forEach(u => pm[u.id] = u);
+ 
+        // Build penalty map from participants
+
+        const penaltyMap = {};
+        participants.forEach(p => penaltyMap[p.user_id] = p.penalty || 0);
+ 
+
+        const displayData = finalResults || sorted.map((p, i) => ({
+          user_id: p.user_id, final_rank: i + 1,
+          final_score: p.score || 0, problems_solved: p.problems_solved || 0,
+          xp_awarded: 0, badge: null
+        }));
+ 
+        // Show my result card
+
+        const myResult = displayData.find(r => r.user_id === currentUser?.id);
+        if (myResult) {
+          const myUser = pm[myResult.user_id] || {};
+          const myName = ((myUser.first_name || '') + ' ' + (myUser.last_name || '')).trim() || 'You';
+          document.getElementById('myResultCard').style.display = 'flex';
+          document.getElementById('myResultRank').textContent = '#' + myResult.final_rank;
+          document.getElementById('myResultName').textContent = myName;
+          document.getElementById('myResultSolved').textContent = myResult.problems_solved || 0;
+          document.getElementById('myResultScore').textContent = myResult.final_score || 0;
+          document.getElementById('myResultXP').textContent = myResult.xp_awarded || 0;
+          if (myResult.badge) document.getElementById('myResultBadge').textContent = '🎍 ' + myResult.badge;
+          if (myResult.badge) document.getElementById('myResultBadge').textContent = '🎉 ' + myResult.badge;
+        }
+ 
+        // FIX: Render full results table with all students data
+
+        document.getElementById('resultsBody').innerHTML = displayData.length ? displayData.map(r => {
+          const u = pm[r.user_id] || {};
+          const name = ((u.first_name || '') + ' ' + (u.last_name || '')).trim() || u.email || 'Student';
+          const isMe = r.user_id === currentUser?.id;
+          const trophy = r.final_rank === 1 ? '🥇' : r.final_rank === 2 ? '🥈' : r.final_rank === 3 ? '🥉' : '';
+          const badgeHtml = r.badge ? ' <span style="font-size:.76rem;color:var(--neon-yellow)">🎉 ' + r.badge + '</span>' : '';
+          const solved = r.problems_solved || 0;
+          const xpVal = r.xp_awarded || 0;
+          const xpHtml = xpVal > 0 ? '<span style="color:var(--neon-yellow);font-weight:700">+' + xpVal + ' XP</span>' : '<span class="zero-xp">0 XP</span>';
+          return '<tr style="' + (isMe ? 'background:rgba(124,58,237,.06)' : '') + '">'
+            + '<td><strong>' + trophy + ' #' + r.final_rank + '</strong></td>'
+            + '<td>' + (isMe ? '<strong>' : '') + esc(name) + badgeHtml + (isMe ? '</strong>' : '') + '</td>'
+            + '<td><span style="color:' + (solved > 0 ? 'var(--neon-green)' : 'var(--neon-pink)') + '">' + solved + ' ' + (solved > 0 ? '✓' : '✗') + '</span></td>'
+            + '<td class="mono">' + (r.final_score || 0) + '</td>'
+            + '<td style="color:var(--neon-pink)">' + (penaltyMap[r.user_id] || 0) + '</td>'
+            + '<td>' + xpHtml + '</td>'
+            + '</tr>';
+ 
+        }).join('') : '<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:2.5rem">No results recorded yet</td></tr>';
+
+      } catch(e) {
+        console.error('showResults error:', e);
+        document.getElementById('resultsBody').innerHTML = '<tr><td colspan="6" style="color:var(--neon-pink);padding:1rem">Error loading results: ' + e.message + '</td></tr>';
+        document.getElementById('resultsBody').innerHTML = '<tr><td colspan="6" style="color:var(--neon-pink);padding:1.5rem">Error loading results: ' + e.message + '</td></tr>';
+      }
+    }
+  </script>
+</body>
+</html>

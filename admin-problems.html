@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Problems — VidX Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+  <link rel="stylesheet" href="animations.css">
+  <style>
+    :root {
+      --bg: #03040a;
+      --bg-surface: #080c14;
+      --bg-card: rgba(13, 18, 32, 0.72);
+      --bg-card-hover: rgba(18, 24, 43, 0.85);
+      --bg-card: rgba(13, 18, 32, 0.78);
+      --bg-card-hover: rgba(18, 24, 43, 0.9);
+      --bg-input: #0d1220;
+      --bg: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-card: #ffffff;
+      --bg-card-hover: #ffffff;
+      --bg-input: #f8fafc;
+      --neon-red: #ef4444;
+      --neon-purple: #8b5cf6;
+      --neon-blue: #3b82f6;
+      --neon-cyan: #06b6d4;
+      --neon-green: #10b981;
+      --glow-red: rgba(239, 68, 68, 0.35);
+      --text: #f1f5f9;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(239, 68, 68, 0.35);
+      --sidebar-w: 260px;
+      --neon-purple: #7c3aed;
+      --neon-blue: #2563eb;
+      --neon-cyan: #0891b2;
+      --neon-green: #059669;
+      --glow-red: rgba(239, 68, 68, 0.2);
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --dim: #94a3b8;
+      --border: #e2e8f0;
+      --border-glow: rgba(239, 68, 68, 0.25);
+      --sidebar-w: 264px;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: rgba(239, 68, 68, 0.5); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(239, 68, 68, 0.4); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--neon-red); }
+
+    .layout { display: flex; min-height: 100vh; position: relative; }
+
+    /* SIDEBAR */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: var(--sidebar-w);
+      background: rgba(8, 12, 20, 0.88);
+      background: rgba(8, 12, 20, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: #ffffff;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 0;
+      padding: 1.75rem 0;
+      z-index: 100;
+      overflow-y: auto;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: transform 0.3s var(--ease);
+      transition: transform 0.35s var(--ease);
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.02);
+    }
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0 1.5rem 1.5rem;
+      padding: 0 1.5rem 1.4rem;
+      gap: 0.85rem;
+      padding: 0 1.75rem 1.75rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.35rem;
+      font-size: 1.4rem;
+      text-decoration: none;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+      letter-spacing: -0.02em;
+    }
+    .logo-icon {
+      width: 34px;
+      height: 34px;
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--neon-red), #f97316);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 0 15px var(--glow-red);
+      box-shadow: 0 0 18px var(--glow-red);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    .admin-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.75rem;
+      gap: 0.45rem;
+      padding: 0.35rem 0.8rem;
+      font-size: 0.72rem;
+      color: #fca5a5;
+      background: rgba(239, 68, 68, 0.12);
+      color: #dc2626;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: 9999px;
+      font-weight: 700;
+      margin: 1rem 1.5rem 0.5rem;
+      border: 1px solid rgba(239, 68, 68, 0.28);
+      border-radius: 100px;
+      font-weight: 800;
+      margin: 1.2rem 1.5rem 0.5rem;
+      margin: 1.2rem 1.75rem 0.5rem;
+      width: fit-content;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      letter-spacing: 0.08em;
+    }
+    .nav-section { padding: 0.75rem 0; }
+    .nav-label {
+      padding: 0 1.5rem;
+      font-size: 0.7rem;
+      padding: 0 1.75rem;
+      font-size: 0.68rem;
+      font-weight: 700;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      color: var(--dim);
+      margin-bottom: 0.5rem;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.75rem 1.5rem;
+      padding: 0.72rem 1.5rem;
+      padding: 0.72rem 1.75rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      font-size: 0.88rem;
+      border-left: 3px solid transparent;
+      transition: all 0.25s ease;
+      transition: all 0.2s ease;
+    }
+    .nav-item:hover {
+      color: var(--text);
+      background: rgba(239, 68, 68, 0.06);
+      padding-left: 1.7rem;
+      background: #f8fafc;
+      padding-left: 1.95rem;
+    }
+    .nav-item.active {
+      color: #fff;
+      color: var(--neon-red);
+      border-left-color: var(--neon-red);
+      background: linear-gradient(90deg, rgba(239, 68, 68, 0.12), transparent);
+      background: linear-gradient(90deg, rgba(239, 68, 68, 0.14) 0%, transparent 100%);
+      background: linear-gradient(90deg, rgba(239, 68, 68, 0.08) 0%, transparent 100%);
+      font-weight: 700;
+    }
+    .sidebar-user {
+      margin-top: auto;
+      padding: 1.25rem 1.5rem;
+      padding: 1.25rem 1.75rem;
+      border-top: 1px solid var(--border);
+      background: rgba(3, 4, 10, 0.5);
+      background: rgba(3, 4, 10, 0.4);
+      background: #f8fafc;
+    }
+
+    /* MAIN */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 2.5rem;
+      padding: 2.5rem 3.5rem 4rem;
+      padding: 2.75rem 3.5rem 4rem;
+      min-width: 0;
+      max-width: 1440px;
+    }
+    .mobile-topbar {
+      display: none;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+      background: rgba(8, 12, 20, 0.9);
+      padding: 1rem 1.25rem;
+      background: rgba(8, 12, 20, 0.85);
+      backdrop-filter: blur(16px);
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      z-index: 90;
+      margin: -2.5rem -3.5rem 1.75rem -3.5rem;
+      margin: -2.75rem -3.5rem 2rem -3.5rem;
+    }
+    .hamburger {
+      background: none;
+      border: none;
+      background: rgba(255, 255, 255, 0.05);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 1.5rem;
+      font-size: 1.25rem;
+      cursor: pointer;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .page-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.75rem;
+      font-size: 2.4rem;
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.75rem;
+      color: #fff;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      color: var(--text);
+    }
+
+    /* FORM CARD */
+    .form-card {
+      background: var(--bg-card);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border-radius: 24px;
+      padding: 2.4rem;
+      border-radius: 22px;
+      padding: 2.2rem;
+      margin-bottom: 2.5rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+    .form-group { margin-bottom: 1rem; }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-size: 0.76rem;
+      color: #cbd5e1;
+      font-weight: 600;
+      font-weight: 700;
+      margin-bottom: 0.45rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.45rem;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 0.8rem 1.1rem;
+      background: var(--bg-input);
+      padding: 0.8rem 1rem;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.92rem;
+      transition: all 0.25s ease;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .form-group textarea {
+      min-height: 100px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: var(--neon-red);
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2), 0 0 15px rgba(239, 68, 68, 0.1);
+      background: #111827;
+      box-shadow: 0 0 16px rgba(239, 68, 68, 0.25);
+      border-color: var(--neon-purple);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+      background: #ffffff;
+    }
+    .form-group select option { background: #0f172a; color: #fff; }
+    .form-group select option { background: #ffffff; color: var(--text); }
+    .checkbox-group {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+      gap: 0.85rem;
+      margin-top: 0.5rem;
+      margin-top: 0.35rem;
+    }
+    .checkbox-group label {
+      display: inline-flex;
+      font-size: 0.88rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      gap: 0.45rem;
+      cursor: pointer;
+      text-transform: none;
+      letter-spacing: normal;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 0.4rem 0.85rem;
+      border-radius: 8px;
+      padding: 0.5rem 0.95rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      transition: border-color 0.2s;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .checkbox-group label:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .checkbox-group input[type="checkbox"] {
+      width: auto;
+      accent-color: var(--neon-red);
+    }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      margin-top: 0.5rem;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 0.75rem 1.25rem;
+      border-radius: 12px;
+      padding: 0.85rem 1.25rem;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .toggle-row label {
+      display: inline-flex;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0;
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-transform: none;
+      font-size: 0.9rem;
+      cursor: pointer;
+      letter-spacing: normal;
+      color: var(--text);
+    }
+    .toggle-row input[type="date"] {
+      width: auto;
+      max-width: 220px;
+    }
+
+    .btn {
+      padding: 0.85rem 1.8rem;
+      border: none;
+      padding: 0.75rem 1.6rem;
+      border-radius: 12px;
+      font-family: 'Syne', sans-serif;
+      border-radius: 14px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      font-size: 0.92rem;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--neon-red), #f97316);
+      background: var(--neon-red);
+      color: #fff;
+      box-shadow: 0 4px 18px rgba(239, 68, 68, 0.35);
+      transition: all 0.25s ease;
+      border: none;
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      gap: 0.4rem;
+      transition: all 0.2s var(--ease);
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(239, 68, 68, 0.5);
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    }
+
+    /* SEARCH & TABLE */
+    /* SEARCH BAR */
+    .search-bar {
+      width: 100%;
+      padding: 0.85rem 1.25rem;
+      background: var(--bg-card);
+      padding: 0.85rem 1.2rem;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.95rem;
+      margin-bottom: 1.25rem;
+      margin-bottom: 1.5rem;
+      backdrop-filter: blur(16px);
+      transition: all 0.25s ease;
+      margin-bottom: 1.75rem;
+      outline: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    }
+    .search-bar:focus {
+      outline: none;
+      border-color: var(--neon-purple);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+      box-shadow: 0 0 16px rgba(139, 92, 246, 0.25);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+    }
+
+    /* TABLE */
+    .table-wrap {
+      background: var(--bg-card);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      border-radius: 20px;
+      overflow: hidden;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+      overflow-x: auto;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td {
+      padding: 1rem 1.25rem;
+      padding: 1.1rem 1.25rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    th {
+      background: rgba(255, 255, 255, 0.02);
+      background: #f8fafc;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+    }
+    tbody tr {
+      transition: background 0.2s ease;
+    }
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    tbody tr:hover { background: #f8fafc; }
+    .action-btn {
+      background: rgba(239, 68, 68, 0.1);
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      padding: 0.4rem 0.65rem;
+      color: #fca5a5;
+      color: #dc2626;
+      transition: all 0.2s ease;
+    }
+    .action-btn:hover {
+      background: rgba(239, 68, 68, 0.25);
+      background: rgba(239, 68, 68, 0.18);
+      transform: scale(1.05);
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 999;
+    }
+    .overlay.show { display: block; }
+
+    @media(max-width: 768px) {
+      .sidebar { transform: translateX(-100%); z-index: 1000; }
+      .sidebar.open { transform: translateX(0); }
+      .main { margin-left: 0; padding: 1.5rem 1rem; }
+      .mobile-topbar { display: flex; }
+      .sidebar.open { transform: translateX(0); z-index: 1001; }
+      .main { margin-left: 0; padding: 1.25rem 1rem 2.5rem; }
+      .mobile-topbar { display: flex; margin: -1.25rem -1rem 1.25rem -1rem; }
+      .form-grid { grid-template-columns: 1fr; }
+      .page-title { font-size: 1.8rem; }
+      .form-card { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <a href="admin-dashboard.html" class="sidebar-logo"><div class="logo-icon">VX</div>VidX</a>
+      <div class="admin-badge">🔴 Command System</div>
+      <div class="nav-section">
+        <div class="nav-label">Control Center</div>
+        <a href="admin-dashboard.html" class="nav-item">📊 Dashboard</a>
+        <a href="admin-problems.html" class="nav-item active">📝 Manage Problems</a>
+        <a href="admin-students.html" class="nav-item">👥 Manage Students</a>
+        <a href="admin-battles.html" class="nav-item">⚔️ Manage Battles</a>
+        <a href="admin-leaderboard.html" class="nav-item">🏆 Manage Leaderboard</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Student View</div>
+        <a href="index.html" class="nav-item">🌐 Landing Page</a>
+        <a href="dashboard.html" class="nav-item">👁 Campus Terminal</a>
+      </div>
+      <div class="sidebar-user">
+        <div style="font-weight:700;color:var(--text)">Administrator</div>
+        <div style="font-size:.8rem;color:var(--neon-red);font-weight:600">Super Admin Access</div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="mobile-topbar"><button class="hamburger" onclick="toggleSidebar()">☰</button><strong>Manage Problems</strong></div>
+      
+      <div data-aos="fade-up" style="margin-bottom:2rem">
+        <div class="cyntexa-kicker" style="color:var(--neon-red)"><span class="cyntexa-kicker-dot" style="background:var(--neon-red)"></span>CURRICULUM MANAGEMENT</div>
+        <h1 class="page-title">Manage <span style="font-style:italic;font-weight:400;color:var(--neon-purple)">Problems.</span></h1>
+      </div>
+
+      <div class="form-card" data-aos="fade-up">
+        <form id="problemForm">
+          <div class="form-grid">
+            <div class="form-group full"><label>Title</label><input type="text" id="title" required placeholder="e.g. Invert Binary Tree"></div>
+            <div class="form-group"><label>Difficulty</label><select id="difficulty"><option value="Easy">Easy</option><option value="Medium">Medium</option><option value="Hard">Hard</option></select></div>
+            <div class="form-group"><label>Topic</label><select id="topic"><option>Arrays</option><option>DP</option><option>Graphs</option><option>Trees</option><option>Strings</option><option>Math</option></select></div>
+            <div class="form-group"><label>XP Reward</label><input type="number" id="xpReward" value="50"></div>
+            <div class="form-group full"><label>Description</label><textarea id="description" required placeholder="Problem description in markdown format..." rows="4"></textarea></div>
+            <div class="form-group full"><label>Constraints</label><textarea id="constraints" rows="3" placeholder="e.g. 1 ≤ n ≤ 10^5"></textarea></div>
+            <div class="form-group full"><label>Hint</label><textarea id="hint" rows="3" placeholder="Optional hint for students"></textarea></div>
+            <div class="form-group full"><label>Editorial</label><textarea id="editorial" rows="4" placeholder="Full solution explanation (shown in Editorial tab)"></textarea></div>
+            <div class="form-group full"><label>Tagged Companies</label>
+              <div class="checkbox-group">
+                <label><input type="checkbox" value="Google"> Google</label>
+                <label><input type="checkbox" value="Amazon"> Amazon</label>
+                <label><input type="checkbox" value="Microsoft"> Microsoft</label>
+                <label><input type="checkbox" value="Meta"> Meta</label>
+                <label><input type="checkbox" value="Apple"> Apple</label>
+              </div>
+            </div>
+            <div class="form-group"><label>Sample Input</label><textarea id="sampleInput" rows="3"></textarea></div>
+            <div class="form-group"><label>Sample Output</label><textarea id="sampleOutput" rows="3"></textarea></div>
+            <div class="form-group full"><label>Test Cases (JSON)</label><textarea id="testCases" rows="4" placeholder='[{"input":"5","expected":"25"}]'></textarea></div>
+            <div class="form-group full"><label>Hidden Test Cases (JSON)</label><textarea id="hiddenTestCases" rows="4" placeholder='[{"input":"100","expected":"10000"}]'></textarea></div>
+            <div class="form-group full toggle-row">
+              <label><input type="checkbox" id="isDaily"> Set as Daily Problem</label>
+              <input type="date" id="dailyDate">
+            </div>
+          </div>
+          <button type="submit" class="btn" style="margin-top:1.5rem">Add Problem +</button>
+        </form>
+      </div>
+
+      <input type="text" class="search-bar" id="searchBar" placeholder="Search problems by title..." oninput="filterTable()">
+      
+      <div class="table-wrap" data-aos="fade-up">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Title</th><th>Difficulty</th><th>Topic</th><th>Solves</th><th>Daily</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="problemTable"><tr><td colspan="7" style="color:var(--text-muted);text-align:center">Loading problems...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="supabase.js"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="animations.js"></script>
+  <script>
+    function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show');}
+    function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');}
+    let allProblems=[];
+    function onDbReady(){ if(!requireAdmin())return; loadProblems(); }
+    async function loadProblems(){
+      allProblems=await getAllProblems(true);
+      renderTable(allProblems);
+    }
+    function renderTable(list){
+      document.getElementById('problemTable').innerHTML=list.length?list.map((p,i)=>{
+        const d=normDiff(p.difficulty);
+        const diffColor = d==='easy' ? '#059669' : d==='medium' ? '#d97706' : '#dc2626';
+        const diffBg = d==='easy' ? 'rgba(5,150,105,0.1)' : d==='medium' ? 'rgba(217,119,6,0.1)' : 'rgba(220,38,38,0.1)';
+        return `
+        <tr>
+          <td class="mono" style="color:var(--text-muted)">${i+1}</td>
+          <td style="font-weight:600;color:var(--text)">${esc(p.title)}</td>
+          <td><span style="display:inline-block;padding:0.25rem 0.65rem;border-radius:9999px;font-size:0.75rem;font-weight:700;color:${diffColor};background:${diffBg}">${esc(p.difficulty||'')}</span></td>
+          <td><span style="font-size:0.82rem;color:var(--neon-cyan);font-weight:600">${esc(p.topic||'')}</span></td>
+          <td class="mono">${p.solve_count||0}</td>
+          <td>${p.is_daily?'<span style="color:#059669;font-weight:600">● Daily</span>':'<span style="color:var(--text-muted)">—</span>'}</td>
+          <td><button class="action-btn" onclick="deleteProblem('${p.id}')" title="Delete">🗑️</button></td>
+        </tr>`;
+      }).join(''):'<tr><td colspan="7" style="text-align:center;color:var(--text-muted)">No problems found</td></tr>';
+    }
+    function filterTable(){
+      const q=document.getElementById('searchBar').value.toLowerCase();
+      renderTable(allProblems.filter(p=>(p.title||'').toLowerCase().includes(q)));
+    }
+    document.getElementById('problemForm').addEventListener('submit',async(e)=>{
+      e.preventDefault();
+      const submitBtn=e.target.querySelector('button[type="submit"]');
+      const companies=[...document.querySelectorAll('.checkbox-group input:checked')].map(c=>c.value);
+      let testCases=[], hiddenTestCases=[];
+      try{testCases=JSON.parse(document.getElementById('testCases').value||'[]');}catch(err){alert('Invalid test cases JSON');return;}
+      try{hiddenTestCases=JSON.parse(document.getElementById('hiddenTestCases').value||'[]');}catch(err){alert('Invalid hidden test cases JSON');return;}
+      const isDaily=document.getElementById('isDaily').checked;
+      const data={
+        title:document.getElementById('title').value.trim(),
+        difficulty:document.getElementById('difficulty').value,
+        topic:document.getElementById('topic').value,
+        xp_reward:parseInt(document.getElementById('xpReward').value)||50,
+        description:document.getElementById('description').value.trim(),
+        constraints:document.getElementById('constraints').value.trim()||null,
+        hint:document.getElementById('hint').value.trim()||null,
+        editorial:document.getElementById('editorial').value.trim()||null,
+        companies,
+        sample_input:document.getElementById('sampleInput').value,
+        sample_output:document.getElementById('sampleOutput').value,
+        test_cases:testCases,
+        hidden_test_cases:hiddenTestCases,
+        is_daily:isDaily,
+        daily_date:isDaily?(document.getElementById('dailyDate').value||new Date().toISOString().split('T')[0]):null
+      };
+      if(submitBtn) submitBtn.disabled=true;
+      try{
+        await insertProblem(data);
+        alert('Problem added!');document.getElementById('problemForm').reset();loadProblems();
+      }catch(err){
+        const msg=err.message||String(err);
+        if(isSchemaOrRlsError(err)){
+          alert('Database schema/permissions need an update. Run vidx-setup.sql in Supabase SQL Editor, then try again.\n\n'+msg);
+        }else{alert('Error: '+msg);}
+      }
+      if(submitBtn) submitBtn.disabled=false;
+    });
+    async function deleteProblem(id){
+      if(!confirm('Delete this problem?'))return;
+      const {error}=await window.db.from('problems').delete().eq('id',id);
+      if(error){alert('Delete failed: '+error.message);return;}
+      loadProblems();
+    }
+  </script>
+</body>
+</html>

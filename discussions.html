@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discussions — VidX</title>
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+  <link rel="stylesheet" href="animations.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+    :root {
+      --bg:           #03040a;
+      --bg2:          #080c14;
+      --bg3:          #0d1220;
+      --card-bg:      rgba(13, 18, 32, 0.76);
+      --neon-blue:    #3b82f6;
+      --neon-purple:  #8b5cf6;
+      --neon-cyan:    #06b6d4;
+      --neon-pink:    #ec4899;
+      --neon-green:   #10b981;
+      --neon-yellow:  #f59e0b;
+      --glow-purple:  rgba(139,92,246,0.3);
+      --glow-purple:  rgba(139,92,246,0.25);
+      --text:         #f8fafc;
+      --muted:        #94a3b8;
+      --dim:          #475569;
+      --border:       rgba(255,255,255,0.08);
+      --border-hover: rgba(139,92,246,0.38);
+      --border-glow:  rgba(139,92,246,0.4);
+      --sidebar-w:    260px;
+      --bg:           #f8fafc;
+      --bg:           #f2f7f4;
+      --bg2:          #ffffff;
+      --bg3:          #f1f5f9;
+      --bg3:          #eaf2ed;
+      --bg4:          #e1eae4;
+      --card-bg:      #ffffff;
+      --card-hover:   #ffffff;
+      --neon-blue:    #2563eb;
+      --neon-purple:  #7c3aed;
+      --neon-cyan:    #0891b2;
+      --neon-pink:    #db2777;
+      --neon-green:   #059669;
+      --neon-yellow:  #d97706;
+      --glow-purple:  rgba(124, 58, 237, 0.15);
+      --text:         #0f172a;
+      --muted:        #64748b;
+      --dim:          #94a3b8;
+      --border:       #e2e8f0;
+      --muted:        #526560;
+      --dim:          #869e96;
+      --border:       #e1eae4;
+      --border-hover: rgba(124, 58, 237, 0.35);
+      --border-glow:  rgba(124, 58, 237, 0.2);
+      --sidebar-w:    264px;
+      --ease:         cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4, .font-display {
+      font-family: 'Syne', sans-serif;
+      letter-spacing: -0.02em;
+    }
+
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.4); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.35); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(124, 58, 237, 0.25); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--neon-purple); }
+
+    .orb, .ambient-glow {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(95px);
+      opacity: 0.16;
+      filter: blur(100px);
+      opacity: 0.14;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.25;
+    }
+    .orb-1 { width: 420px; height: 420px; background: #06b6d4; bottom: -50px; left: 30%; }
+    .orb-2 { width: 360px; height: 360px; background: #8b5cf6; top: -50px; right: 10%; }
+    .orb-1 { width: 440px; height: 440px; background: #06b6d4; bottom: -80px; left: 25%; }
+    .orb-2 { width: 380px; height: 380px; background: #8b5cf6; top: -60px; right: 8%; }
+    .ambient-1 { width: 440px; height: 440px; background: radial-gradient(circle, rgba(8, 145, 178, 0.12) 0%, transparent 70%); bottom: -80px; left: 25%; }
+    .ambient-2 { width: 380px; height: 380px; background: radial-gradient(circle, rgba(124, 58, 237, 0.12) 0%, transparent 70%); top: -60px; right: 8%; }
+
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(95px);
+      opacity: 0.12;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 { width: 440px; height: 440px; background: #06b6d4; bottom: -80px; left: 25%; }
+    .orb-2 { width: 380px; height: 380px; background: #8b5cf6; top: -60px; right: 8%; }
+
+    .layout { display: flex; min-height: 100vh; position: relative; z-index: 1; }
+
+    /* Frosted Glass Sidebar */
+    /* Frosted Glass Cyntexa Sidebar */
+    /* =======================================================
+       SIDEBAR
+       ======================================================= */
+    .sidebar {
+      position: fixed;
+      left: 0; top: 0; bottom: 0;
+      width: var(--sidebar-w);
+      background: rgba(8, 12, 20, 0.88);
+      background: rgba(8, 12, 20, 0.92);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: #ffffff;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 0;
+      padding: 1.75rem 0;
+      z-index: 100;
+      overflow-y: auto;
+      transition: transform 0.3s var(--ease);
+      transition: transform 0.35s var(--ease);
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.02);
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0 1.5rem 1.4rem;
+      gap: 0.85rem;
+      padding: 0 1.75rem 1.75rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.35rem;
+      font-size: 1.4rem;
+      text-decoration: none;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+      letter-spacing: -0.02em;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82rem;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 0 18px rgba(139, 92, 246, 0.45);
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+    }
+
+    .nav-section { padding: 1.2rem 0 0.5rem; }
+    .nav-section { padding: 1.35rem 0 0.4rem; }
+    .nav-label {
+      padding: 0 1.5rem;
+      padding: 0 1.75rem;
+      font-size: 0.68rem;
+      font-weight: 700;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 0.6rem;
+      color: var(--dim);
+      margin-bottom: 0.5rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.72rem 1.5rem;
+      gap: 0.85rem;
+      padding: 0.72rem 1.75rem;
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.88rem;
+      font-size: 0.9rem;
+      border-left: 3px solid transparent;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .nav-item:hover {
+      color: var(--text);
+      background: rgba(139, 92, 246, 0.06);
+      padding-left: 1.7rem;
+      background: var(--bg3);
+      padding-left: 1.95rem;
+    }
+
+    .nav-item.active {
+      color: #fff;
+      color: var(--neon-purple);
+      border-left-color: var(--neon-purple);
+      background: linear-gradient(90deg, rgba(139, 92, 246, 0.14) 0%, transparent 100%);
+      background: linear-gradient(90deg, rgba(124, 58, 237, 0.08) 0%, transparent 100%);
+      font-weight: 700;
+    }
+
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      right: 1.5rem;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--neon-purple);
+      box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
+    }
+
+    .sidebar-user {
+      margin-top: auto;
+      padding: 1.25rem 1.5rem;
+      padding: 1.25rem 1.75rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      background: rgba(3, 4, 10, 0.4);
+      background: #f8fafc;
+    }
+
+    .user-av {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 0 14px rgba(139, 92, 246, 0.35);
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+      flex-shrink: 0;
+    }
+
+    /* =======================================================
+       MAIN CONTENT
+       ======================================================= */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 2.25rem 3rem 4rem;
+      padding: 2.5rem 3.5rem 4rem;
+      padding: 2.75rem 3.5rem 4rem;
+      min-width: 0;
+    }
+
+    .mobile-topbar {
+      display: none;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: rgba(8, 12, 20, 0.85);
+      backdrop-filter: blur(16px);
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 90;
+      margin: -2.25rem -3rem 1.75rem -3rem;
+      margin: -2.5rem -3.5rem 1.75rem -3.5rem;
+      margin: -2.75rem -3.5rem 2rem -3.5rem;
+    }
+
+    .hamburger {
+      background: rgba(255, 255, 255, 0.05);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 1.25rem;
+      cursor: pointer;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+      line-height: 1;
+    }
+    .hamburger:hover { background: rgba(255, 255, 255, 0.1); }
+    .hamburger:hover { background: var(--bg3); }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      margin-bottom: 2.2rem;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      gap: 1.5rem;
+    }
+
+    .page-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.2rem;
+      font-size: 2.4rem;
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      color: var(--text);
+    }
+
+    /* Filter Pills */
+    .filters {
+      display: flex;
+      gap: 0.65rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 0.55rem 1.25rem;
+      background: rgba(13, 18, 32, 0.6);
+      backdrop-filter: blur(10px);
+      padding: 0.6rem 1.4rem;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      color: var(--muted);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 600;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.25s var(--ease);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    }
+
+    .filter-btn:hover {
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--border-hover);
+      background: var(--bg3);
+      transform: translateY(-1px);
+    }
+
+    .filter-btn.active {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(59, 130, 246, 0.15));
+      background: var(--neon-purple);
+      border-color: var(--neon-purple);
+      color: #fff;
+      box-shadow: 0 4px 18px rgba(139, 92, 246, 0.25);
+      box-shadow: 0 4px 16px rgba(124, 58, 237, 0.25);
+    }
+
+    .btn {
+      padding: 0.65rem 1.4rem;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+      color: #fff;
+      box-shadow: 0 4px 18px var(--glow-purple);
+      box-shadow: 0 4px 14px var(--glow-purple);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(139, 92, 246, 0.45);
+      box-shadow: 0 8px 25px rgba(124, 58, 237, 0.35);
+    }
+
+    /* Post Cards */
+    .post-card {
+      background: rgba(13, 18, 32, 0.74);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.6rem 1.8rem;
+      padding: 1.8rem 2rem;
+      margin-bottom: 1.25rem;
+      cursor: pointer;
+      transition: transform 0.3s var(--ease), border-color 0.3s ease, box-shadow 0.3s ease;
+      transition: all 0.3s var(--ease);
+      position: relative;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+    }
+
+    .post-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35), 0 0 20px rgba(139, 92, 246, 0.12);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4), 0 0 24px rgba(139, 92, 246, 0.16);
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.06), 0 0 20px rgba(124, 58, 237, 0.06);
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .post-av {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #fff;
+      box-shadow: 0 0 12px rgba(139, 92, 246, 0.3);
+      box-shadow: 0 3px 10px rgba(124, 58, 237, 0.2);
+      flex-shrink: 0;
+    }
+
+    .post-author { font-weight: 700; font-size: 0.95rem; }
+    .post-author { font-weight: 700; font-size: 0.95rem; color: var(--text); }
+    .post-time { font-size: 0.78rem; color: var(--muted); margin-top: 0.1rem; }
+
+    .post-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.18rem;
+      font-size: 1.22rem;
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.01em;
+      color: #fff;
+      color: var(--text);
+      transition: color 0.2s ease;
+    }
+
+    .post-card:hover .post-title {
+      color: #c4b5fd;
+      color: var(--neon-purple);
+    }
+
+    .post-preview {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.6;
+      font-size: 0.95rem;
+      line-height: 1.65;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .post-meta {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      margin-top: 1rem;
+      margin-top: 1.2rem;
+      padding-top: 0.9rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .type-badge {
+      margin-left: auto;
+      padding: 0.25rem 0.75rem;
+      padding: 0.28rem 0.85rem;
+      border-radius: 100px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      background: rgba(139, 92, 246, 0.15);
+      color: #c4b5fd;
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      background: rgba(124, 58, 237, 0.08);
+      color: var(--neon-purple);
+      border: 1px solid rgba(124, 58, 237, 0.2);
+      text-transform: capitalize;
+      letter-spacing: 0.03em;
+    }
+
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .modal.show { display: flex; }
+
+    .modal-card {
+      background: rgba(13, 18, 32, 0.96);
+      border: 1px solid var(--border-glow);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2.2rem;
+      padding: 2.4rem;
+      width: 100%;
+      max-width: 580px;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px var(--glow-purple);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65), 0 0 40px var(--glow-purple);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.15);
+      animation: modalFadeIn 0.3s var(--ease);
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.96) translateY(10px); }
+      from { opacity: 0; transform: scale(0.96) translateY(12px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-card h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.45rem;
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label {
+      display: block;
+      font-size: 0.78rem;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 0.45rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      padding: 0.8rem 1rem;
+      background: var(--bg3);
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      border-color: var(--neon-purple);
+      box-shadow: 0 0 14px rgba(139, 92, 246, 0.25);
+      box-shadow: 0 0 16px rgba(139, 92, 246, 0.3);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+      background: #ffffff;
+    }
+    .form-group select option { background: var(--bg3); }
+    .form-group select option { background: var(--bg3); color: var(--text); }
+    .form-group select option { background: #ffffff; color: var(--text); }
+    .form-group textarea { min-height: 120px; resize: vertical; line-height: 1.6; }
+
+    .reply-box {
+      margin-top: 1.75rem;
+      padding-top: 1.75rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .reply-item {
+      padding: 0.85rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 0.9rem 1rem;
+      background: rgba(255, 255, 255, 0.03);
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 0.75rem;
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      background: rgba(15, 23, 42, 0.4);
+      z-index: 998;
+      backdrop-filter: blur(4px);
+    }
+    .overlay.show { display: block; }
+
+    @media (max-width: 900px) {
+      .main { padding: 1.75rem 1.5rem 3rem; }
+      .mobile-topbar { margin: -1.75rem -1.5rem 1.5rem -1.5rem; }
+      .main { padding: 2rem 1.5rem 3rem; }
+      .mobile-topbar { margin: -2rem -1.5rem 1.75rem -1.5rem; }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); z-index: 1000; }
+      .sidebar.open { transform: translateX(0); z-index: 1001; }
+      .main { margin-left: 0; padding: 1.25rem 1rem 2.5rem; }
+      .mobile-topbar { display: flex; margin: -1.25rem -1rem 1.25rem -1rem; }
+      .page-title { font-size: 1.65rem; }
+      .post-card { padding: 1.25rem; }
+      .page-title { font-size: 1.8rem; }
+      .post-card { padding: 1.3rem; }
+      .modal-card { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="ambient-glow ambient-1"></div>
+  <div class="ambient-glow ambient-2"></div>
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <a href="dashboard.html" class="sidebar-logo">
+        <div class="logo-icon">VX</div>
+        <span>VidX</span>
+      </a>
+      <div class="nav-section">
+        <div class="nav-label">Core Platform</div>
+        <a href="dashboard.html" class="nav-item">🏠 Dashboard</a>
+        <a href="problems.html" class="nav-item">📚 Problem Library</a>
+        <a href="problem.html" class="nav-item">⚡ Daily Problem</a>
+        <a href="leaderboard.html" class="nav-item">🏆 Leaderboard</a>
+        <a href="sadhana.html" class="nav-item">🧘 Sadhana Mode</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Community & Arena</div>
+        <a href="battles.html" class="nav-item">👥 Battles</a>
+        <a href="knowledge-hub.html" class="nav-item">🎓 Knowledge Hub</a>
+        <a href="discussions.html" class="nav-item active">💬 Discussions</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Account & Honors</div>
+        <a href="profile.html" class="nav-item">👤 My Profile</a>
+        <a href="certificate.html" class="nav-item">📜 Certificates</a>
+        <a href="#" class="nav-item" onclick="logout();return false">🚪 Log Out</a>
+      </div>
+      <div class="sidebar-user">
+        <div class="user-av" id="sidebarAv">?</div>
+        <div>
+          <div style="font-weight:700;color:var(--text)" id="sidebarName">—</div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="mobile-topbar">
+        <button class="hamburger" onclick="toggleSidebar()">☰</button>
+        <strong style="font-family:'Syne',sans-serif">Discussions</strong>
+      </div>
+      
+      <div class="page-header" data-aos="fade-up">
+        <div>
+          <div class="cyntexa-kicker"><span class="cyntexa-kicker-dot"></span>CAMPUS FORUM & PEER EXCHANGE</div>
+          <h1 class="page-title">Community <span style="font-style:italic;font-weight:400;color:var(--neon-purple)">Discussions.</span></h1>
+          <p style="color:var(--muted);font-size:0.95rem;max-width:600px;margin-top:0.4rem">Ask tricky algorithm questions, share interview nuggets, and collaborate with peer developers across VidX.</p>
+        </div>
+        <button class="cyntexa-explore-btn" onclick="openNewPost()"><span>New Discussion</span><span class="arrow-circle">→</span></button>
+      </div>
+
+      <div class="filters" data-aos="fade-up">
+        <button class="filter-btn active" onclick="filterPosts('all',this)">All Discussions</button>
+        <button class="filter-btn" onclick="filterPosts('question',this)">Questions</button>
+        <button class="filter-btn" onclick="filterPosts('tip',this)">Tips & Strategies</button>
+        <button class="filter-btn" onclick="filterPosts('resource',this)">Resources</button>
+      </div>
+
+      <div id="postsList" data-aos="fade-up"><p style="color:var(--muted)">Loading discussions...</p></div>
+    </div>
+  </div>
+
+  <div class="modal" id="newPostModal">
+    <div class="modal-card">
+      <h2>Start a Discussion</h2>
+      <div class="form-group"><label>Discussion Title</label><input type="text" id="postTitle" placeholder="e.g. How to optimize Dijkstra for sparse graphs?"></div>
+      <div class="form-group"><label>Category</label><select id="postType"><option value="question">Question</option><option value="tip">Tip</option><option value="resource">Resource</option></select></div>
+      <div class="form-group"><label>Content</label><textarea id="postContent" placeholder="Describe the problem, approach, or link you'd like to share..."></textarea></div>
+      <div style="display:flex;gap:0.75rem;margin-top:1.5rem">
+        <button class="cyntexa-explore-btn" onclick="submitPost()"><span>Publish Post</span><span class="arrow-circle">→</span></button>
+        <button class="btn" style="background:transparent;border:1px solid var(--border);color:var(--text);box-shadow:none" onclick="closeNewPost()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="viewModal">
+    <div class="modal-card" id="viewContent"></div>
+  </div>
+
+  <script src="supabase.js"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="animations.js"></script>
+  <script>
+    function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show');}
+    function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');}
+
+    let currentUser=null,allPosts=[],allUsers={},currentFilter='all';
+
+    async function onDbReady(){
+      currentUser=await requireAuth();if(!currentUser)return;
+      const cached=getCachedProfile(currentUser.id);
+      if(cached){
+        setText('sidebarAv',getInitials(cached.first_name,cached.last_name));
+        setText('sidebarName',`${cached.first_name||''} ${cached.last_name||''}`.trim());
+      }
+      getUserProfile(currentUser.id).then(p=>{
+        if(!p)return;
+        setText('sidebarAv',getInitials(p.first_name,p.last_name));
+        setText('sidebarName',`${p.first_name||''} ${p.last_name||''}`.trim());
+      });
+      loadPosts();
+      getLeaderboard(500).then(students=>{students.forEach(s=>allUsers[s.id]=s);renderPosts();});
+    }
+
+    async function loadPosts(){
+      try{
+        const {data,error}=await window.db.from('discussions').select('*').order('created_at',{ascending:false});
+        if(error)throw error;
+        allPosts=data||[];renderPosts();
+      }catch(e){
+        console.error('loadPosts:',e);
+        document.getElementById('postsList').innerHTML='<p style="color:var(--muted)">Could not load posts: '+esc(e.message)+'</p>';
+      }
+    }
+
+    function filterPosts(f,btn){
+      currentFilter=f;
+      document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      renderPosts();
+    }
+
+    function authorName(userId){
+      const a=allUsers[userId];
+      return a?`${a.first_name||''} ${a.last_name||''}`.trim()||'Student':'Student';
+    }
+
+    function renderPosts(){
+      const filtered=currentFilter==='all'?allPosts:allPosts.filter(p=>p.type===currentFilter);
+      setHTML('postsList',filtered.length?filtered.map(p=>{
+        const author=allUsers[p.user_id];
+        return `<div class="post-card" onclick="viewPost('${esc(p.id)}')">
+          <div class="post-header">
+            <div class="post-av">${author?esc(getInitials(author.first_name,author.last_name)):'?'}</div>
+            <div>
+              <div class="post-author">${esc(authorName(p.user_id))}</div>
+              <div class="post-time">${formatDate(p.created_at)}</div>
+            </div>
+            <span class="type-badge">${esc(p.type||'question')}</span>
+          </div>
+          <div class="post-title">${esc(p.title)}</div>
+          <div class="post-preview">${esc(p.content)}</div>
+          <div class="post-meta">
+            <span>💬 Join Discussion</span>
+            <span>❤️ ${p.upvotes||0}</span>
+            <span style="margin-left:auto;color:var(--neon-purple);display:flex;align-items:center;gap:0.3rem">Read thread →</span>
+          </div>
+        </div>`;
+      }).join(''):'<div style="text-align:center;padding:3rem;background:#ffffff;border:1px dashed var(--border);border-radius:20px;color:var(--muted)">No discussions found under this filter. Be the first to start one!</div>');
+    }
+
+    function openNewPost(){document.getElementById('newPostModal').classList.add('show');}
+    function closeNewPost(){document.getElementById('newPostModal').classList.remove('show');}
+
+    async function submitPost(){
+      const title=document.getElementById('postTitle').value.trim();
+      const content=document.getElementById('postContent').value.trim();
+      const type=document.getElementById('postType').value;
+      if(!title||!content){alert('Please fill in the title and content.');return;}
+      const res=await insertResilient('discussions',{user_id:currentUser.id,title,content,type});
+      if(res.error){alert('Failed to publish: '+res.error.message+(isSchemaOrRlsError(res.error)?'\n\nRun vidx-setup.sql in the Supabase SQL Editor.':''));return;}
+      document.getElementById('postTitle').value='';document.getElementById('postContent').value='';
+      closeNewPost();loadPosts();
+    }
+
+    async function viewPost(id){
+      const post=allPosts.find(p=>p.id===id);if(!post)return;
+      const {data:replies}=await window.db.from('discussion_replies').select('*').eq('discussion_id',id).order('created_at');
+      const author=allUsers[post.user_id];
+      document.getElementById('viewContent').innerHTML=`
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem">
+          <div class="post-av">${author?esc(getInitials(author.first_name,author.last_name)):'?'}</div>
+          <div>
+            <div style="font-weight:700;color:var(--text)">${esc(authorName(post.user_id))}</div>
+            <div style="font-size:0.8rem;color:var(--muted)">${formatDate(post.created_at)}</div>
+          </div>
+          <span class="type-badge" style="margin-left:auto">${esc(post.type||'question')}</span>
+        </div>
+        <h2 style="margin-bottom:0.75rem;color:var(--text)">${esc(post.title)}</h2>
+        <div style="line-height:1.8;margin-bottom:1.5rem;color:#334155;background:#f8fafc;padding:1.25rem;border-radius:14px;border:1px solid var(--border);white-space:pre-wrap">${esc(post.content)}</div>
+
+        <h4 style="margin-bottom:0.85rem;font-size:1.05rem;color:var(--text)">Replies (${(replies||[]).length})</h4>
+        <div style="max-height:220px;overflow-y:auto;padding-right:0.5rem;margin-bottom:1.25rem">
+          ${(replies||[]).map(r=>`<div class="reply-item"><strong style="color:var(--neon-purple)">${esc(authorName(r.user_id))}</strong>: ${esc(r.content)}</div>`).join('')||'<p style="color:var(--muted);font-size:.85rem">No replies yet. Be the first!</p>'}
+        </div>
+
+        <div class="reply-box">
+          <label style="display:block;font-size:0.76rem;font-weight:700;color:var(--muted);margin-bottom:0.45rem;text-transform:uppercase;letter-spacing:0.08em">Add your reply</label>
+          <textarea id="replyText" placeholder="Write your constructive response or solution..." style="width:100%;padding:.8rem;background:#f8fafc;border:1px solid var(--border);border-radius:10px;color:var(--text);min-height:80px;font-family:inherit"></textarea>
+          <div style="display:flex;gap:0.75rem;margin-top:0.85rem">
+            <button class="cyntexa-explore-btn" onclick="submitReply('${esc(id)}')"><span>Reply</span><span class="arrow-circle">→</span></button>
+            <button class="btn" style="background:transparent;border:1px solid var(--border);color:var(--text);box-shadow:none" onclick="document.getElementById('viewModal').classList.remove('show')">Close</button>
+          </div>
+        </div>`;
+      document.getElementById('viewModal').classList.add('show');
+    }
+
+    async function submitReply(discussionId){
+      const box=document.getElementById('replyText');
+      const content=box.value.trim();if(!content)return;
+      const res=await insertResilient('discussion_replies',{discussion_id:discussionId,user_id:currentUser.id,content});
+      if(res.error){alert('Failed to reply: '+res.error.message);return;}
+      viewPost(discussionId);
+    }
+  </script>
+</body>
+</html>

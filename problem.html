@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Problem — VidX</title>
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+  <link rel="stylesheet" href="animations.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+    :root {
+      --bg:           #03040a;
+      --bg2:          #080c14;
+      --bg3:          #0d1220;
+      --card-bg:      rgba(13, 18, 32, 0.76);
+      --neon-blue:    #3b82f6;
+      --neon-purple:  #8b5cf6;
+      --neon-cyan:    #06b6d4;
+      --neon-pink:    #ec4899;
+      --neon-green:   #10b981;
+      --glow-purple:  rgba(139,92,246,0.3);
+      --glow-purple:  rgba(139,92,246,0.25);
+      --text:         #f8fafc;
+      --muted:        #94a3b8;
+      --dim:          #475569;
+      --border:       rgba(255,255,255,0.08);
+      --border-hover: rgba(139,92,246,0.38);
+      --border-glow:  rgba(139,92,246,0.4);
+      --bg:           #f8fafc;
+      --bg:           #f2f7f4;
+      --bg2:          #ffffff;
+      --bg3:          #f1f5f9;
+      --bg4:          #e2e8f0;
+      --bg3:          #eaf2ed;
+      --bg4:          #e1eae4;
+      --card-bg:      #ffffff;
+      --card-hover:   #ffffff;
+      --neon-blue:    #2563eb;
+      --neon-purple:  #7c3aed;
+      --neon-cyan:    #0891b2;
+      --neon-pink:    #db2777;
+      --neon-green:   #059669;
+      --neon-yellow:  #d97706;
+      --glow-purple:  rgba(124, 58, 237, 0.15);
+      --text:         #0f172a;
+      --muted:        #64748b;
+      --dim:          #94a3b8;
+      --border:       #e2e8f0;
+      --muted:        #526560;
+      --dim:          #869e96;
+      --border:       #e1eae4;
+      --border-hover: rgba(124, 58, 237, 0.35);
+      --border-glow:  rgba(124, 58, 237, 0.25);
+      --ease:         cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, h4 { font-family: 'Syne', sans-serif; letter-spacing: -0.02em; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.35); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(124, 58, 237, 0.25); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--neon-purple); }
+
+    .orb, .ambient-glow {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(95px);
+      opacity: 0.1;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.12;
+      filter: blur(120px);
+      opacity: 0.25;
+    }
+    .orb-1 { width: 320px; height: 320px; background: #8b5cf6; top: -50px; left: -50px; }
+    .ambient-1 { width: 400px; height: 400px; background: radial-gradient(circle, #8b5cf6 0%, transparent 70%); top: -80px; left: -80px; }
+    .ambient-2 { width: 360px; height: 360px; background: radial-gradient(circle, #06b6d4 0%, transparent 70%); bottom: -60px; right: -60px; }
+    .ambient-1 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%); top: -80px; left: -80px; }
+    .ambient-2 { width: 360px; height: 360px; background: radial-gradient(circle, rgba(124, 58, 237, 0.1) 0%, transparent 70%); bottom: -60px; right: -60px; }
+
+    .layout {
+      display: flex;
+      height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    .panel-left, .panel-right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .panel-left {
+      border-right: 1px solid var(--border);
+      background: var(--bg);
+      background: rgba(4, 7, 15, 0.65);
+    }
+
+    .panel-header {
+      padding: 1.1rem 1.75rem;
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8, 12, 20, 0.95);
+      backdrop-filter: blur(16px);
+      backdrop-filter: blur(20px);
+      background: #ffffff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+    }
+
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.85rem;
+      margin-bottom: 0.95rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      gap: 0.85rem;
+    }
+
+    .back-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 600;
+      font-weight: 700;
+      font-size: 0.88rem;
+      transition: color 0.2s ease, transform 0.2s ease;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      gap: 0.4rem;
+    }
+
+    .back-link:hover {
+      color: var(--text);
+      transform: translateX(-2px);
+      color: #fff;
+      color: var(--neon-purple);
+      transform: translateX(-3px);
+    }
+
+    .action-btns { display: flex; gap: 0.6rem; }
+    .action-btns { display: flex; gap: 0.65rem; }
+
+    .icon-btn {
+      padding: 0.42rem 0.85rem;
+      padding: 0.45rem 0.95rem;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-size: 0.84rem;
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .icon-btn:hover { border-color: var(--border-hover); background: rgba(139, 92, 246, 0.08); }
+    .icon-btn:hover { border-color: var(--border-hover); background: rgba(139, 92, 246, 0.1); }
+    .icon-btn:hover { border-color: var(--border-hover); background: rgba(124, 58, 237, 0.08); }
+    .icon-btn.active {
+      border-color: var(--neon-purple);
+      background: rgba(139, 92, 246, 0.18);
+      background: rgba(139, 92, 246, 0.2);
+      color: #fff;
+      box-shadow: 0 0 15px var(--glow-purple);
+      background: rgba(124, 58, 237, 0.12);
+      color: var(--neon-purple);
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 1.25rem;
+      font-size: 0.82rem;
+      gap: 1.5rem;
+      font-size: 0.84rem;
+      color: var(--muted);
+      flex-wrap: wrap;
+      margin-bottom: 0.85rem;
+      margin-bottom: 0.95rem;
+    }
+
+    .stats-row span strong { color: var(--neon-cyan); }
+    .stats-row span strong { color: var(--neon-cyan); font-family: 'JetBrains Mono', monospace; }
+    .stats-row span strong { color: var(--neon-purple); font-family: 'JetBrains Mono', monospace; }
+
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      padding: 0.42rem 0.95rem;
+      padding: 0.45rem 1rem;
+      background: transparent;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      border-radius: 10px;
+      color: var(--muted);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab:hover { color: var(--text); border-color: var(--border-hover); }
+    .tab.active {
+      background: rgba(139, 92, 246, 0.15);
+      background: rgba(139, 92, 246, 0.18);
+      background: var(--neon-purple);
+      border-color: var(--neon-purple);
+      color: #fff;
+      box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+      box-shadow: 0 0 15px rgba(139, 92, 246, 0.25);
+      box-shadow: 0 4px 12px var(--glow-purple);
+    }
+
+    .panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.75rem;
+      padding: 2rem;
+      background: var(--bg);
+      padding: 2rem;
+      background: transparent;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      padding: 0.28rem 0.8rem;
+      border-radius: 100px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      margin-right: 0.45rem;
+    }
+
+    .tag-easy  { background: rgba(16,185,129,0.15); color: var(--neon-green); border: 1px solid rgba(16,185,129,0.3); }
+    .tag-med   { background: rgba(245,158,11,0.15); color: var(--neon-yellow); border: 1px solid rgba(245,158,11,0.3); }
+    .tag-hard  { background: rgba(236,72,153,0.15); color: var(--neon-pink); border: 1px solid rgba(236,72,153,0.3); }
+    .tag-topic { background: rgba(139,92,246,0.15); color: var(--neon-purple); border: 1px solid rgba(139,92,246,0.25); }
+    .tag-easy  { background: rgba(16,185,129,0.12); color: var(--neon-green); border: 1px solid rgba(16,185,129,0.3); }
+    .tag-med   { background: rgba(245,158,11,0.12); color: var(--neon-yellow); border: 1px solid rgba(245,158,11,0.3); }
+    .tag-hard  { background: rgba(236,72,153,0.12); color: var(--neon-pink); border: 1px solid rgba(236,72,153,0.3); }
+    .tag-topic { background: rgba(139,92,246,0.12); color: var(--neon-purple); border: 1px solid rgba(139,92,246,0.25); }
+    .tag-easy  { background: rgba(5, 150, 105, 0.1); color: var(--neon-green); border: 1px solid rgba(5, 150, 105, 0.25); }
+    .tag-med   { background: rgba(217, 119, 6, 0.1); color: var(--neon-yellow); border: 1px solid rgba(217, 119, 6, 0.25); }
+    .tag-hard  { background: rgba(219, 39, 119, 0.1); color: var(--neon-pink); border: 1px solid rgba(219, 39, 119, 0.25); }
+    .tag-topic { background: rgba(124, 58, 237, 0.08); color: var(--neon-purple); border: 1px solid rgba(124, 58, 237, 0.2); }
+
+    .prob-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.55rem;
+      font-size: 1.75rem;
+      font-weight: 800;
+      margin: 0.85rem 0;
+      margin: 1rem 0;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    .prob-desc {
+      color: var(--muted);
+      color: #334155;
+      line-height: 1.8;
+      margin-bottom: 1.75rem;
+      margin-bottom: 2rem;
+      white-space: pre-wrap;
+      font-size: 0.95rem;
+      font-size: 0.98rem;
+    }
+
+    .example-box {
+      background: var(--bg3);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.2rem;
+      margin-bottom: 1.25rem;
+      border-radius: 16px;
+      padding: 1.4rem;
+      margin-bottom: 1.4rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+
+    .example-box h4 {
+      font-size: 0.88rem;
+      font-size: 0.85rem;
+      color: var(--neon-cyan);
+      margin-bottom: 0.6rem;
+      color: var(--neon-purple);
+      margin-bottom: 0.65rem;
+      font-family: 'Syne', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .example-box pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      color: var(--text);
+      color: #0f172a;
+      background: #f1f5f9;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+    }
+
+    .section-block {
+      margin-top: 1.75rem;
+      padding-top: 1.25rem;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .section-block h3 {
+      font-size: 1.1rem;
+      font-size: 1.15rem;
+      font-weight: 800;
+      margin-bottom: 0.85rem;
+      margin-bottom: 1rem;
+      color: var(--neon-cyan);
+      color: var(--text);
+    }
+
+    .related-card {
+      display: block;
+      padding: 0.85rem 1.15rem;
+      padding: 1rem 1.35rem;
+      background: var(--bg3);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 0.6rem;
+      border-radius: 14px;
+      margin-bottom: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color 0.2s ease, transform 0.2s ease;
+      transition: all 0.2s ease;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+
+    .related-card:hover {
+      border-color: var(--border-hover);
+      transform: translateX(4px);
+      transform: translateX(5px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      box-shadow: 0 6px 18px rgba(124, 58, 237, 0.08);
+    }
+
+    /* Right Panel (IDE Toolbar & Editor) */
+    .editor-toolbar {
+      padding: 0.85rem 1.25rem;
+      padding: 0.95rem 1.5rem;
+      background: rgba(8, 12, 20, 0.95);
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+      backdrop-filter: blur(16px);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+    }
+
+    .lang-select {
+      padding: 0.45rem 0.9rem;
+      padding: 0.55rem 1.1rem;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      border-radius: 12px;
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .lang-select:focus { border-color: var(--neon-purple); }
+    .lang-select option { background: var(--bg3); }
+
+    .btn-run, .btn-submit {
+      padding: 0.55rem 1.35rem;
+      padding: 0.6rem 1.5rem;
+      border: none;
+      border-radius: 10px;
+      border-radius: 12px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+      transition: all 0.2s var(--ease);
+    }
+
+    .btn-run {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-run:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+      color: #fff;
+      box-shadow: 0 0 20px var(--glow-purple);
+      box-shadow: 0 4px 16px var(--glow-purple);
+    }
+    .btn-submit:hover {
+      box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-answer {
+      padding: 0.55rem 1.1rem;
+      padding: 0.6rem 1.25rem;
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      border-radius: 10px;
+      background: rgba(8, 145, 178, 0.08);
+      border: 1px solid rgba(8, 145, 178, 0.25);
+      border-radius: 12px;
+      color: var(--neon-cyan);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.82rem;
+      font-size: 0.84rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-answer:hover { background: rgba(6, 182, 212, 0.18); transform: translateY(-1px); }
+    .btn-answer:hover { background: rgba(8, 145, 178, 0.15); transform: translateY(-1px); }
+
+    .paste-check {
+      font-size: 0.78rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      gap: 0.45rem;
+      margin-left: auto;
+      cursor: pointer;
+    }
+
+    .btn-run:disabled, .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* Code Area - Anchor in dark IDE chrome for focus */
+    .code-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #060911;
+      background: #050811;
+      background: #0f172a;
+      position: relative;
+    }
+
+    #codeEditor {
+      flex: 1;
+      width: 100%;
+      padding: 1.25rem 1.5rem;
+      padding: 1.5rem 1.75rem;
+      background: transparent;
+      border: none;
+      color: #e2e8f0;
+      color: #f1f5f9;
+      color: #f8fafc;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.92rem;
+      line-height: 1.7;
+      font-size: 0.95rem;
+      line-height: 1.75;
+      resize: none;
+      outline: none;
+      tab-size: 4;
+    }
+
+    /* Output Terminal Panel */
+    .output-panel {
+      height: 190px;
+      height: 200px;
+      border-top: 1px solid var(--border);
+      background: rgba(4, 7, 15, 0.95);
+      padding: 1rem 1.5rem;
+      background: rgba(4, 7, 15, 0.96);
+      border-top: 1px solid #1e293b;
+      background: #020617;
+      padding: 1.2rem 1.75rem;
+      overflow-y: auto;
+      backdrop-filter: blur(12px);
+      backdrop-filter: blur(16px);
+    }
+
+    .output-label {
+      font-size: 0.75rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+      color: #94a3b8;
+      font-weight: 800;
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
+    }
+
+    .output-meta {
+      font-size: 0.78rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      color: #64748b;
+      margin-bottom: 0.5rem;
+    }
+
+    .output-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      color: var(--neon-cyan);
+      line-height: 1.5;
+      color: #38bdf8;
+      line-height: 1.6;
+    }
+
+    .output-text.error   { color: var(--neon-pink); }
+    .output-text.success { color: var(--neon-green); }
+    .output-text.error   { color: #f43f5e; }
+    .output-text.success { color: #10b981; }
+
+    /* Result Modal */
+    .overlay-result {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 4, 10, 0.88);
+      background: rgba(15, 23, 42, 0.5);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      backdrop-filter: blur(8px);
+      backdrop-filter: blur(10px);
+    }
+
+    .overlay-result.show { display: flex; }
+
+    .result-card {
+      text-align: center;
+      padding: 3rem 2.5rem;
+      padding: 3.5rem 3rem;
+      background: rgba(8, 12, 20, 0.98);
+      border: 1px solid var(--border-glow);
+      border-radius: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 50px var(--glow-purple);
+      max-width: 460px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75), 0 0 50px var(--glow-purple);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.12), 0 0 40px var(--glow-purple);
+      max-width: 480px;
+      width: 100%;
+    }
+
+    .result-card h2 {
+      font-size: 1.9rem;
+      font-size: 2.1rem;
+      font-weight: 800;
+      margin: 1rem 0 0.5rem;
+      margin: 1.2rem 0 0.5rem;
+      color: var(--text);
+    }
+
+    .result-xp {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2.2rem;
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: var(--neon-green);
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 0.85rem;
+      gap: 0.95rem;
+      justify-content: center;
+      margin-top: 1.75rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.7rem 1.5rem;
+      border-radius: 10px;
+      padding: 0.75rem 1.65rem;
+      border-radius: 12px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      font-size: 0.92rem;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s var(--ease);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+      color: #fff;
+      box-shadow: 0 4px 18px var(--glow-purple);
+      box-shadow: 0 4px 20px var(--glow-purple);
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.05);
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    @media (max-width: 768px) {
+      .layout { flex-direction: column; height: auto; overflow: auto; }
+      .panel-left, .panel-right { height: 50vh; flex: none; }
+      .paste-check { margin-left: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="ambient-glow ambient-1"></div>
+  <div class="ambient-glow ambient-2"></div>
+
+  <div class="layout">
+    <!-- Left Problem Panel -->
+    <div class="panel-left">
+      <div class="panel-header">
+        <div class="header-row">
+          <a href="problems.html" class="back-link">← Problem Library</a>
+          <div class="action-btns">
+            <button class="icon-btn" id="bookmarkBtn" onclick="toggleBookmarkBtn()">🔖 Save</button>
+            <button class="icon-btn" id="likeBtn" onclick="toggleLikeBtn()">❤️ Like</button>
+          </div>
+        </div>
+        <div class="stats-row" id="statsRow">Loading stats...</div>
+        <div class="tabs" id="tabBar">
+          <button class="tab active" data-tab="problem">📄 Problem</button>
+          <button class="tab" data-tab="hint">💡 Hint</button>
+          <button class="tab" data-tab="editorial">📖 Editorial</button>
+          <button class="tab" data-tab="discussion">💬 Discussion</button>
+          <button class="tab" data-tab="related">🔗 Related</button>
+        </div>
+      </div>
+      <div class="panel-body" id="leftContent">
+        <p style="color:var(--muted)">Loading...</p>
+      </div>
+    </div>
+
+    <!-- Right IDE Panel -->
+    <div class="panel-right">
+      <div class="editor-toolbar">
+        <select class="lang-select" id="langSelect" onchange="loadTemplate()">
+          <option value="python">Python 3</option>
+          <option value="java">Java (OpenJDK)</option>
+          <option value="cpp">C++ (GCC)</option>
+          <option value="javascript">JavaScript (Node.js)</option>
+        </select>
+        <button class="btn-run" id="runBtn" onclick="runCode()">▶ Run Test</button>
+        <button class="btn-submit" id="submitBtn" onclick="submitCode()">Submit Solution →</button>
+        <button class="btn-answer" onclick="submitAnswerOnly()">Answer Only (+1 XP)</button>
+        <label class="paste-check"><input type="checkbox" id="pasteMode"> Pasted solution (no bonus)</label>
+      </div>
+      <div class="code-area">
+        <textarea id="codeEditor" spellcheck="false"></textarea>
+        <div class="output-panel">
+          <div class="output-label">Console & Test Diagnostics</div>
+          <div class="output-meta mono" id="outputMeta"></div>
+          <div class="output-text" id="output">Ready to execute tests...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accepted Result Overlay Modal -->
+  <div class="overlay-result" id="resultOverlay">
+    <div class="result-card">
+      <div style="font-size:3.5rem" id="resultEmoji">🎉</div>
+      <h2 id="resultTitle">Accepted!</h2>
+      <div class="result-xp" id="resultXP">+50 XP</div>
+      <p id="resultDetail" style="color:var(--muted);margin-top:.6rem"></p>
+      <div class="result-actions">
+        <a href="dashboard.html" class="btn btn-primary">Dashboard</a>
+        <a href="leaderboard.html" class="btn btn-ghost">Leaderboard</a>
+        <a href="problems.html" class="btn btn-ghost">More Problems</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="supabase.js"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="animations.js"></script>
+  <script>
+    const TEMPLATES={
+      python:'# Write your solution here\nimport sys\ndata = sys.stdin.read().split()\n\n',
+      java:'import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        // Write your solution here\n    }\n}',
+      cpp:'#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    // Write your solution here\n    return 0;\n}',
+      javascript:'const fs=require("fs");\nconst input=fs.readFileSync(0,"utf8").trim();\n// Write your solution here\n'
+    };
+    let currentUser=null,problem=null,stats={successRate:0,totalAttempts:0,totalAccepted:0},related=[],bookmarked=false,liked=false,activeTab='problem',_allCache=[];
+
+    async function onDbReady(){
+      currentUser=await requireAuth();if(!currentUser)return;
+      const params=new URLSearchParams(window.location.search);
+      const id=params.get('id');
+      problem=id?await getProblemById(id):await getDailyProblem();
+      if(!problem){document.getElementById('leftContent').innerHTML='<p style="color:var(--neon-pink)">No problem found.</p>';return;}
+      document.title=problem.title+' — VidX';
+      document.querySelectorAll('#tabBar .tab').forEach(t=>t.addEventListener('click',()=>showTab(t.dataset.tab)));
+      // show the problem immediately; load the extras in the background
+      renderStats();showTab('problem');loadTemplate();
+      Promise.all([getAllProblems(),getProblemStats(problem.id),getRelatedProblems(problem)]).then(([all,st,rel])=>{
+        _allCache=all;stats=st;related=rel;renderStats();
+        if(activeTab==='related')showTab('related');
+      });
+      Promise.all([getBookmarkedProblems(currentUser.id),getLikedProblems(currentUser.id)]).then(([bm,lk])=>{
+        bookmarked=bm.includes(problem.id);liked=lk.includes(problem.id);updateActionBtns();
+      });
+    }
+
+    function updateActionBtns(){
+      document.getElementById('bookmarkBtn').classList.toggle('active',bookmarked);
+      document.getElementById('bookmarkBtn').textContent=bookmarked?'🔖 Saved':'🔖 Save';
+      document.getElementById('likeBtn').classList.toggle('active',liked);
+    }
+    async function toggleBookmarkBtn(){if(!problem)return;bookmarked=await toggleBookmark(currentUser.id,problem.id);updateActionBtns();}
+    async function toggleLikeBtn(){if(!problem)return;liked=await toggleLike(currentUser.id,problem.id);updateActionBtns();}
+
+    function renderStats(){
+      document.getElementById('statsRow').innerHTML=
+        '<span>Success: <strong>'+stats.successRate+'%</strong></span>'+
+        '<span>Attempts: <strong>'+stats.totalAttempts+'</strong></span>'+
+        '<span>Accepted: <strong>'+stats.totalAccepted+'</strong></span>'+
+        '<span>XP: <strong>'+(problem.xp_reward||50)+'</strong></span>';
+    }
+
+    function showTab(tab){
+      if(!problem)return;
+      activeTab=tab;
+      document.querySelectorAll('#tabBar .tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+      const el=document.getElementById('leftContent');
+      const diff=normDifficulty(problem.difficulty);
+      const dc=difficultyTagClass(problem.difficulty);
+      const companies=(problem.companies||[]).map(c=>'<span class="tag tag-topic">'+esc(c)+'</span>').join('');
+      if(tab==='problem'){
+        el.innerHTML='<div><span class="tag '+dc+'">'+diff+'</span><span class="tag tag-topic">'+esc(problem.topic||'General')+'</span>'+companies+'</div>'+
+          '<h1 class="prob-title">'+esc(problem.title)+'</h1><div class="prob-desc">'+(problem.description||'')+'</div>'+
+          (problem.constraints?'<div class="example-box"><h4>Constraints</h4><pre>'+esc(problem.constraints)+'</pre></div>':'')+
+          (problem.sample_input?'<div class="example-box"><h4>Sample Input</h4><pre>'+esc(problem.sample_input)+'</pre></div>':'')+
+          (problem.sample_output?'<div class="example-box"><h4>Sample Output</h4><pre>'+esc(problem.sample_output)+'</pre></div>':'');
+      }else if(tab==='hint'){
+        el.innerHTML='<h3 style="font-weight:800;margin-bottom:1rem">💡 Algorithmic Hint</h3><p style="color:var(--muted);line-height:1.8">'+esc(problem.hint||'Break the problem into smaller sub-problems. Consider edge cases first. Try brute force, then identify repetitive work to optimize with hash tables or dynamic programming.')+'</p>';
+      }else if(tab==='editorial'){
+        el.innerHTML='<h3 style="font-weight:800;margin-bottom:1rem">📖 Official Editorial</h3><p style="color:var(--muted);line-height:1.8;white-space:pre-wrap">'+esc(problem.editorial||'Editorial coming soon. Focus on understanding the '+(problem.topic||'topic')+' approach step by step.')+'</p>';
+      }else if(tab==='discussion'){
+        el.innerHTML='<h3 style="font-weight:800;margin-bottom:1rem">💬 Batch Discussion</h3><p style="color:var(--muted)">Share approaches and compare complexity with batchmates on the <a href="discussions.html" style="color:var(--neon-purple);text-decoration:none;font-weight:700">Discussions forum →</a>.</p>';
+      }else if(tab==='related'){
+        const sameCo=_allCache.filter(p=>p.id!==problem.id&&(p.companies||[]).some(c=>(problem.companies||[]).includes(c)));
+        el.innerHTML='<div class="section-block" style="border:none;padding:0"><h3>🔗 Related Problems</h3>'+
+          (related.length?related.map(p=>'<a href="problem.html?id='+encodeURIComponent(p.id)+'" class="related-card">'+esc(p.title)+' <span style="color:var(--muted);font-size:.82rem">· '+esc(p.topic||'')+'</span></a>').join(''):'<p style="color:var(--muted)">No related problems yet.</p>')+
+          ((problem.companies||[]).length?'<h3 style="margin-top:1.75rem">🏢 Similar Company Questions</h3>'+(sameCo.slice(0,5).map(p=>'<a href="problem.html?id='+encodeURIComponent(p.id)+'" class="related-card">'+esc(p.title)+'</a>').join('')||'<p style="color:var(--muted)">None found.</p>'):'')+'</div>';
+      }
+    }
+
+    function loadTemplate(){document.getElementById('codeEditor').value=TEMPLATES[document.getElementById('langSelect').value]||'';}
+
+
+    // ── EDITOR: paste disable + IDE indentation ───────────────────────────────
+    document.addEventListener('DOMContentLoaded',function(){
+      var editor=document.getElementById('codeEditor');
+      var INDENT='    '; // 4 spaces
+ 
+
+      // Block paste
+      editor.addEventListener('paste',function(e){e.preventDefault();});
+ 
+
+      editor.addEventListener('keydown',function(e){
+        var val=this.value;
+        var start=this.selectionStart;
+        var end=this.selectionEnd;
+ 
+
+        // TAB — insert 4 spaces
+        if(e.key==='Tab'&&!e.shiftKey){
+          e.preventDefault();
+          if(start===end){
+            this.value=val.substring(0,start)+INDENT+val.substring(end);
+            this.selectionStart=this.selectionEnd=start+4;
+          }else{
+            var lines=val.split('\n');
+            var charCount=0,startLine=-1,endLine=-1;
+            for(var i=0;i<lines.length;i++){
+              if(charCount<=start&&startLine===-1)startLine=i;
+              if(charCount<=end)endLine=i;
+              charCount+=lines[i].length+1;
+            }
+            for(var i=startLine;i<=endLine;i++)lines[i]=INDENT+lines[i];
+            this.value=lines.join('\n');
+            this.selectionStart=start+4;
+            this.selectionEnd=end+(4*(endLine-startLine+1));
+          }
+ 
+
+        // SHIFT+TAB — remove one indent level
+        }else if(e.key==='Tab'&&e.shiftKey){
+          e.preventDefault();
+          var lines=val.split('\n');
+          var charCount=0,startLine=-1,endLine=-1;
+          for(var i=0;i<lines.length;i++){
+            if(charCount<=start&&startLine===-1)startLine=i;
+            if(charCount<=end)endLine=i;
+            charCount+=lines[i].length+1;
+          }
+          var removed=0;
+          for(var i=startLine;i<=endLine;i++){
+            if(lines[i].startsWith(INDENT)){lines[i]=lines[i].substring(4);removed+=4;}
+            else if(lines[i].startsWith(' ')){var sp=lines[i].match(/^ +/)[0].length;var rem=Math.min(sp,4);lines[i]=lines[i].substring(rem);removed+=rem;}
+          }
+          this.value=lines.join('\n');
+          this.selectionStart=Math.max(0,start-4);
+          this.selectionEnd=Math.max(0,end-removed);
+ 
+
+        // ENTER — preserve indent + auto-indent after : or {
+        }else if(e.key==='Enter'){
+          e.preventDefault();
+          var lineStart=val.lastIndexOf('\n',start-1)+1;
+          var currentLine=val.substring(lineStart,start);
+          var leadingMatch=currentLine.match(/^(\s*)/);
+          var indent=leadingMatch?leadingMatch[1]:'';
+          var trimmed=currentLine.replace(/\s+$/,'');
+          var lang=document.getElementById('langSelect').value;
+          if(trimmed.endsWith(':')||(lang!=='python'&&trimmed.endsWith('{'))){
+            indent+=INDENT;
+          }
+          this.value=val.substring(0,start)+'\n'+indent+val.substring(end);
+          this.selectionStart=this.selectionEnd=start+1+indent.length;
+ 
+
+        // BACKSPACE — remove full indent block when cursor is after only spaces
+        }else if(e.key==='Backspace'&&start===end){
+          var lineStart=val.lastIndexOf('\n',start-1)+1;
+          var beforeCursor=val.substring(lineStart,start);
+          if(beforeCursor.length>0&&beforeCursor.trim()===''){
+            e.preventDefault();
+            var removeCount=beforeCursor.length%4===0?4:beforeCursor.length%4;
+            this.value=val.substring(0,start-removeCount)+val.substring(start);
+            this.selectionStart=this.selectionEnd=start-removeCount;
+          }
+        }
+      });
+    });
+    // ─────────────────────────────────────────────────────────────────────────
+ 
+
+    function getTestCases(){
+      var visible=[],hidden=[];
+      try{
+        visible=typeof problem.test_cases==='string'?JSON.parse(problem.test_cases):(problem.test_cases||[]);
+        hidden=typeof problem.hidden_test_cases==='string'?JSON.parse(problem.hidden_test_cases):(problem.hidden_test_cases||[]);
+      }catch(e){console.warn('[VidX] test case parse error:',e);}
+      var tc=visible.concat(hidden);
+      if(!tc.length&&problem.sample_input)tc=[{input:problem.sample_input,expected:problem.sample_output}];
+      return tc;
+    }
+ 
+
+    async function runCode(){
+      var btn=document.getElementById('runBtn'),out=document.getElementById('output'),meta=document.getElementById('outputMeta');
+      btn.disabled=true;out.textContent='Running...';out.className='output-text';meta.textContent='';
+      btn.disabled=true;out.textContent='Running test case execution...';out.className='output-text';meta.textContent='';
+      try{
+        var code=document.getElementById('codeEditor').value;
+        var lang=document.getElementById('langSelect').value;
+        var result=await executeCode(lang,code,problem.sample_input||'');
+        if(result.tle||result.error){out.textContent=result.error||formatExecutionOutput(result)||'Time Limit Exceeded';out.className='output-text error';}
+        else if(result.code!==0&&result.code!==undefined){out.textContent=formatExecutionOutput(result)||'Runtime Error';out.className='output-text error';}
+        else{out.textContent=formatExecutionOutput(result);out.className='output-text';}
+        meta.textContent='Runtime: '+(result.runtimeMs||0)+'ms · Memory: '+(result.memoryKb||0)+'KB';
+      }catch(e){out.textContent='Error: '+e.message;out.className='output-text error';}
+      btn.disabled=false;
+    }
+ 
+
+    async function submitCode(){
+      var btn=document.getElementById('submitBtn'),out=document.getElementById('output'),meta=document.getElementById('outputMeta');
+      btn.disabled=true;out.textContent='Judging...';out.className='output-text';meta.textContent='';
+      btn.disabled=true;out.textContent='Judging submission...';out.className='output-text';meta.textContent='';
+      var submitStartTime=Date.now();
+      try{
+        var code=document.getElementById('codeEditor').value;
+        var lang=document.getElementById('langSelect').value;
+        var pasteMode=document.getElementById('pasteMode').checked;
+        var testCases=getTestCases();
+        var judge=await judgeSubmission(lang,code,testCases,8000,function(cur,total){out.textContent='Judging test case '+cur+' of '+total+'...';});
+        var timeTaken=Math.max(1,Math.round((Date.now()-submitStartTime)/60000));
+        var submissionMode=pasteMode?'paste':'code';
+        var res=await submitSolution(currentUser.id,problem.id,{verdict:judge.verdict,language:lang,timeTaken:timeTaken,code:code,passedCases:judge.passed,totalCases:judge.total,runtimeMs:judge.runtimeMs,submissionMode:submissionMode});
+        if(res.error){out.textContent='Submission saved with errors: '+res.error;out.className='output-text error';meta.textContent='Verdict: '+judge.verdict;return;}
+        if(judge.verdict==='Accepted'){
+          showResult('🎉','Accepted!',res);refreshStats();
+          out.textContent='✅ All '+judge.total+' test cases passed!';out.className='output-text success';
+        }else{
+          var msg=judge.verdict;
+          if(judge.failedCase){var fc=judge.failedCase;if(fc.expected)msg+='\nTest #'+fc.index+'\nExpected: '+fc.expected+'\nGot: '+(fc.actual||'(empty)');else if(fc.stderr)msg+='\n'+fc.stderr;else if(fc.error)msg+='\n'+fc.error;}
+          msg+='\n\n+'+(res.xpGained||3)+' XP · '+judge.passed+'/'+judge.total+' passed';
+          out.textContent=msg;out.className='output-text error';
+        }
+        meta.textContent='Verdict: '+judge.verdict+' · Runtime: '+(judge.runtimeMs||0)+'ms · '+judge.passed+'/'+judge.total+' passed';
+      }catch(e){out.textContent='Submission failed: '+(e.message||'Unknown error');out.className='output-text error';}
+      finally{btn.disabled=false;}
+    }
+ 
+
+    async function submitAnswerOnly(){
+      if(!confirm('Submit answer only? You will earn only +1 XP.'))return;
+      var res=await submitSolution(currentUser.id,problem.id,{verdict:'Answer Only',language:'none',timeTaken:0,submissionMode:'answer'});
+      showResult('📝','Answer Recorded',res);
+    }
+ 
+
+    function refreshStats(){ if(!problem)return; getProblemStats(problem.id).then(st=>{stats=st;renderStats();}); }
+
+    function showResult(emoji,title,res){
+      document.getElementById('resultEmoji').textContent=emoji;
+      document.getElementById('resultTitle').textContent=title;
+      document.getElementById('resultXP').textContent='+'+(res.xpGained||0)+' XP';
+      var detail=res.verdict||'';
+      if(res.position)detail+=' · Solver #'+res.position;
+      if(res.streakBonus)detail+=' · Streak bonus +'+res.streakBonus;
+      if(res.alreadySolved&&res.verdict==='Accepted')detail+=' · Already solved (no extra XP)';
+      document.getElementById('resultDetail').textContent=detail;
+      document.getElementById('resultOverlay').classList.add('show');
+    }
+  
+  </script>
+</body>
+</html>

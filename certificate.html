@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Certificates — VidX</title>
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+  <link rel="stylesheet" href="animations.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+    :root {
+      --bg:           #03040a;
+      --bg2:          #080c14;
+      --bg3:          #0d1220;
+      --card-bg:      rgba(13, 18, 32, 0.76);
+      --neon-blue:    #3b82f6;
+      --neon-purple:  #8b5cf6;
+      --neon-cyan:    #06b6d4;
+      --neon-pink:    #ec4899;
+      --neon-green:   #10b981;
+      --neon-yellow:  #f59e0b;
+      --glow-purple:  rgba(139,92,246,0.3);
+      --text:         #f8fafc;
+      --muted:        #94a3b8;
+      --dim:          #475569;
+      --border:       rgba(255,255,255,0.08);
+      --border-hover: rgba(139,92,246,0.38);
+      --border-glow:  rgba(139,92,246,0.4);
+      --sidebar-w:    260px;
+      --bg:           #f8fafc;
+      --bg:           #f2f7f4;
+      --bg2:          #ffffff;
+      --bg3:          #f1f5f9;
+      --bg3:          #eaf2ed;
+      --bg4:          #e1eae4;
+      --card-bg:      #ffffff;
+      --card-hover:   #ffffff;
+      --neon-blue:    #2563eb;
+      --neon-purple:  #7c3aed;
+      --neon-cyan:    #0891b2;
+      --neon-pink:    #db2777;
+      --neon-green:   #059669;
+      --neon-yellow:  #d97706;
+      --glow-purple:  rgba(124, 58, 237, 0.15);
+      --text:         #0f172a;
+      --muted:        #64748b;
+      --dim:          #94a3b8;
+      --border:       #e2e8f0;
+      --muted:        #526560;
+      --dim:          #869e96;
+      --border:       #e1eae4;
+      --border-hover: rgba(124, 58, 237, 0.35);
+      --border-glow:  rgba(124, 58, 237, 0.2);
+      --sidebar-w:    264px;
+      --ease:         cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4, .font-display {
+      font-family: 'Syne', sans-serif;
+      letter-spacing: -0.02em;
+    }
+
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.4); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.35); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(124, 58, 237, 0.25); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--neon-purple); }
+
+    .orb, .ambient-glow {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(95px);
+      opacity: 0.16;
+      filter: blur(100px);
+      opacity: 0.14;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.22;
+    }
+    .orb-1 { width: 420px; height: 420px; background: #10b981; bottom: 10%; right: 10%; }
+    .orb-2 { width: 360px; height: 360px; background: #8b5cf6; top: 10%; left: 20%; }
+    .orb-1 { width: 440px; height: 440px; background: #10b981; bottom: 5%; right: 10%; }
+    .orb-2 { width: 380px; height: 380px; background: #8b5cf6; top: 8%; left: 18%; }
+    .ambient-1 { width: 440px; height: 440px; background: radial-gradient(circle, rgba(5, 150, 105, 0.12) 0%, transparent 70%); bottom: 5%; right: 10%; }
+    .ambient-2 { width: 380px; height: 380px; background: radial-gradient(circle, rgba(124, 58, 237, 0.12) 0%, transparent 70%); top: 8%; left: 18%; }
+
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(95px);
+      opacity: 0.12;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 { width: 440px; height: 440px; background: #10b981; bottom: 5%; right: 10%; }
+    .orb-2 { width: 380px; height: 380px; background: #8b5cf6; top: 8%; left: 18%; }
+
+    .layout { display: flex; min-height: 100vh; position: relative; z-index: 1; }
+
+    /* Frosted Glass Sidebar */
+    /* Frosted Glass Cyntexa Sidebar */
+    /* =======================================================
+       SIDEBAR
+       ======================================================= */
+    .sidebar {
+      position: fixed;
+      left: 0; top: 0; bottom: 0;
+      width: var(--sidebar-w);
+      background: rgba(8, 12, 20, 0.88);
+      background: rgba(8, 12, 20, 0.92);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: #ffffff;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 0;
+      padding: 1.75rem 0;
+      z-index: 100;
+      overflow-y: auto;
+      transition: transform 0.3s var(--ease);
+      transition: transform 0.35s var(--ease);
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.02);
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0 1.5rem 1.4rem;
+      gap: 0.85rem;
+      padding: 0 1.75rem 1.75rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.35rem;
+      font-size: 1.4rem;
+      text-decoration: none;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+      letter-spacing: -0.02em;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82rem;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 0 18px rgba(139, 92, 246, 0.45);
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+    }
+
+    .nav-section { padding: 1.2rem 0 0.5rem; }
+    .nav-section { padding: 1.35rem 0 0.4rem; }
+    .nav-label {
+      padding: 0 1.5rem;
+      padding: 0 1.75rem;
+      font-size: 0.68rem;
+      font-weight: 700;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 0.6rem;
+      color: var(--dim);
+      margin-bottom: 0.5rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.72rem 1.5rem;
+      gap: 0.85rem;
+      padding: 0.72rem 1.75rem;
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.88rem;
+      font-size: 0.9rem;
+      border-left: 3px solid transparent;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .nav-item:hover {
+      color: var(--text);
+      background: rgba(139, 92, 246, 0.06);
+      padding-left: 1.7rem;
+      background: var(--bg3);
+      padding-left: 1.95rem;
+    }
+
+    .nav-item.active {
+      color: #fff;
+      color: var(--neon-purple);
+      border-left-color: var(--neon-purple);
+      background: linear-gradient(90deg, rgba(139, 92, 246, 0.14) 0%, transparent 100%);
+      background: linear-gradient(90deg, rgba(124, 58, 237, 0.08) 0%, transparent 100%);
+      font-weight: 700;
+    }
+
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      right: 1.5rem;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--neon-purple);
+      box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
+    }
+
+    .sidebar-user {
+      margin-top: auto;
+      padding: 1.25rem 1.5rem;
+      padding: 1.25rem 1.75rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      background: rgba(3, 4, 10, 0.4);
+      background: #f8fafc;
+    }
+
+    .user-av {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 0 14px rgba(139, 92, 246, 0.35);
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+      flex-shrink: 0;
+    }
+
+    /* =======================================================
+       MAIN CONTENT
+       ======================================================= */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 2.25rem 3rem 4rem;
+      padding: 2.5rem 3.5rem 4rem;
+      padding: 2.75rem 3.5rem 4rem;
+      min-width: 0;
+    }
+
+    .mobile-topbar {
+      display: none;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: rgba(8, 12, 20, 0.85);
+      backdrop-filter: blur(16px);
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 90;
+      margin: -2.25rem -3rem 1.75rem -3rem;
+      margin: -2.5rem -3.5rem 1.75rem -3.5rem;
+      margin: -2.75rem -3.5rem 2rem -3.5rem;
+    }
+
+    .hamburger {
+      background: rgba(255, 255, 255, 0.05);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 1.25rem;
+      cursor: pointer;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+      line-height: 1;
+    }
+    .hamburger:hover { background: rgba(255, 255, 255, 0.1); }
+    .hamburger:hover { background: var(--bg3); }
+
+    .page-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.2rem;
+      font-size: 2.4rem;
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 2rem;
+      letter-spacing: -0.02em;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      color: var(--text);
+    }
+
+    /* Tier Cards */
+    .tiers {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+      margin-bottom: 2.8rem;
+    }
+
+    .tier-card {
+      background: rgba(13, 18, 32, 0.74);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.75rem 1.5rem;
+      border-radius: 22px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      position: relative;
+      transition: transform 0.3s var(--ease), border-color 0.3s ease, box-shadow 0.3s ease;
+      transition: all 0.3s var(--ease);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+    }
+
+    .tier-card.unlocked {
+      border-color: var(--border-glow);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 0 20px rgba(139, 92, 246, 0.15);
+      border-color: rgba(124, 58, 237, 0.4);
+      box-shadow: 0 8px 24px rgba(124, 58, 237, 0.1);
+      background: linear-gradient(180deg, rgba(124, 58, 237, 0.04) 0%, #ffffff 100%);
+      transform: translateY(-2px);
+      border-color: rgba(139, 92, 246, 0.45);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35), 0 0 24px rgba(139, 92, 246, 0.18);
+      background: linear-gradient(180deg, rgba(139, 92, 246, 0.1) 0%, rgba(13, 18, 32, 0.85) 100%);
+    }
+
+    .tier-card.locked {
+      opacity: 0.55;
+      opacity: 0.5;
+      filter: grayscale(0.2);
+      opacity: 0.65;
+      background: #f8fafc;
+    }
+
+    .tier-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+    }
+
+    .tier-icon { font-size: 2.2rem; margin-bottom: 0.6rem; }
+    .tier-icon { font-size: 2.4rem; margin-bottom: 0.8rem; }
+    .tier-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      font-size: 1.15rem;
+      margin-bottom: 0.35rem;
+      letter-spacing: -0.01em;
+      color: #fff;
+      color: var(--text);
+    }
+    .tier-xp { font-size: 0.85rem; color: var(--muted); font-weight: 500; }
+    .tier-xp {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    /* Prestigious Certificate Display */
+    .cert-display { max-width: 760px; margin: 0 auto; }
+    .cert-display { max-width: 800px; margin: 0 auto; }
+
+    .certificate {
+      background: rgba(13, 18, 32, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 2px solid var(--neon-purple);
+      border-radius: 24px;
+      padding: 3.5rem 3rem;
+      background: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.12) 0%, rgba(13, 18, 32, 0.95) 70%);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 2px solid rgba(139, 92, 246, 0.5);
+      background: radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.06) 0%, #ffffff 70%);
+      border: 2px solid rgba(124, 58, 237, 0.35);
+      border-radius: 28px;
+      padding: 3.8rem 3.2rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 50px var(--glow-purple);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65), 0 0 50px rgba(139, 92, 246, 0.2);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06), 0 0 40px rgba(124, 58, 237, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cert-border {
+      position: absolute;
+      inset: 16px;
+      border: 1px dashed rgba(139, 92, 246, 0.4);
+      border-radius: 18px;
+      inset: 14px;
+      border: 1px dashed rgba(139, 92, 246, 0.35);
+      border: 1px dashed rgba(124, 58, 237, 0.35);
+      border-radius: 20px;
+      pointer-events: none;
+    }
+
+    .cert-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.4rem;
+      font-size: 2.6rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-cyan));
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.85rem;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.02em;
+    }
+
+    .cert-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.55rem;
+      font-size: 1.45rem;
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin-bottom: 0.65rem;
+      margin-bottom: 1.2rem;
+      color: var(--neon-cyan);
+      letter-spacing: -0.01em;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .cert-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.4rem;
+      font-size: 2.5rem;
+      font-size: 2.6rem;
+      font-weight: 800;
+      margin: 1.25rem 0;
+      margin: 1rem 0;
+      background: linear-gradient(135deg, #ffffff 30%, #c4b5fd 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+
+    .cert-detail {
+      color: #94a3b8;
+      color: var(--muted);
+      margin: 0.45rem 0;
+      font-size: 0.98rem;
+      font-size: 1rem;
+    }
+    .cert-detail strong { color: var(--text); }
+
+    .cert-xp {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--neon-green);
+      margin: 1.25rem 0;
+      letter-spacing: 0.04em;
+    }
+
+    .btn {
+      padding: 0.75rem 1.75rem;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+      color: #fff;
+      margin-top: 1.75rem;
+      box-shadow: 0 4px 18px var(--glow-purple);
+      transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(139, 92, 246, 0.45);
+    }
+
+    /* Locked State */
+    .locked-state {
+      text-align: center;
+      padding: 3.5rem 2.5rem;
+      background: rgba(13, 18, 32, 0.74);
+      backdrop-filter: blur(18px);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      max-width: 520px;
+      max-width: 540px;
+      margin: 0 auto;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    }
+
+    .locked-state h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.4rem;
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+
+    .progress-bar {
+      height: 9px;
+      height: 10px;
+      background: var(--bg3);
+      border-radius: 6px;
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 1.25rem 0;
+      margin: 1.5rem 0;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--neon-purple), var(--neon-cyan));
+      border-radius: 6px;
+      border-radius: 8px;
+      transition: width 1s var(--ease);
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      background: rgba(15, 23, 42, 0.4);
+      z-index: 999;
+      backdrop-filter: blur(4px);
+    }
+    .overlay.show { display: block; }
+
+    @media (max-width: 900px) {
+      .main { padding: 1.75rem 1.5rem 3rem; }
+      .mobile-topbar { margin: -1.75rem -1.5rem 1.5rem -1.5rem; }
+      .main { padding: 2rem 1.5rem 3rem; }
+      .mobile-topbar { margin: -2rem -1.5rem 1.75rem -1.5rem; }
+      .tiers { gap: 1rem; }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); z-index: 1000; }
+      .sidebar.open { transform: translateX(0); z-index: 1001; }
+      .main { margin-left: 0; padding: 1.25rem 1rem 2.5rem; }
+      .mobile-topbar { display: flex; margin: -1.25rem -1rem 1.25rem -1rem; }
+      .tiers { grid-template-columns: 1fr; }
+      .certificate { padding: 2.2rem 1.5rem; }
+      .cert-name { font-size: 1.8rem; }
+      .page-title { font-size: 1.65rem; }
+      .cert-name { font-size: 1.9rem; }
+      .page-title { font-size: 1.8rem; }
+    }
+
+    @media print {
+      body { background: #fff !important; color: #000 !important; }
+      .sidebar, .mobile-topbar, .tiers, .btn, .orb, .overlay { display: none !important; }
+      .sidebar, .mobile-topbar, .tiers, .cyntexa-explore-btn, .cyntexa-kicker, .orb, .overlay, .page-title, p { display: none !important; }
+      .sidebar, .mobile-topbar, .tiers, .cyntexa-explore-btn, .cyntexa-kicker, .ambient-glow, .overlay, .page-title, p { display: none !important; }
+      .main { margin: 0 !important; padding: 0 !important; }
+      .certificate {
+        border: 3px double #8b5cf6 !important;
+        border: 3px double #7c3aed !important;
+        box-shadow: none !important;
+        background: #fff !important;
+        color: #000 !important;
+      }
+      .cert-name, .cert-logo { -webkit-text-fill-color: #000 !important; color: #000 !important; }
+      .cert-detail { color: #333 !important; }
+      .cert-detail strong { color: #000 !important; }
+      .cert-xp { color: #059669 !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="ambient-glow ambient-1"></div>
+  <div class="ambient-glow ambient-2"></div>
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <a href="dashboard.html" class="sidebar-logo">
+        <div class="logo-icon">VX</div>
+        <span>VidX</span>
+      </a>
+      <div class="nav-section">
+        <div class="nav-label">Core Platform</div>
+        <a href="dashboard.html" class="nav-item">🏠 Dashboard</a>
+        <a href="problems.html" class="nav-item">📚 Problem Library</a>
+        <a href="problem.html" class="nav-item">⚡ Daily Problem</a>
+        <a href="leaderboard.html" class="nav-item">🏆 Leaderboard</a>
+        <a href="sadhana.html" class="nav-item">🧘 Sadhana Mode</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Community & Arena</div>
+        <a href="battles.html" class="nav-item">👥 Battles</a>
+        <a href="knowledge-hub.html" class="nav-item">🎓 Knowledge Hub</a>
+        <a href="discussions.html" class="nav-item">💬 Discussions</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Account & Honors</div>
+        <a href="profile.html" class="nav-item">👤 My Profile</a>
+        <a href="certificate.html" class="nav-item active">📜 Certificates</a>
+        <a href="#" class="nav-item" onclick="logout();return false">🚪 Log Out</a>
+      </div>
+      <div class="sidebar-user">
+        <div class="user-av" id="sidebarAv">?</div>
+        <div>
+          <div style="font-weight:700;color:var(--text)" id="sidebarName">—</div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="mobile-topbar">
+        <button class="hamburger" onclick="toggleSidebar()">☰</button>
+        <strong style="font-family:'Syne',sans-serif">Certificates</strong>
+      </div>
+      
+      <div data-aos="fade-up">
+        <div class="cyntexa-kicker"><span class="cyntexa-kicker-dot"></span>VERIFIED ACCREDITATION & HONORS</div>
+        <h1 class="page-title">Verified <span style="font-style:italic;font-weight:400;color:var(--neon-purple)">Credentials.</span></h1>
+        <p style="color:var(--muted);font-size:0.95rem;max-width:620px;margin-top:0.4rem;margin-bottom:2.2rem">Cryptographically tracked performance milestones, awarded through rigorous algorithmic challenges and competitive arena matches.</p>
+      </div>
+
+      <div class="tiers" data-aos="fade-up" id="tiersGrid"></div>
+      <div class="cert-display" id="certDisplay" data-aos="fade-up"><p style="color:var(--muted);text-align:center">Loading credentials...</p></div>
+    </div>
+  </div>
+
+  <script src="supabase.js"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="animations.js"></script>
+  <script>
+    function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show');}
+    function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');}
+    const CERTS=[{xp:500,icon:'🥉',name:'Beginner Certificate',level:'Debug Warrior'},{xp:2000,icon:'🥈',name:'Intermediate Certificate',level:'Code Samurai'},{xp:5000,icon:'🏆',name:'Master Certificate',level:'Legend'}];
+    async function onDbReady(){
+      const user=await requireAuth();if(!user)return;
+      const profile=await getUserProfile(user.id);if(!profile)return;
+      document.getElementById('sidebarAv').textContent=getInitials(profile.first_name,profile.last_name);
+      document.getElementById('sidebarName').textContent=`${profile.first_name||''} ${profile.last_name||''}`.trim();
+      const xp=profile.xp||0;
+      const qualified=CERTS.filter(c=>xp>=c.xp);
+      const nextCert=CERTS.find(c=>xp<c.xp);
+      document.getElementById('tiersGrid').innerHTML=CERTS.map(c=>`
+        <div class="tier-card ${xp>=c.xp?'unlocked':'locked'}">
+          <div class="tier-icon">${c.icon}</div>
+          <div class="tier-name">${c.name}</div>
+          <div class="tier-xp">${c.xp.toLocaleString()} XP required</div>
+          <div style="margin-top:0.75rem;font-size:0.75rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:${xp>=c.xp?'var(--neon-green)':'var(--muted)'}">
+            ${xp>=c.xp?'✓ UNLOCKED':'LOCKED'}
+          </div>
+        </div>
+      `).join('');
+      if(qualified.length){
+        const best=qualified[qualified.length-1];
+        const fullName=`${profile.first_name||''} ${profile.last_name||''}`.trim();
+        document.getElementById('certDisplay').innerHTML=`
+          <div class="certificate" id="printCert">
+            <div class="cert-border"></div>
+            <div class="cert-logo">VidX</div>
+            <div class="cert-title">${best.icon} ${best.name}</div>
+            <p class="cert-detail">This certifies that</p>
+            <div class="cert-name">${fullName}</div>
+            <p class="cert-detail">has demonstrated exceptional technical mastery and achieved <strong>${best.level}</strong> standing</p>
+            <div class="cert-xp">${xp.toLocaleString()} XP earned</div>
+            <p class="cert-detail">${profile.college||'VidX Campus Member'} · ${new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}</p>
+            <div style="margin-top:2rem">
+              <button class="cyntexa-explore-btn" onclick="window.print()" style="margin:0 auto"><span>Download PDF Certificate</span><span class="arrow-circle">↓</span></button>
+            </div>
+          </div>`;
+      }else{
+        const needed=nextCert.xp-xp;const pct=Math.round((xp/nextCert.xp)*100);
+        document.getElementById('certDisplay').innerHTML=`
+          <div class="locked-state">
+            <div style="font-size:3rem;margin-bottom:1rem">🔒</div>
+            <h3>Certificate Locked</h3>
+            <p style="color:var(--muted);font-size:0.95rem">Earn ${needed.toLocaleString()} more XP to unlock the ${nextCert.name}</p>
+            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+            <p style="font-size:.85rem;color:var(--muted);font-family:'JetBrains Mono',monospace">${xp.toLocaleString()} / ${nextCert.xp.toLocaleString()} XP (${pct}%)</p>
+          </div>`;
+      }
+    }
+  </script>
+</body>
+</html>

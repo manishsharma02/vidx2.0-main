@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Battle Management — VidX Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+  <link rel="stylesheet" href="animations.css">
+  <style>
+    :root {
+      --bg: #03040a;
+      --bg-surface: #080c14;
+      --bg-card: rgba(13, 18, 32, 0.72);
+      --bg-card-hover: rgba(18, 24, 43, 0.85);
+      --bg-card: rgba(13, 18, 32, 0.78);
+      --bg-card-hover: rgba(18, 24, 43, 0.9);
+      --bg-input: #0d1220;
+      --neon-purple: #8b5cf6;
+      --neon-blue: #3b82f6;
+      --neon-cyan: #06b6d4;
+      --neon-pink: #ec4899;
+      --neon-green: #10b981;
+      --bg: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-card: #ffffff;
+      --bg-card-hover: #ffffff;
+      --bg-input: #f8fafc;
+      --neon-purple: #7c3aed;
+      --neon-blue: #2563eb;
+      --neon-cyan: #0891b2;
+      --neon-pink: #db2777;
+      --neon-green: #059669;
+      --neon-red: #ef4444;
+      --neon-yellow: #f59e0b;
+      --glow-red: rgba(239, 68, 68, 0.35);
+      --glow-purple: rgba(139, 92, 246, 0.35);
+      --text: #f1f5f9;
+      --glow-purple: rgba(139, 92, 246, 0.3);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(139, 92, 246, 0.35);
+      --sidebar-w: 260px;
+      --neon-yellow: #d97706;
+      --glow-red: rgba(239, 68, 68, 0.2);
+      --glow-purple: rgba(124, 58, 237, 0.2);
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --dim: #94a3b8;
+      --border: #e2e8f0;
+      --border-glow: rgba(239, 68, 68, 0.25);
+      --sidebar-w: 264px;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: rgba(239, 68, 68, 0.5); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(239, 68, 68, 0.4); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--neon-red); }
+
+    .layout { display: flex; min-height: 100vh; position: relative; }
+
+    /* SIDEBAR */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: var(--sidebar-w);
+      background: rgba(8, 12, 20, 0.88);
+      background: rgba(8, 12, 20, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: #ffffff;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 0;
+      padding: 1.75rem 0;
+      z-index: 100;
+      overflow-y: auto;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: transform 0.3s var(--ease);
+      transition: transform 0.35s var(--ease);
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.02);
+    }
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0 1.5rem 1.5rem;
+      padding: 0 1.5rem 1.4rem;
+      gap: 0.85rem;
+      padding: 0 1.75rem 1.75rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.35rem;
+      font-size: 1.4rem;
+      text-decoration: none;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+      letter-spacing: -0.02em;
+    }
+    .logo-icon {
+      width: 34px;
+      height: 34px;
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--neon-red), #f97316);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 0 15px var(--glow-red);
+      box-shadow: 0 0 18px var(--glow-red);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    .admin-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.75rem;
+      gap: 0.45rem;
+      padding: 0.35rem 0.8rem;
+      font-size: 0.72rem;
+      color: #fca5a5;
+      background: rgba(239, 68, 68, 0.12);
+      color: #dc2626;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: 9999px;
+      font-weight: 700;
+      margin: 1rem 1.5rem 0.5rem;
+      border: 1px solid rgba(239, 68, 68, 0.28);
+      border-radius: 100px;
+      font-weight: 800;
+      margin: 1.2rem 1.5rem 0.5rem;
+      margin: 1.2rem 1.75rem 0.5rem;
+      width: fit-content;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      letter-spacing: 0.08em;
+    }
+    .nav-section { padding: 0.75rem 0; }
+    .nav-label {
+      padding: 0 1.5rem;
+      font-size: 0.7rem;
+      padding: 0 1.75rem;
+      font-size: 0.68rem;
+      font-weight: 700;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      color: var(--dim);
+      margin-bottom: 0.5rem;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.75rem 1.5rem;
+      padding: 0.72rem 1.5rem;
+      padding: 0.72rem 1.75rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      font-size: 0.88rem;
+      border-left: 3px solid transparent;
+      transition: all 0.25s ease;
+      transition: all 0.2s ease;
+    }
+    .nav-item:hover {
+      color: var(--text);
+      background: rgba(239, 68, 68, 0.06);
+      padding-left: 1.7rem;
+      background: #f8fafc;
+      padding-left: 1.95rem;
+    }
+    .nav-item.active {
+      color: #fff;
+      color: var(--neon-red);
+      border-left-color: var(--neon-red);
+      background: linear-gradient(90deg, rgba(239, 68, 68, 0.12), transparent);
+      background: linear-gradient(90deg, rgba(239, 68, 68, 0.14) 0%, transparent 100%);
+      background: linear-gradient(90deg, rgba(239, 68, 68, 0.08) 0%, transparent 100%);
+      font-weight: 700;
+    }
+    .sidebar-user {
+      margin-top: auto;
+      padding: 1.25rem 1.5rem;
+      padding: 1.25rem 1.75rem;
+      border-top: 1px solid var(--border);
+      background: rgba(3, 4, 10, 0.5);
+      background: rgba(3, 4, 10, 0.4);
+      background: #f8fafc;
+    }
+
+    /* MAIN */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 2.5rem;
+      padding: 2.5rem 3.5rem 4rem;
+      padding: 2.75rem 3.5rem 4rem;
+      min-width: 0;
+      max-width: 1440px;
+    }
+    .mobile-topbar {
+      display: none;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+      background: rgba(8, 12, 20, 0.9);
+      padding: 1rem 1.25rem;
+      background: rgba(8, 12, 20, 0.85);
+      backdrop-filter: blur(16px);
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      z-index: 90;
+      margin: -2.5rem -3.5rem 1.75rem -3.5rem;
+      margin: -2.75rem -3.5rem 2rem -3.5rem;
+    }
+    .hamburger {
+      background: none;
+      border: none;
+      background: rgba(255, 255, 255, 0.05);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 1.5rem;
+      font-size: 1.25rem;
+      cursor: pointer;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .page-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      color: var(--text);
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      margin-bottom: 2.2rem;
+      margin-bottom: 2.25rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+      gap: 1.25rem;
+      gap: 1.5rem;
+    }
+    .topbar h1, .page-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.75rem;
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #fff;
+      line-height: 1.15;
+    }
+
+    /* STATS GRID */
+    /* STATS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+      margin-bottom: 2.2rem;
+      gap: 1.4rem;
+      margin-bottom: 2.25rem;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem 1.25rem;
+      backdrop-filter: blur(16px);
+      transition: all 0.25s ease;
+      border-radius: 20px;
+      padding: 1.6rem 1.4rem;
+      backdrop-filter: blur(18px);
+      transition: all 0.3s var(--ease);
+      padding: 1.6rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+      transition: all 0.3s var(--ease);
+    }
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      height: 3px;
+    }
+    .stat-card.red::before { background: linear-gradient(90deg, var(--neon-red), transparent); }
+    .stat-card.yellow::before { background: linear-gradient(90deg, var(--neon-yellow), transparent); }
+    .stat-card.blue::before { background: linear-gradient(90deg, var(--neon-blue), transparent); }
+    .stat-card.green::before { background: linear-gradient(90deg, var(--neon-green), transparent); }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      background: var(--bg-card-hover);
+      border-color: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+      border-color: rgba(255, 255, 255, 0.16);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+    }
+    .stat-card.red::before { background: var(--neon-red); }
+    .stat-card.yellow::before { background: var(--neon-yellow); }
+    .stat-card.blue::before { background: var(--neon-blue); }
+    .stat-card.green::before { background: var(--neon-green); }
+    .stat-label {
+      font-size: 0.8rem;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      letter-spacing: 0.08em;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+    .stat-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-top: 0.4rem;
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-top: 0.45rem;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    .stat-card.red .stat-value { color: #f87171; }
+    .stat-card.yellow .stat-value { color: #fbbf24; }
+    .stat-card.blue .stat-value { color: #60a5fa; }
+    .stat-card.green .stat-value { color: #34d399; }
+
+    /* CARD & TABS */
+    .card {
+      background: var(--bg-card);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      border-radius: 22px;
+      padding: 1.75rem;
+      border-radius: 20px;
+      padding: 1.8rem;
+      margin-bottom: 1.5rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+    }
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      font-weight: 800;
+      font-size: 1.15rem;
+      margin-bottom: 1rem;
+      color: #fff;
+    }
+    .tab-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      gap: 0.65rem;
+      margin-bottom: 1.75rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .tab {
+      padding: 0.55rem 1.15rem;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 0.55rem 1.25rem;
+      background: rgba(13, 18, 32, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.5rem 1rem;
+      border-radius: 100px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+      transition: all 0.25s var(--ease);
+      transition: all 0.2s;
+    }
+    .tab:hover {
+      background: rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: var(--text);
+    }
+    .tab:hover { color: var(--text); background: var(--bg); }
+    .tab.active {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.35);
+      background: rgba(239, 68, 68, 0.18);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.2);
+    }
+
+    /* BUTTONS */
+    .btn {
+      padding: 0.75rem 1.35rem;
+      padding: 0.75rem 1.4rem;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Syne', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: all 0.25s ease;
+      transition: all 0.25s var(--ease);
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-red {
+      background: linear-gradient(135deg, var(--neon-red), #f97316);
+      background: var(--neon-purple);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.35);
+      box-shadow: 0 4px 18px rgba(239, 68, 68, 0.35);
+      box-shadow: 0 2px 10px rgba(124, 58, 237, 0.25);
+    }
+    .btn-red:hover { box-shadow: 0 8px 22px rgba(239, 68, 68, 0.5); }
+    .btn-red:hover { box-shadow: 0 8px 25px rgba(239, 68, 68, 0.5); }
+    .btn-purple {
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+      color: #fff;
+      box-shadow: 0 4px 15px var(--glow-purple);
+      box-shadow: 0 4px 18px var(--glow-purple);
+    }
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .btn-sm {
+      padding: 0.4rem 0.85rem;
+      padding: 0.45rem 0.85rem;
+      font-size: 0.78rem;
+      border-radius: 8px;
+    }
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+    .btn-danger:hover { background: rgba(239, 68, 68, 0.25); }
+    .btn-success {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #6ee7b7;
+    }
+    .btn-success:hover { background: rgba(16, 185, 129, 0.25); }
+
+    /* BATTLE CARDS */
+    .battle-card {
+      background: rgba(255, 255, 255, 0.02);
+      background: rgba(13, 18, 32, 0.6);
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem 1.4rem;
+      margin-bottom: 0.85rem;
+      border-radius: 16px;
+      padding: 1.4rem 1.6rem;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      transition: all 0.25s ease;
+      gap: 1.5rem;
+      transition: all 0.2s ease;
+    }
+    .battle-card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.035);
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.03);
+      transform: translateY(-2px);
+      border-color: var(--border-hover);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+      background: #ffffff;
+    }
+    .battle-card-info { flex: 1; min-width: 250px; }
+    .battle-card-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 0.4rem;
+      font-weight: 800;
+      font-size: 1.15rem;
+      margin-bottom: 0.45rem;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      color: #fff;
+      color: var(--text);
+    }
+    .battle-card-meta {
+      display: flex;
+      gap: 1.25rem;
+      font-size: 0.82rem;
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 1rem;
+      gap: 1.1rem;
+      flex-wrap: wrap;
+    }
+    .battle-card-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      padding: 0.28rem 0.85rem;
+      border-radius: 100px;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      letter-spacing: 0.05em;
+      letter-spacing: 0.06em;
+    }
+    .s-draft { background: rgba(100, 116, 139, 0.15); color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.25); }
+    .s-upcoming { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.25); }
+    .s-live { background: rgba(239, 68, 68, 0.18); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); animation: livePulse 1.5s infinite; }
+    .s-completed { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.25); }
+    .s-cancelled { background: rgba(100, 116, 139, 0.15); color: #64748b; text-decoration: line-through; }
+    .s-draft { background: #f1f5f9; color: var(--text-muted); border: 1px solid var(--border); }
+    .s-upcoming { background: rgba(217, 119, 6, 0.1); color: #d97706; border: 1px solid rgba(217, 119, 6, 0.25); }
+    .s-live { background: rgba(239, 68, 68, 0.1); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.25); animation: livePulse 2s infinite; }
+    .s-completed { background: rgba(5, 150, 105, 0.1); color: #059669; border: 1px solid rgba(5, 150, 105, 0.25); }
+    .s-cancelled { background: #f1f5f9; color: #94a3b8; text-decoration: line-through; }
+    @keyframes livePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+
+    .btn {
+      padding: 0.65rem 1.35rem;
+      border-radius: 12px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s var(--ease);
+    }
+    .btn-sm { padding: 0.4rem 0.75rem; font-size: 0.8rem; border-radius: 8px; }
+    .btn-red {
+      background: var(--neon-red);
+      color: #fff;
+      border: none;
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+    }
+    .btn-red:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4); }
+    .btn-ghost {
+      background: #ffffff;
+      color: var(--text);
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    }
+    .btn-ghost:hover { border-color: var(--border-hover); background: #f8fafc; }
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.08);
+      color: #dc2626;
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+    .btn-danger:hover { background: rgba(239, 68, 68, 0.18); }
+    .btn-success {
+      background: rgba(5, 150, 105, 0.08);
+      color: #059669;
+      border: 1px solid rgba(5, 150, 105, 0.25);
+    }
+    .btn-success:hover { background: rgba(5, 150, 105, 0.18); }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(8px);
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .modal-overlay.show { display: flex; animation: fadeIn 0.25s ease-out; }
+    .modal {
+      background: rgba(13, 18, 32, 0.96);
+      border: 1px solid var(--border-glow);
+      border-radius: 20px;
+      padding: 2.25rem;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2.4rem;
+      width: 100%;
+      max-width: 720px;
+      max-width: 740px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 35px rgba(139, 92, 246, 0.2);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65), 0 0 40px rgba(139, 92, 246, 0.2);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.15);
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+    .modal-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.3rem;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #fff;
+      color: var(--text);
+    }
+    .modal-close {
+      background: rgba(255, 255, 255, 0.05);
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .modal-close:hover { color: #fff; background: rgba(255, 255, 255, 0.1); }
+    .modal-close:hover { color: var(--text); background: #e2e8f0; }
+
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: #cbd5e1;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.45rem;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 0.8rem 1.1rem;
+      background: var(--bg-input);
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.92rem;
+      transition: all 0.25s ease;
+      outline: none;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: var(--neon-red);
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+      background: #111827;
+      box-shadow: 0 0 16px rgba(239, 68, 68, 0.25);
+      border-color: var(--neon-purple);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+      background: #ffffff;
+    }
+    .form-group select option { background: #0f172a; color: #fff; }
+    .form-group select option { background: #ffffff; color: var(--text); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+
+    /* PROBLEM PICKER */
+    .problem-picker {
+      max-height: 250px;
+      max-height: 240px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg-input);
+      background: #f8fafc;
+    }
+    .problem-pick-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .problem-pick-item:last-child { border: none; }
+    .problem-pick-item:hover { background: rgba(139, 92, 246, 0.08); }
+    .problem-pick-item:hover { background: #f1f5f9; }
+    .problem-pick-item.selected {
+      background: rgba(139, 92, 246, 0.12);
+      background: rgba(124, 58, 237, 0.06);
+      border-left: 3px solid var(--neon-purple);
+    }
+    .problem-pick-item input[type=checkbox] { accent-color: var(--neon-purple); width: 16px; height: 16px; }
+    .selected-problems { margin-top: 0.75rem; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .sel-problem-tag {
+      padding: 0.35rem 0.75rem;
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.35);
+      background: rgba(124, 58, 237, 0.08);
+      border: 1px solid rgba(124, 58, 237, 0.25);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text);
+    }
+    .sel-problem-tag button {
+      background: none;
+      border: none;
+      color: #f472b6;
+      color: #dc2626;
+      cursor: pointer;
+      font-size: 0.85rem;
+      line-height: 1;
+      padding: 0;
+    }
+
+    /* ANALYTICS */
+    .analytics-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem; }
+    .analytics-box {
+      background: rgba(255, 255, 255, 0.02);
+      background: rgba(255, 255, 255, 0.03);
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      text-align: center;
+    }
+    .analytics-box .val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--neon-cyan);
+      color: var(--neon-purple);
+    }
+    .analytics-box .lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .analytics-box .lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem; text-transform: uppercase; letter-spacing: 0.06em; }
+
+    .participants-list { max-height: 320px; overflow-y: auto; }
+    .participant-row {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.88rem;
+    }
+    .participant-row:last-child { border: none; }
+    .rank-num { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--text-muted); width: 35px; }
+
+    .alert {
+      padding: 0.85rem 1.15rem;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      display: none;
+    }
+    .alert.show { display: block; }
+    .alert.error { background: rgba(236, 72, 153, 0.12); border: 1px solid rgba(236, 72, 153, 0.35); color: #f472b6; }
+    .alert.success { background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); color: #34d399; }
+    .alert.error { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); color: #dc2626; }
+    .alert.success { background: rgba(5, 150, 105, 0.1); border: 1px solid rgba(5, 150, 105, 0.25); color: #059669; }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 999;
+    }
+    .overlay.show { display: block; }
+
+    @media(max-width: 900px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+    @media(max-width: 768px) {
+      .sidebar { transform: translateX(-100%); z-index: 1000; }
+      .sidebar.open { transform: translateX(0); }
+      .main { margin-left: 0; padding: 1.5rem 1rem; }
+      .mobile-topbar { display: flex; }
+      .sidebar.open { transform: translateX(0); z-index: 1001; }
+      .main { margin-left: 0; padding: 1.25rem 1rem 2.5rem; }
+      .mobile-topbar { display: flex; margin: -1.25rem -1rem 1.25rem -1rem; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .analytics-row { grid-template-columns: 1fr; }
+      .page-title { font-size: 1.8rem; }
+      .modal { padding: 1.5rem; }
+    }
+    @media(max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <!-- CREATE/EDIT MODAL -->
+  <div class="modal-overlay" id="battleModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">⚔️ Create Battle</div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="alert" id="modalAlert"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Battle Title *</label><input type="text" id="fTitle" placeholder="e.g. Amazon Coding Clash"></div>
+        <div class="form-group"><label>Difficulty</label>
+          <select id="fDifficulty">
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate" selected>Intermediate</option>
+            <option value="Advanced">Advanced</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Description</label><textarea id="fDesc" placeholder="Describe this battle challenge..."></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Battle Type</label>
+          <select id="fType" onchange="toggleTypeFields()">
+            <option value="open">Open Battle</option>
+            <option value="branch">Branch Battle</option>
+            <option value="year">Year Battle</option>
+            <option value="placement">Placement Battle</option>
+            <option value="custom">Custom Battle</option>
+          </select>
+        </div>
+        <div class="form-group"><label>XP Reward</label><input type="number" id="fXP" value="200" min="10"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Start Date & Time *</label><input type="datetime-local" id="fStart"></div>
+        <div class="form-group"><label>End Date & Time *</label><input type="datetime-local" id="fEnd"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Registration Deadline</label><input type="datetime-local" id="fRegDeadline"></div>
+        <div class="form-group"><label>Max Participants</label><input type="number" id="fMaxP" value="100" min="2"></div>
+      </div>
+      <div class="form-group" id="branchField" style="display:none"><label>Allowed Branches (comma separated)</label><input type="text" id="fBranches" placeholder="CSE, IT, ECE"></div>
+      <div class="form-group" id="yearField" style="display:none"><label>Allowed Years (comma separated)</label><input type="text" id="fYears" placeholder="2, 3, 4"></div>
+      <div class="form-group">
+        <label>Select Problems *</label>
+        <input type="text" id="problemSearch" placeholder="Search problems..." oninput="filterProblems()" style="margin-bottom:.5rem">
+        <div class="problem-picker" id="problemPicker"><p style="color:var(--text-muted);padding:1rem;font-size:.85rem">Loading problems...</p></div>
+        <div class="selected-problems" id="selectedProblems"></div>
+      </div>
+      <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:1.5rem;flex-wrap:wrap">
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-ghost" onclick="saveBattle('draft')">💾 Save Draft</button>
+        <button class="btn btn-red" onclick="saveBattle('upcoming')">🚀 Publish Battle</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PARTICIPANTS MODAL -->
+  <div class="modal-overlay" id="participantsModal">
+    <div class="modal" style="max-width:520px">
+      <div class="modal-header"><div class="modal-title">👥 Battle Participants</div><button class="modal-close" onclick="document.getElementById('participantsModal').classList.remove('show')">✕</button></div>
+      <div class="analytics-row" id="battleAnalyticsRow"></div>
+      <div class="participants-list" id="participantsList"></div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <a href="admin-dashboard.html" class="sidebar-logo" onclick="closeSidebar()"><div class="logo-icon">VX</div>VidX</a>
+      <div class="admin-badge">🔴 Command System</div>
+      <div class="nav-section">
+        <div class="nav-label">Control Center</div>
+        <a href="admin-dashboard.html" class="nav-item" onclick="closeSidebar()">📊 Dashboard</a>
+        <a href="admin-problems.html" class="nav-item" onclick="closeSidebar()">📝 Manage Problems</a>
+        <a href="admin-students.html" class="nav-item" onclick="closeSidebar()">👥 Manage Students</a>
+        <a href="admin-battles.html" class="nav-item active" onclick="closeSidebar()">⚔️ Manage Battles</a>
+        <a href="admin-leaderboard.html" class="nav-item" onclick="closeSidebar()">🏆 Manage Leaderboard</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Student View</div>
+        <a href="index.html" class="nav-item" onclick="closeSidebar()">🌐 Landing Page</a>
+        <a href="dashboard.html" class="nav-item" onclick="closeSidebar()">👁 Campus Terminal</a>
+      </div>
+      <div class="sidebar-user">
+        <div style="font-weight:700;color:var(--text)">Administrator</div>
+        <div style="font-size:.8rem;color:var(--neon-red);font-weight:600">Super Admin Access</div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="mobile-topbar"><button class="hamburger" onclick="toggleSidebar()">☰</button><strong>Battle Management</strong></div>
+      
+      <div class="topbar" data-aos="fade-up">
+        <div>
+          <div class="cyntexa-kicker" style="color:var(--neon-red)"><span class="cyntexa-kicker-dot" style="background:var(--neon-red)"></span>ARENA CONTROLLER</div>
+          <h1 class="page-title">Battle <span style="font-style:italic;font-weight:400;color:var(--neon-purple)">Management.</span></h1>
+        </div>
+        <button class="btn btn-red" onclick="openCreateModal()">+ Create Battle</button>
+      </div>
+
+      <div class="stats-grid" data-aos="fade-up">
+        <div class="stat-card red"><div class="stat-label">Total Battles</div><div class="stat-value" id="statTotal">—</div></div>
+        <div class="stat-card yellow"><div class="stat-label">Upcoming</div><div class="stat-value" id="statUpcoming">—</div></div>
+        <div class="stat-card blue"><div class="stat-label">Live Now</div><div class="stat-value" id="statLive">—</div></div>
+        <div class="stat-card green"><div class="stat-label">Completed</div><div class="stat-value" id="statCompleted">—</div></div>
+      </div>
+
+      <div class="card" data-aos="fade-up">
+        <div class="tab-row" id="filterTabs">
+          <div class="tab active" onclick="filterBattles('all',this)">All Battles</div>
+          <div class="tab" onclick="filterBattles('draft',this)">Draft</div>
+          <div class="tab" onclick="filterBattles('upcoming',this)">Upcoming</div>
+          <div class="tab" onclick="filterBattles('live',this)">🔴 Live</div>
+          <div class="tab" onclick="filterBattles('completed',this)">Completed</div>
+          <div class="tab" onclick="filterBattles('cancelled',this)">Cancelled</div>
+        </div>
+        <div id="battlesList"><p style="color:var(--text-muted)">Loading battles...</p></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="supabase.js"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="animations.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded',function(){
+      if(typeof AOS!=='undefined') AOS.init({once:true,duration:500,offset:0});
+    });
+    function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show');}
+    function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');}
+
+    let allBattles=[],allProblems=[],selectedProblemIds=[],editingBattleId=null,currentFilter='all';
+
+    function onDbReady(){
+      if(!requireAdmin())return;
+      if(typeof AOS!=='undefined'){AOS.init({once:true,duration:500,offset:0});AOS.refresh();}
+      loadAll();
+      setInterval(autoUpdateStatuses,60000);
+    }
+
+    async function loadAll(){
+      await Promise.all([loadBattles(),loadProblems()]);
+    }
+
+    async function loadBattles(){
+      try{
+        const {data,error}=await window.db.from('battles').select('*').order('created_at',{ascending:false});
+        if(error)throw error;
+        allBattles=data||[];
+        await autoUpdateStatuses();
+        renderStats();
+        renderBattles();
+      }catch(e){document.getElementById('battlesList').innerHTML=`<p style="color:var(--neon-pink)">Error: ${e.message}</p>`;}
+    }
+
+    async function loadProblems(){
+      try{
+        const {data}=await window.db.from('problems').select('id,title,difficulty,topic').order('created_at',{ascending:false});
+        allProblems=data||[];
+        renderProblemPicker();
+      }catch(e){console.error(e);}
+    }
+
+    async function autoUpdateStatuses(){
+      const now=new Date();
+      for(const b of allBattles){
+        if(b.status==='cancelled'||b.status==='completed') continue;
+        let newStatus=b.status;
+        if(new Date(b.start_time)<=now && new Date(b.end_time)>now) newStatus='live';
+        else if(new Date(b.end_time)<=now && b.status!=='draft') newStatus='completed';
+        else if(new Date(b.start_time)>now && b.status!=='draft') newStatus='upcoming';
+        if(newStatus!==b.status){
+          await window.db.from('battles').update({status:newStatus}).eq('id',b.id);
+          b.status=newStatus;
+          if(newStatus==='completed') await generateResults(b.id);
+        }
+      }
+      renderStats();
+      renderBattles();
+    }
+
+    function renderStats(){
+      document.getElementById('statTotal').textContent=allBattles.length;
+      document.getElementById('statUpcoming').textContent=allBattles.filter(b=>b.status==='upcoming').length;
+      document.getElementById('statLive').textContent=allBattles.filter(b=>b.status==='live').length;
+      document.getElementById('statCompleted').textContent=allBattles.filter(b=>b.status==='completed').length;
+    }
+
+    function filterBattles(filter,el){
+      currentFilter=filter;
+      document.querySelectorAll('#filterTabs .tab').forEach(t=>t.classList.remove('active'));
+      el.classList.add('active');
+      renderBattles();
+    }
+
+    function renderBattles(){
+      const list=currentFilter==='all'?allBattles:allBattles.filter(b=>b.status===currentFilter);
+      if(!list.length){document.getElementById('battlesList').innerHTML='<p style="color:var(--text-muted);padding:.5rem">No battles found</p>';return;}
+      document.getElementById('battlesList').innerHTML=list.map(b=>{
+        const start=new Date(b.start_time).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+        const end=new Date(b.end_time).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+        const statusCls={draft:'s-draft',upcoming:'s-upcoming',live:'s-live',completed:'s-completed',cancelled:'s-cancelled'}[b.status]||'s-draft';
+        const liveBtn=b.status==='live'?`<a href="battle-room.html?id=${b.id}&admin=1" class="btn btn-sm btn-danger">🔴 View Live</a>`:'';
+        const publishBtn=b.status==='draft'?`<button class="btn btn-sm btn-success" onclick="publishBattle('${b.id}')">🚀 Publish</button>`:'';
+        const endBtn=b.status==='live'?`<button class="btn btn-sm btn-ghost" onclick="endBattle('${b.id}')">⏹ End</button>`:'';
+        const cancelBtn=(b.status==='draft'||b.status==='upcoming')?`<button class="btn btn-sm btn-danger" onclick="cancelBattle('${b.id}')">✕ Cancel</button>`:'';
+        return `<div class="battle-card">
+          <div class="battle-card-info">
+            <div class="battle-card-title">${b.title} <span class="status-badge ${statusCls}">${b.status}</span></div>
+            <div class="battle-card-meta">
+              <span>📅 ${start} → ${end}</span>
+              <span>⭐ ${b.xp_reward} XP</span>
+              <span>👥 ${b.participant_count||0}/${b.max_participants}</span>
+              <span>🎯 ${b.battle_type||'open'}</span>
+              <span>🏋 ${b.difficulty||'Intermediate'}</span>
+            </div>
+          </div>
+          <div class="battle-card-actions">
+            ${liveBtn}${publishBtn}${endBtn}${cancelBtn}
+            <button class="btn btn-sm btn-ghost" onclick="viewParticipants('${b.id}')">👥</button>
+            <button class="btn btn-sm btn-ghost" onclick="editBattle('${b.id}')">✏️</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteBattle('${b.id}')">🗑</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function openCreateModal(){
+      editingBattleId=null;
+      selectedProblemIds=[];
+      document.getElementById('modalTitle').textContent='⚔️ Create Battle';
+      document.getElementById('fTitle').value='';
+      document.getElementById('fDesc').value='';
+      document.getElementById('fDifficulty').value='Intermediate';
+      document.getElementById('fType').value='open';
+      document.getElementById('fXP').value='200';
+      document.getElementById('fStart').value='';
+      document.getElementById('fEnd').value='';
+      document.getElementById('fRegDeadline').value='';
+      document.getElementById('fMaxP').value='100';
+      document.getElementById('fBranches').value='';
+      document.getElementById('fYears').value='';
+      showModalAlert('','');
+      toggleTypeFields();
+      renderProblemPicker();
+      renderSelectedProblems();
+      document.getElementById('battleModal').classList.add('show');
+    }
+
+    async function editBattle(id){
+      const b=allBattles.find(x=>x.id===id);
+      if(!b)return;
+      editingBattleId=id;
+      document.getElementById('modalTitle').textContent='✏️ Edit Battle';
+      document.getElementById('fTitle').value=b.title||'';
+      document.getElementById('fDesc').value=b.description||'';
+      document.getElementById('fDifficulty').value=b.difficulty||'Intermediate';
+      document.getElementById('fType').value=b.battle_type||'open';
+      document.getElementById('fXP').value=b.xp_reward||200;
+      document.getElementById('fStart').value=b.start_time?b.start_time.slice(0,16):'';
+      document.getElementById('fEnd').value=b.end_time?b.end_time.slice(0,16):'';
+      document.getElementById('fRegDeadline').value=b.registration_deadline?b.registration_deadline.slice(0,16):'';
+      document.getElementById('fMaxP').value=b.max_participants||100;
+      document.getElementById('fBranches').value=(b.allowed_branches||[]).join(', ');
+      document.getElementById('fYears').value=(b.allowed_years||[]).join(', ');
+      toggleTypeFields();
+      // Load existing problems for this battle
+      try{
+        const {data}=await window.db.from('battle_problems').select('problem_id').eq('battle_id',id);
+        selectedProblemIds=(data||[]).map(x=>x.problem_id);
+      }catch(e){selectedProblemIds=[];}
+      renderProblemPicker();
+      renderSelectedProblems();
+      showModalAlert('','');
+      document.getElementById('battleModal').classList.add('show');
+    }
+
+    function closeModal(){document.getElementById('battleModal').classList.remove('show');}
+
+    function toggleTypeFields(){
+      const t=document.getElementById('fType').value;
+      document.getElementById('branchField').style.display=t==='branch'?'block':'none';
+      document.getElementById('yearField').style.display=t==='year'?'block':'none';
+    }
+
+    function showModalAlert(msg,type){
+      const el=document.getElementById('modalAlert');
+      if(!msg){el.className='alert';el.textContent='';return;}
+      el.className=`alert show ${type}`;el.textContent=msg;
+    }
+
+    async function saveBattle(statusOverride){
+      const title=document.getElementById('fTitle').value.trim();
+      const start=document.getElementById('fStart').value;
+      const end=document.getElementById('fEnd').value;
+      if(!title){showModalAlert('Battle title is required.','error');return;}
+      if(!start||!end){showModalAlert('Start and end time are required.','error');return;}
+      if(new Date(end)<=new Date(start)){showModalAlert('End time must be after start time.','error');return;}
+      if(!selectedProblemIds.length){showModalAlert('Select at least one problem.','error');return;}
+
+      const type=document.getElementById('fType').value;
+      const payload={
+        title,
+        description:document.getElementById('fDesc').value.trim(),
+        difficulty:document.getElementById('fDifficulty').value,
+        battle_type:type,
+        xp_reward:parseInt(document.getElementById('fXP').value)||200,
+        start_time:new Date(start).toISOString(),
+        end_time:new Date(end).toISOString(),
+        registration_deadline:document.getElementById('fRegDeadline').value?new Date(document.getElementById('fRegDeadline').value).toISOString():null,
+        max_participants:parseInt(document.getElementById('fMaxP').value)||100,
+        status:statusOverride||'draft',
+        allowed_branches:type==='branch'?document.getElementById('fBranches').value.split(',').map(s=>s.trim()).filter(Boolean):null,
+        allowed_years:type==='year'?document.getElementById('fYears').value.split(',').map(s=>s.trim()).filter(Boolean):null,
+        updated_at:new Date().toISOString()
+      };
+
+      try{
+        let battleId=editingBattleId;
+        if(editingBattleId){
+          const {error}=await window.db.from('battles').update(payload).eq('id',editingBattleId);
+          if(error)throw error;
+        }else{
+          const {data,error}=await window.db.from('battles').insert(payload).select().single();
+          if(error)throw error;
+          battleId=data.id;
+        }
+        // Save problems
+        await window.db.from('battle_problems').delete().eq('battle_id',battleId);
+        if(selectedProblemIds.length){
+          const rows=selectedProblemIds.map((pid,i)=>({battle_id:battleId,problem_id:pid,problem_order:i+1,points:100}));
+          await window.db.from('battle_problems').insert(rows);
+        }
+        // Notify students if publishing
+        if(statusOverride==='upcoming'){
+          try{await sendNotificationToAll(`New battle "${payload.title}" is starting on ${new Date(payload.start_time).toLocaleDateString()}. Register now!`,'⚔️ New Battle Created');}catch(e){}
+        }
+        closeModal();
+        await loadBattles();
+        showModalAlert('','');
+      }catch(e){showModalAlert('Error: '+e.message,'error');}
+    }
+
+    async function publishBattle(id){
+      if(!confirm('Publish this battle? Students will be notified.'))return;
+      try{
+        await window.db.from('battles').update({status:'upcoming'}).eq('id',id);
+        const b=allBattles.find(x=>x.id===id);
+        if(b) try{await sendNotificationToAll(`Battle "${b.title}" is now open for registration!`,'⚔️ Battle Published');}catch(e){}
+        await loadBattles();
+      }catch(e){alert('Error: '+e.message);}
+    }
+
+    async function endBattle(id){
+      if(!confirm('End this battle now?'))return;
+      try{
+        await window.db.from('battles').update({status:'completed'}).eq('id',id);
+        await generateResults(id);
+        await loadBattles();
+      }catch(e){alert('Error: '+e.message);}
+    }
+
+    async function cancelBattle(id){
+      if(!confirm('Cancel this battle?'))return;
+      try{
+        await window.db.from('battles').update({status:'cancelled'}).eq('id',id);
+        await loadBattles();
+      }catch(e){alert('Error: '+e.message);}
+    }
+
+    async function deleteBattle(id){
+      if(!confirm('Delete this battle permanently?'))return;
+      try{
+        await window.db.from('battle_problems').delete().eq('battle_id',id);
+        await window.db.from('battle_participants').delete().eq('battle_id',id);
+        await window.db.from('battle_submissions').delete().eq('battle_id',id);
+        await window.db.from('battle_results').delete().eq('battle_id',id);
+        await window.db.from('battles').delete().eq('id',id);
+        await loadBattles();
+      }catch(e){alert('Error: '+e.message);}
+    }
+
+    async function generateResults(battleId){
+      try{
+        const {data:participants}=await window.db.from('battle_participants').select('*').eq('battle_id',battleId).order('score',{ascending:false});
+        if(!participants||!participants.length)return;
+        const battle=allBattles.find(b=>b.id===battleId);
+        const baseXP=battle?.xp_reward||200;
+        const solvers=participants.filter(p=>(p.problems_solved||0)>0);
+        for(let i=0;i<participants.length;i++){
+          const p=participants[i];
+          const rank=i+1;
+          const solved=p.problems_solved||0;
+
+          let xp=0;
+          let badge=null;
+
+          if(solved>0){
+            const solverRank=solvers.findIndex(s=>s.user_id===p.user_id)+1;
+            xp=Math.floor(baseXP*0.2); // participation, only for those who solved something
+            if(solverRank===1)xp+=baseXP;
+            else if(solverRank<=3)xp+=Math.floor(baseXP*0.6);
+            else if(solverRank<=10)xp+=Math.floor(baseXP*0.3);
+
+            if(solverRank===1)badge='champion';
+            else if(solverRank<=3)badge='top3';
+            else if(solverRank<=10)badge='top10';
+          }
+          // Award XP
+          try{await giveXP(p.user_id,xp);}catch(e){}
+          // Save result
+          await window.db.from('battle_results').upsert({battle_id:battleId,user_id:p.user_id,final_rank:rank,final_score:p.score,problems_solved:p.problems_solved,xp_awarded:xp,badge},{onConflict:'battle_id,user_id'});
+          // Save badge
+          if(badge) try{await window.db.from('battle_badges').insert({user_id:p.user_id,battle_id:battleId,badge_type:badge});}catch(e){}
+          // Notify student
+          try{await window.db.from('notifications').insert({user_id:p.user_id,title:'⚔️ Battle Results',message:`You finished #${rank} in "${battle?.title||'Battle'}". You earned ${xp} XP!`,type:'system',is_read:false});}catch(e){}
+        }
+        // Update winner
+        if(participants[0]){
+          await window.db.from('battles').update({winner_id:participants[0].user_id,results_published:true}).eq('id',battleId);
+        }
+      }catch(e){console.error('generateResults:',e);}
+    }
+
+    async function viewParticipants(id){
+      const b=allBattles.find(x=>x.id===id);
+      try{
+        const {data:parts}=await window.db.from('battle_participants').select('*').eq('battle_id',id).order('score',{ascending:false});
+        const participants=parts||[];
+        // Analytics
+        const {data:subs}=await window.db.from('battle_submissions').select('verdict').eq('battle_id',id);
+        const totalSubs=(subs||[]).length;
+        const accepted=(subs||[]).filter(s=>s.verdict==='Accepted').length;
+        document.getElementById('battleAnalyticsRow').innerHTML=`
+          <div class="analytics-box"><div class="val">${participants.length}</div><div class="lbl">Registered</div></div>
+          <div class="analytics-box"><div class="val">${totalSubs}</div><div class="lbl">Submissions</div></div>
+          <div class="analytics-box"><div class="val">${totalSubs?Math.round((accepted/totalSubs)*100):0}%</div><div class="lbl">Acceptance</div></div>`;
+        // Get user profiles
+        const userIds=participants.map(p=>p.user_id);
+        let profileMap={};
+        if(userIds.length){
+          const {data:profiles}=await window.db.from('users').select('id,first_name,last_name,email').in('id',userIds);
+          (profiles||[]).forEach(u=>profileMap[u.id]=u);
+        }
+        document.getElementById('participantsList').innerHTML=participants.length?participants.map((p,i)=>{
+          const u=profileMap[p.user_id]||{};
+          const name=`${u.first_name||''} ${u.last_name||''}`.trim()||u.email||'Unknown';
+          return `<div class="participant-row"><span class="rank-num">#${i+1}</span><span style="flex:1;font-weight:600;color:var(--text)">${name}</span><span class="mono" style="color:var(--neon-purple);font-weight:700">${p.score||0}pts</span><span style="color:var(--text-muted);font-size:.78rem;margin-left:.5rem">${p.problems_solved||0} solved</span></div>`;
+        }).join(''):'<p style="color:var(--text-muted);padding:1rem;font-size:.85rem">No participants yet</p>';
+        document.getElementById('participantsModal').classList.add('show');
+      }catch(e){alert('Error loading participants: '+e.message);}
+    }
+
+    // Problem Picker
+    function renderProblemPicker(filter=''){
+      const q=filter.toLowerCase();
+      const filtered=allProblems.filter(p=>!q||(p.title||'').toLowerCase().includes(q)||(p.topic||'').toLowerCase().includes(q));
+      document.getElementById('problemPicker').innerHTML=filtered.length?filtered.map(p=>{
+        const sel=selectedProblemIds.includes(p.id);
+        const diffColor=p.difficulty==='Advanced'||p.difficulty==='Hard'?'#dc2626':p.difficulty==='Intermediate'||p.difficulty==='Medium'?'#d97706':'#059669';
+        return `<div class="problem-pick-item ${sel?'selected':''}" onclick="toggleProblem('${p.id}')">
+          <input type="checkbox" ${sel?'checked':''} onclick="toggleProblem('${p.id}');event.stopPropagation()">
+          <span style="flex:1;font-size:.88rem;font-weight:600;color:var(--text)">${p.title}</span>
+          <span style="font-size:.75rem;font-weight:700;color:${diffColor}">${p.difficulty||''}</span>
+          <span style="font-size:.75rem;color:var(--neon-cyan);margin-left:.5rem;font-weight:600">${p.topic||''}</span>
+        </div>`;
+      }).join(''):'<p style="color:var(--text-muted);padding:1rem;font-size:.85rem">No problems found</p>';
+    }
+
+    function filterProblems(){renderProblemPicker(document.getElementById('problemSearch').value);}
+
+    function toggleProblem(id){
+      const idx=selectedProblemIds.indexOf(id);
+      if(idx===-1)selectedProblemIds.push(id);
+      else selectedProblemIds.splice(idx,1);
+      renderProblemPicker(document.getElementById('problemSearch').value);
+      renderSelectedProblems();
+    }
+
+    function renderSelectedProblems(){
+      document.getElementById('selectedProblems').innerHTML=selectedProblemIds.map(id=>{
+        const p=allProblems.find(x=>x.id===id);
+        return p?`<div class="sel-problem-tag">${p.title}<button onclick="toggleProblem('${id}')">✕</button></div>`:'';
+      }).join('');
+    }
+  </script>
+</body>
+</html>

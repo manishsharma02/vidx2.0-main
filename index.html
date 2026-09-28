@@ -1,0 +1,2288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VidX — The Coding Platform for College Coders</title>
+  <meta name="description" content="VidX — The premier student coding and competition platform built for your college batch. Daily challenges, XP, live leaderboards, and code battles.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+  <link rel="stylesheet" href="animations.css">
+
+  <style>
+    :root {
+      --bg:           #f8fafc;
+      --bg2:          #ffffff;
+      --bg3:          #f1f5f9;
+      --bg4:          #e2e8f0;
+      --card-bg:      #ffffff;
+      --neon-blue:    #2563eb;
+      --neon-purple:  #7c3aed;
+      --neon-cyan:    #0284c7;
+      --neon-pink:    #db2777;
+      --neon-green:   #059669;
+      --glow-blue:    rgba(37, 99, 235, 0.12);
+      --glow-purple:  rgba(124, 58, 237, 0.15);
+      --glow-cyan:    rgba(2, 132, 199, 0.12);
+      --text:         #0f172a;
+      --muted:        #64748b;
+      --dim:          #94a3b8;
+      --border:       rgba(0, 0, 0, 0.08);
+      --border-hover: rgba(124, 58, 237, 0.35);
+      --border-glow:  rgba(124, 58, 237, 0.25);
+      --primary:      #7c3aed;
+      --primary-dark: #6d28d9;
+      --ease:         cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, h4, .font-display {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: rgba(124, 58, 237, 0.3); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--neon-purple); }
+
+    /* Ambient Floating Orbs - Light Pastel */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.08;
+      pointer-events: none;
+      z-index: 0;
+      animation: orbFloat 12s ease-in-out infinite alternate;
+      will-change: transform;
+    }
+    .orb-1 { width: 480px; height: 480px; background: #7c3aed; top: -140px; left: -100px; }
+    .orb-2 { width: 420px; height: 420px; background: #2563eb; bottom: -120px; right: -100px; animation-delay: 3s; }
+    .orb-3 { width: 300px; height: 300px; background: #0284c7; top: 45%; left: 55%; animation-delay: 6s; }
+
+    @keyframes orbFloat {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(40px, -40px) scale(1.1); }
+    }
+
+    /* NAVBAR */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 3.5rem;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(255, 255, 255, 0.88);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      transition: all 0.35s var(--ease);
+    }
+    .navbar.scrolled {
+      padding: 0.9rem 3.5rem;
+      background: rgba(255, 255, 255, 0.98);
+      border-bottom-color: rgba(124, 58, 237, 0.2);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.45rem;
+      letter-spacing: -0.02em;
+    }
+    .nav-logo-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 0 16px var(--glow-purple);
+      transition: transform 0.25s var(--ease);
+    }
+    .nav-logo:hover .nav-logo-icon { transform: scale(1.08); }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2.25rem;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.92rem;
+      position: relative;
+      padding: 0.3rem 0;
+      transition: color 0.2s ease;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--neon-purple), var(--neon-cyan));
+      border-radius: 2px;
+      transition: width 0.25s var(--ease);
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a:hover::after { width: 100%; }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.6rem;
+      border-radius: 12px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.92rem;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all 0.25s var(--ease);
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+      color: #fff;
+      box-shadow: 0 4px 18px var(--glow-purple);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 8px 24px rgba(124, 58, 237, 0.35);
+    }
+    .btn-ghost {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+    .btn-ghost:hover {
+      background: #f8fafc;
+      border-color: rgba(0, 0, 0, 0.16);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+    .btn-lg {
+      padding: 0.95rem 2rem;
+      font-size: 1rem;
+      border-radius: 14px;
+    }
+
+    /* Mobile hamburger */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .hamburger span {
+      width: 24px;
+      height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+    .hamburger.active span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+    }
+    .hamburger.active span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 70px;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      padding: 1.75rem;
+      flex-direction: column;
+      gap: 1.25rem;
+      z-index: 99;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
+
+    /* EDITORIAL HERO SECTION - ASYMMETRIC SPLIT */
+    .hero-editorial {
+      position: relative;
+      z-index: 2;
+      min-height: 94vh;
+      display: flex;
+      align-items: center;
+      padding: 9rem 3.5rem 5.5rem;
+      max-width: 1440px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .hero-split-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 3.5rem;
+      align-items: center;
+      width: 100%;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* VIDX Perspective Code Tunnel Background */
+    .vidx-tunnel {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(circle at 50% 46%, rgba(79, 70, 229, 0.07) 0%, rgba(37, 99, 235, 0.035) 40%, rgba(124, 58, 237, 0.015) 65%, transparent 85%),
+        #f8fafc;
+    }
+    .vidx-tunnel canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      pointer-events: none;
+    }
+    .hero-text-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .hero-headline {
+      font-size: clamp(2.2rem, 4.1vw, 3.4rem);
+      font-weight: 800;
+      line-height: 1.16;
+      margin-bottom: 1.15rem;
+      color: var(--text);
+      letter-spacing: -0.035em;
+    }
+    .hero-headline .gradient-accent {
+      background: linear-gradient(135deg, #0f172a 30%, #475569 70%, var(--neon-purple) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-typed-container {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(1.25rem, 2.2vw, 1.8rem);
+      font-weight: 700;
+      color: var(--neon-purple);
+      display: inline-block;
+      min-height: 1.4em;
+      margin-bottom: 1.25rem;
+      letter-spacing: -0.01em;
+    }
+    .hero-description {
+      font-size: 1.05rem;
+      color: var(--muted);
+      line-height: 1.75;
+      margin-bottom: 2rem;
+      max-width: 540px;
+    }
+    .hero-action-row {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.25rem;
+    }
+
+    .hero-trust-bar {
+      display: flex;
+      align-items: center;
+      gap: 1.75rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+    .hero-trust-bar span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      color: var(--muted);
+    }
+
+    /* HERO VISUAL COMPOSITION (RIGHT COL) */
+    .hero-visual-col {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .hero-visual-glow {
+      position: absolute;
+      width: 380px;
+      height: 380px;
+      background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, rgba(59, 130, 246, 0.08) 50%, transparent 70%);
+      filter: blur(50px);
+      z-index: 0;
+      pointer-events: none;
+    }
+    .hero-card-stack {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 460px;
+    }
+    .hero-floating-pill {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(124, 58, 237, 0.25);
+      border-radius: 12px;
+      padding: 0.65rem 1.1rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      animation: orbFloat 8s ease-in-out infinite alternate;
+    }
+    .pill-top-right {
+      top: -24px;
+      right: -20px;
+      border-color: rgba(5, 150, 105, 0.3);
+      color: #059669;
+    }
+    .pill-bottom-left {
+      bottom: -22px;
+      left: -20px;
+      border-color: rgba(245, 158, 11, 0.3);
+      color: #d97706;
+      animation-delay: 2.5s;
+    }
+
+    /* STATS RIBBON SECTION */
+    .stats-bar {
+      position: relative;
+      z-index: 2;
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 2.2rem 2.5rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+    }
+    .stat-item {
+      text-align: center;
+      padding: 0.5rem 1rem;
+      position: relative;
+    }
+    .stat-item:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 15%;
+      bottom: 15%;
+      width: 1px;
+      background: rgba(0, 0, 0, 0.08);
+    }
+    .stat-number {
+      display: block;
+      font-size: clamp(2.2rem, 3.5vw, 3rem);
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+    .stat-label {
+      font-size: 0.88rem;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-top: 0.35rem;
+    }
+
+    /* EDITORIAL SECTIONS SHARED */
+    section { position: relative; z-index: 2; }
+    .section-wrap {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 8rem 3rem;
+    }
+    .section-header-editorial {
+      margin-bottom: 4.5rem;
+      max-width: 720px;
+    }
+    .section-header-editorial.center {
+      text-align: center;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .section-title-large {
+      font-size: clamp(1.85rem, 3.2vw, 2.5rem);
+      font-weight: 800;
+      line-height: 1.2;
+      color: var(--text);
+      letter-spacing: -0.03em;
+      margin-bottom: 0.85rem;
+    }
+    .section-desc-editorial {
+      font-size: 1.02rem;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 620px;
+    }
+
+    /* 1. MANIFESTO / "WE ARE VIDX" SPLIT SECTION */
+    .manifesto-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+    .manifesto-text p {
+      font-size: 1.02rem;
+      color: #334155;
+      line-height: 1.75;
+      margin-bottom: 1.25rem;
+    }
+    .manifesto-highlights {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-top: 2rem;
+    }
+    .highlight-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.25rem 1.35rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+      transition: all 0.3s var(--ease);
+    }
+    .highlight-card:hover {
+      border-color: rgba(124, 58, 237, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(124, 58, 237, 0.08);
+    }
+    .highlight-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--neon-purple);
+      margin-bottom: 0.4rem;
+      letter-spacing: 0.05em;
+    }
+    .highlight-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text);
+      margin-bottom: 0.3rem;
+      letter-spacing: -0.01em;
+    }
+    .highlight-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* 2. CAMPUS TRACKS & ASYMMETRIC GRID */
+    .tracks-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .tracks-feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 3rem 2.5rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.35s var(--ease);
+    }
+    .tracks-feature-card:hover {
+      border-color: var(--border-hover);
+      box-shadow: 0 16px 36px rgba(124, 58, 237, 0.08);
+      transform: translateY(-4px);
+    }
+    .tracks-stacked-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .track-mini-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.75rem 2rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+      transition: all 0.3s var(--ease);
+    }
+    .track-mini-card:hover {
+      border-color: rgba(124, 58, 237, 0.3);
+      transform: translateX(6px);
+      box-shadow: 0 8px 24px rgba(124, 58, 237, 0.08);
+    }
+    .track-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.85rem;
+    }
+
+    /* 3. STORIES / HALL OF FAME */
+    .stories-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+    .story-card-inner {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.25rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      transition: all 0.35s var(--ease);
+    }
+    .story-card-inner:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-5px);
+      box-shadow: 0 16px 35px rgba(124, 58, 237, 0.08);
+    }
+    .story-avatar-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .story-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-cyan));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: #fff;
+    }
+    .story-quote {
+      font-size: 0.98rem;
+      color: #334155;
+      line-height: 1.7;
+      margin-bottom: 1.75rem;
+      font-style: italic;
+    }
+
+    /* 4. LEADERBOARD PREVIEW */
+    .leaderboard-section {
+      background: #f1f5f9;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .leaderboard-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-width: 840px;
+      margin: 0 auto;
+    }
+    .rank-card {
+      display: flex;
+      align-items: center;
+      gap: 1.35rem;
+      padding: 1.2rem 1.8rem;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+      transition: all 0.3s var(--ease);
+    }
+    .rank-card:hover {
+      border-color: var(--border-hover);
+      transform: translateX(8px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    }
+    .rank-card.rank-1 {
+      border-color: rgba(245, 158, 11, 0.4);
+      background: linear-gradient(90deg, rgba(245, 158, 11, 0.08) 0%, #ffffff 60%);
+      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.12);
+    }
+    .rank-card.rank-2 {
+      border-color: rgba(148, 163, 184, 0.4);
+      background: linear-gradient(90deg, rgba(148, 163, 184, 0.08) 0%, #ffffff 60%);
+    }
+    .rank-card.rank-3 {
+      border-color: rgba(249, 115, 22, 0.4);
+      background: linear-gradient(90deg, rgba(249, 115, 22, 0.08) 0%, #ffffff 60%);
+    }
+    .rank-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 1.2rem;
+      width: 42px;
+      text-align: center;
+      color: var(--muted);
+    }
+    .rank-card.rank-1 .rank-num { color: #d97706; font-weight: 800; font-size: 1.35rem; }
+    .rank-card.rank-2 .rank-num { color: #64748b; }
+    .rank-card.rank-3 .rank-num { color: #ea580c; }
+    .rank-avatar {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+      box-shadow: 0 0 15px rgba(124, 58, 237, 0.25);
+    }
+    .rank-info { flex: 1; min-width: 0; }
+    .rank-name {
+      font-weight: 700;
+      font-size: 1.05rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 0.15rem;
+      color: var(--text);
+    }
+    .rank-meta {
+      font-size: 0.84rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .rank-xp-bar-wrap { width: 150px; flex-shrink: 0; }
+    .rank-xp {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--neon-purple);
+      text-align: right;
+      margin-bottom: 0.4rem;
+    }
+    .xp-bar { height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+    .xp-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--neon-purple), var(--neon-cyan));
+      border-radius: 3px;
+      transition: width 1s ease;
+    }
+    .loading-text {
+      text-align: center;
+      color: var(--muted);
+      padding: 3rem;
+      font-weight: 600;
+    }
+
+    /* 5. MONUMENTAL CTA */
+    .cta-section {
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 50%, rgba(124, 58, 237, 0.08) 0%, transparent 70%);
+      border-top: 1px solid var(--border);
+    }
+    .cta-mesh {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 25% 45%, rgba(124, 58, 237, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 75% 55%, rgba(37, 99, 235, 0.08) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .cta-inner {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 8rem 2rem;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+    .cta-inner h2 {
+      font-size: clamp(2rem, 3.8vw, 3rem);
+      font-weight: 800;
+      margin-bottom: 1.15rem;
+      color: var(--text);
+      letter-spacing: -0.035em;
+    }
+    .cta-inner p {
+      color: #475569;
+      font-size: 1.08rem;
+      margin-bottom: 2.25rem;
+      line-height: 1.7;
+    }
+    .cta-buttons {
+      display: flex;
+      gap: 1.25rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* CYNTEXA SIGNATURE COMPONENTS & BULLETPROOF SIZES */
+    svg {
+      max-width: 100%;
+    }
+
+    .cyntexa-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #6d28d9;
+      margin-bottom: 1.25rem;
+      padding: 0.35rem 1rem;
+      background: rgba(124, 58, 237, 0.08);
+      border: 1px solid rgba(124, 58, 237, 0.2);
+      border-radius: 9999px;
+      backdrop-filter: blur(8px);
+    }
+
+    .cyntexa-kicker .kicker-dot {
+      width: 7px;
+      height: 7px;
+      min-width: 7px;
+      min-height: 7px;
+      border-radius: 50%;
+      background: #7c3aed;
+      box-shadow: 0 0 8px #7c3aed;
+      display: inline-block;
+    }
+
+    .cyntexa-explore-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.92rem;
+      position: relative;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0.4rem 0;
+      transition: color 0.3s var(--ease);
+    }
+
+    .cyntexa-explore-btn:hover {
+      color: #6d28d9;
+    }
+
+    .circle-badge {
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      min-height: 36px;
+      border-radius: 50%;
+      background: rgba(124, 58, 237, 0.08);
+      border: 1px solid rgba(124, 58, 237, 0.25);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: all 0.35s var(--ease);
+      overflow: hidden;
+      color: #7c3aed;
+      flex-shrink: 0;
+    }
+
+    .circle-badge svg,
+    .cyntexa-explore-btn svg {
+      width: 15px !important;
+      height: 15px !important;
+      min-width: 15px !important;
+      min-height: 15px !important;
+      max-width: 15px !important;
+      max-height: 15px !important;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.5;
+      display: block;
+      transition: transform 0.35s var(--ease);
+    }
+
+    .cyntexa-explore-btn:hover .circle-badge {
+      border-color: rgba(124, 58, 237, 0.8);
+      background: #7c3aed;
+      color: #ffffff;
+      box-shadow: 0 0 16px rgba(124, 58, 237, 0.35);
+      transform: scale(1.06);
+    }
+
+    .cyntexa-explore-btn:hover .circle-badge svg {
+      stroke: #ffffff;
+      transform: translateX(2px);
+    }
+
+    /* KINETIC MARQUEE TAPE */
+    .cyntexa-marquee-strip {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      padding: 1.1rem 0;
+      background: #ffffff;
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      display: flex;
+      white-space: nowrap;
+      user-select: none;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    }
+
+    .cyntexa-marquee-track {
+      display: flex;
+      gap: 3rem;
+      align-items: center;
+      animation: cyntexaMarqueeScroll 28s linear infinite;
+      will-change: transform;
+    }
+
+    .cyntexa-marquee-track:hover {
+      animation-play-state: paused;
+    }
+
+    .cyntexa-marquee-item {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.86rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #64748b;
+      flex-shrink: 0;
+    }
+
+    .cyntexa-marquee-item span.accent {
+      color: #0f172a;
+      font-weight: 800;
+    }
+
+    .cyntexa-marquee-item .sep {
+      color: #7c3aed;
+      font-size: 0.85rem;
+    }
+
+    @keyframes cyntexaMarqueeScroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* FAQ ACCORDION & CATEGORY PILLS */
+    .faq-filters {
+      display: flex;
+      justify-content: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.25rem;
+    }
+
+    .faq-filter-btn {
+      padding: 0.5rem 1.15rem;
+      border-radius: 9999px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.25s var(--ease);
+      font-family: inherit;
+    }
+
+    .faq-filter-btn:hover {
+      border-color: rgba(124, 58, 237, 0.35);
+      color: var(--text);
+    }
+
+    .faq-filter-btn.active {
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: 0 4px 14px var(--glow-purple);
+    }
+
+    .cyntexa-faq-item {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 16px;
+      margin-bottom: 0.85rem;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+      transition: all 0.25s var(--ease);
+    }
+
+    .cyntexa-faq-item:hover {
+      border-color: rgba(124, 58, 237, 0.3);
+      box-shadow: 0 6px 18px rgba(124, 58, 237, 0.06);
+    }
+
+    .cyntexa-faq-item.active {
+      border-color: rgba(124, 58, 237, 0.45);
+      box-shadow: 0 8px 24px rgba(124, 58, 237, 0.08);
+    }
+
+    .cyntexa-faq-trigger {
+      width: 100%;
+      padding: 1.2rem 1.6rem;
+      background: none;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.2rem;
+      text-align: left;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 1.02rem;
+      color: var(--text);
+      cursor: pointer;
+      outline: none;
+      transition: color 0.2s ease;
+    }
+
+    .cyntexa-faq-trigger:hover {
+      color: var(--neon-purple);
+    }
+
+    .cyntexa-faq-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .faq-pill-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.2rem 0.65rem;
+      border-radius: 9999px;
+      background: rgba(124, 58, 237, 0.08);
+      color: #6d28d9;
+      border: 1px solid rgba(124, 58, 237, 0.2);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .cyntexa-faq-chevron {
+      width: 20px !important;
+      height: 20px !important;
+      min-width: 20px !important;
+      min-height: 20px !important;
+      max-width: 20px !important;
+      max-height: 20px !important;
+      color: var(--neon-purple);
+      transition: transform 0.3s var(--ease);
+      flex-shrink: 0;
+      display: inline-block;
+    }
+
+    .cyntexa-faq-item.active .cyntexa-faq-chevron {
+      transform: rotate(180deg);
+    }
+
+    .cyntexa-faq-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s var(--ease), padding 0.3s var(--ease);
+      padding: 0 1.6rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.75;
+    }
+
+    .cyntexa-faq-item.active .cyntexa-faq-content {
+      max-height: 400px;
+      padding: 0 1.6rem 1.4rem;
+    }
+
+    /* FOOTER */
+    footer {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 3rem 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.92rem;
+      background: #ffffff;
+    }
+    footer span {
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 800;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) {
+      .hero-split-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .manifesto-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+      .tracks-grid { grid-template-columns: 1fr; }
+      .stories-grid { grid-template-columns: 1fr; }
+      .stats-bar { grid-template-columns: repeat(2, 1fr); }
+      .navbar { padding: 1.1rem 2rem; }
+      .navbar.scrolled { padding: 0.85rem 2rem; }
+    }
+    @media (max-width: 768px) {
+      .nav-links, .nav-actions { display: none; }
+      .hamburger { display: flex; }
+      .hero-editorial { padding: 7.5rem 1.5rem 4rem; }
+      .section-wrap { padding: 5rem 1.5rem; }
+      .stats-bar { grid-template-columns: 1fr; border-radius: 18px; padding: 1.5rem; }
+      .stat-item:not(:last-child)::after { display: none; }
+      .stat-item { border-bottom: 1px solid rgba(0,0,0,0.06); padding: 1rem 0; }
+      .rank-xp-bar-wrap { display: none; }
+      .pill-top-right, .pill-bottom-left { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Floating Orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon">VX</div>
+      VidX
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#manifesto">Manifesto</a></li>
+      <li><a href="#tracks">Tracks</a></li>
+      <li><a href="#stories">Stories</a></li>
+      <li><a href="#leaderboard">Leaderboard</a></li>
+      <li><a href="#faqs">FAQs</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <a href="login.html" class="btn btn-ghost">Login</a>
+      <a href="register.html" class="btn btn-primary">Join Platform →</a>
+    </div>
+
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#home" onclick="closeMobileMenu()">Home</a>
+    <a href="#manifesto" onclick="closeMobileMenu()">Manifesto</a>
+    <a href="#tracks" onclick="closeMobileMenu()">Tracks</a>
+    <a href="#stories" onclick="closeMobileMenu()">Stories</a>
+    <a href="#leaderboard" onclick="closeMobileMenu()">Leaderboard</a>
+    <a href="#faqs" onclick="closeMobileMenu()">FAQs</a>
+    <div style="display:flex;gap:0.75rem;margin-top:1rem">
+      <a href="login.html" class="btn btn-ghost" style="flex:1;text-align:center">Login</a>
+      <a href="register.html" class="btn btn-primary" style="flex:1;text-align:center">Join Now</a>
+    </div>
+  </div>
+
+  <!-- HERO SECTION: Cyntexa Asymmetric Editorial Split -->
+  <section class="hero-editorial" id="home">
+    <!-- VIDX Perspective Code Tunnel Background -->
+    <div class="vidx-tunnel" id="vidxTunnel">
+      <canvas id="vidxTunnelCanvas"></canvas>
+    </div>
+
+    <div class="hero-split-grid">
+      
+      <!-- Left Column: Editorial Typography & Actions -->
+      <div class="hero-text-col" data-aos="fade-up">
+        <div class="cyntexa-kicker">
+          <span class="kicker-dot"></span>
+          Live College Arena 
+        </div>
+
+        <h1 class="hero-headline">
+          The Coding Platform<br>
+          <span class="gradient-accent">Built for Your</span>
+        </h1>
+
+        <div class="hero-typed-container">
+          <span id="typed"></span>
+        </div>
+
+        <p class="hero-description">
+          Elevate your daily problem-solving discipline. Compete head-to-head with batchmates from your own college, conquer interview-grade DSA problems, and build an unbreakable streak.
+        </p>
+
+        <div class="hero-action-row">
+          <a href="register.html" class="btn btn-primary btn-lg">Get Started Free →</a>
+          <a href="#tracks" class="cyntexa-explore-btn">
+            Explore Problem Tracks
+            <div class="circle-badge">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </a>
+        </div>
+
+        <div class="hero-trust-bar">
+          <span>⚡ Daily Midnight Reset</span>
+          <span>🔥 Streak XP Multiplier</span>
+          <span>🏆 Verified Campus Rankings</span>
+        </div>
+      </div>
+
+      <!-- Right Column: Layered Interactive Visual Terminal Card -->
+      <!-- Right Column: Layered Interactive Visual Terminal Card (Dark IDE Anchor) -->
+      <div class="hero-visual-col" data-aos="fade-left" data-aos-delay="150">
+        <div class="hero-visual-glow"></div>
+        
+        <div class="hero-card-stack">
+          <!-- Floating status pill top right -->
+          <div class="hero-floating-pill pill-top-right">
+            <span>● 45/45 Test Cases Passed</span>
+          </div>
+
+          <!-- Interactive Code Terminal Card -->
+          <div class="cyntexa-terminal-mock">
+            <div class="cyntexa-terminal-header">
+              <div class="cyntexa-terminal-dots">
+                <span></span><span></span><span></span>
+              </div>
+              <div class="cyntexa-terminal-title">solution.cpp — C++20</div>
+              <div style="font-size:0.75rem;color:#10b981;font-weight:700">● 12ms</div>
+            </div>
+            <div class="cyntexa-terminal-body">
+              <span style="color:#f472b6">#include</span> <span style="color:#60a5fa">&lt;bits/stdc++.h&gt;</span><br>
+              <span style="color:#818cf8">using namespace</span> std;<br><br>
+              <span style="color:#60a5fa">class</span> <span style="color:#fde047">VidXSolution</span> {<br>
+              <span style="color:#818cf8">public:</span><br>
+              &nbsp;&nbsp;<span style="color:#38bdf8">int</span> solveMaxStreak(<span style="color:#38bdf8">vector</span>&lt;<span style="color:#38bdf8">int</span>&gt;&amp; xp) {<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#38bdf8">int</span> rank = <span style="color:#f97316">1</span>, streak = <span style="color:#f97316">14</span>;<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#818cf8">for</span>(<span style="color:#38bdf8">auto</span>&amp; pt : xp) rank += pt;<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#818cf8">return</span> rank * streak; <span style="color:#64748b">// Rank #1 unlocked</span><br>
+              &nbsp;&nbsp;}<br>
+              };
+            </div>
+          </div>
+
+          <!-- Floating rank badge bottom left -->
+          <div class="hero-floating-pill pill-bottom-left">
+            <span>🏆 Campus Rank #1 • 4,850 XP</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- KINETIC MARQUEE TAPE RIBBON -->
+  <div class="cyntexa-marquee-strip">
+    <div class="cyntexa-marquee-track">
+      <div class="cyntexa-marquee-item">
+        <span class="accent">DATA STRUCTURES</span> <span class="sep">✦</span>
+        <span>DYNAMIC PROGRAMMING</span> <span class="sep">✦</span>
+        <span class="accent">GRAPH ALGORITHMS</span> <span class="sep">✦</span>
+        <span>DAILY SADHANA</span> <span class="sep">✦</span>
+        <span class="accent">1V1 BATTLES</span> <span class="sep">✦</span>
+        <span>BATCH LEADERBOARD</span> <span class="sep">✦</span>
+        <span class="accent">CAMPUS STREAKS</span> <span class="sep">✦</span>
+        <span>SYSTEM DESIGN</span> <span class="sep">✦</span>
+        <span class="accent">INTERVIEW PREPARATION</span> <span class="sep">✦</span>
+      </div>
+      <div class="cyntexa-marquee-item" aria-hidden="true">
+        <span class="accent">DATA STRUCTURES</span> <span class="sep">✦</span>
+        <span>DYNAMIC PROGRAMMING</span> <span class="sep">✦</span>
+        <span class="accent">GRAPH ALGORITHMS</span> <span class="sep">✦</span>
+        <span>DAILY SADHANA</span> <span class="sep">✦</span>
+        <span class="accent">1V1 BATTLES</span> <span class="sep">✦</span>
+        <span>BATCH LEADERBOARD</span> <span class="sep">✦</span>
+        <span class="accent">CAMPUS STREAKS</span> <span class="sep">✦</span>
+        <span>SYSTEM DESIGN</span> <span class="sep">✦</span>
+        <span class="accent">INTERVIEW PREPARATION</span> <span class="sep">✦</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS BAR -->
+  <div style="padding: 3.5rem 1.5rem 0;">
+    <div class="stats-bar">
+      <div class="stat-item" data-aos="fade-up">
+        <span class="stat-number mono" data-count="500" data-suffix="+">0</span>
+        <span class="stat-label">Active Students</span>
+      </div>
+      <div class="stat-item" data-aos="fade-up" data-aos-delay="100">
+        <span class="stat-number mono" data-count="100" data-suffix="+">0</span>
+        <span class="stat-label">Problems Curated</span>
+      </div>
+      <div class="stat-item" data-aos="fade-up" data-aos-delay="200">
+        <span class="stat-number mono" data-count="365">0</span>
+        <span class="stat-label">Daily Challenges</span>
+      </div>
+      <div class="stat-item" data-aos="fade-up" data-aos-delay="300">
+        <span class="stat-number mono" data-count="100" data-suffix="%">0</span>
+        <span class="stat-label">Real Rankings</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. MANIFESTO / "WE ARE VIDX" EDITORIAL SECTION -->
+  <section class="section-wrap" id="manifesto">
+    <div class="manifesto-grid">
+      
+      <!-- Visual Card -->
+      <div class="manifesto-visual" data-aos="fade-right">
+        <div class="cyntexa-story-card" style="padding: 2.5rem; min-height: 440px; justify-content: center;">
+          <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem">
+            <span class="vidx-pill" style="color:#059669;border-color:rgba(16,185,129,0.3);background:rgba(16,185,129,0.1)">● High-Velocity Competition</span>
+          </div>
+          <h3 style="font-size:1.75rem;font-weight:800;color:var(--text);margin-bottom:0.85rem;line-height:1.25;letter-spacing:-0.025em">
+            Where your code defines your standing.
+          </h3>
+          <p style="color:var(--muted);font-size:1.02rem;line-height:1.7;margin-bottom:2rem">
+            We built VidX to bridge the gap between solitary problem solving and real-world competitive engineering. On VidX, every accepted submission echoes through your department.
+          </p>
+          <div style="display:flex;align-items:center;gap:1.5rem">
+            <a href="register.html" class="cyntexa-explore-btn">
+              Join Your College Cohort
+              <div class="circle-badge">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manifesto Narrative & Highlights -->
+      <div class="manifesto-text" data-aos="fade-left">
+        <div class="cyntexa-kicker">
+          <span class="kicker-dot"></span>
+          Our Platform Manifesto
+        </div>
+        <h2 class="section-title-large">We are VidX.</h2>
+        <p>
+          VidX is not just a problem database. It is an arena where college coding culture comes alive. Where every submission counts towards your standing among the peers you sit next to in class.
+        </p>
+        <p>
+          A culture of daily forward motion, where students continuously evolve their algorithmic intuition. Through midnight deadlines and high-pressure battles, we turn aspiring students into elite problem solvers.
+        </p>
+        
+        <div class="manifesto-highlights">
+          <div class="highlight-card">
+            <div class="highlight-num">01 / DISCIPLINE</div>
+            <div class="highlight-title">Daily Sadhana</div>
+            <div class="highlight-desc">A fresh algorithmic challenge every midnight to build consistent coding habits.</div>
+          </div>
+          <div class="highlight-card">
+            <div class="highlight-num">02 / COMPETITION</div>
+            <div class="highlight-title">Live Battles</div>
+            <div class="highlight-desc">Real-time synchronized 1v1 and room matches with instant automated judging.</div>
+          </div>
+          <div class="highlight-card">
+            <div class="highlight-num">03 / REPUTATION</div>
+            <div class="highlight-title">Campus Rank</div>
+            <div class="highlight-desc">Transparent college leaderboard filtering by branch, year, and overall XP.</div>
+          </div>
+          <div class="highlight-card">
+            <div class="highlight-num">04 / MASTERY</div>
+            <div class="highlight-title">Curated Tracks</div>
+            <div class="highlight-desc">Hand-picked interview problemsets tagged by company and core DSA concept.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 2. TRACKS & ASYMMETRIC GRID (Inspired by Cyntexa Opportunities) -->
+  <!-- 2. TRACKS & ASYMMETRIC GRID -->
+  <section class="section-wrap" id="tracks" style="padding-top:0">
+    <div class="section-header-editorial" data-aos="fade-up">
+      <div class="cyntexa-kicker">
+        <span class="kicker-dot"></span>
+        Curated Learning Disciplines
+      </div>
+      <h2 class="section-title-large">Engineered for Technical Mastery</h2>
+      <p class="section-desc-editorial">
+        Explore structured tracks designed to take you from foundational data structures to competitive programming and placement-level problem solving.
+      </p>
+    </div>
+
+    <div class="tracks-grid">
+      <!-- Large Featured Spotlight Card -->
+      <div class="tracks-feature-card" data-aos="fade-up">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+            <span class="track-badge" style="background:rgba(239,68,68,0.12);color:#dc2626;border:1px solid rgba(239,68,68,0.25)">● Daily Sadhana Spotlight</span>
+            <span class="mono" style="font-size:0.85rem;color:var(--neon-purple);font-weight:700">Resets in 11h 24m</span>
+          </div>
+          <h3 style="font-size:1.85rem;font-weight:800;color:var(--text);margin-bottom:0.85rem;line-height:1.25;letter-spacing:-0.025em">
+            The Daily Coding Challenge
+          </h3>
+          <p style="color:var(--muted);font-size:1.02rem;line-height:1.75;margin-bottom:2rem">
+            Every day brings one carefully selected problem. Solve it within the 24-hour window to protect your streak and earn bonus college XP. Miss it, and your batch leaderboard ranking drops.
+          </p>
+        </div>
+
+        <div style="border-top:1px solid var(--border);padding-top:1.75rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem">
+          <div class="mono" style="font-size:0.92rem;color:#334155">
+            Reward: <strong style="color:#d97706">+50 XP</strong> · 78% Batch Success Rate
+          </div>
+          <a href="problems.html" class="cyntexa-explore-btn">
+            Solve Today's Problem
+            <div class="circle-badge">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Stacked Mini Cards -->
+      <div class="tracks-stacked-col">
+        <div class="track-mini-card" data-aos="fade-up" data-aos-delay="100">
+          <span class="track-badge" style="background:rgba(124,58,237,0.1);color:#7c3aed;border:1px solid rgba(124,58,237,0.25)">⚔️ Battle Arena</span>
+          <h4 style="font-size:1.2rem;font-weight:700;color:var(--text);margin-bottom:0.4rem;letter-spacing:-0.015em">Synchronized Code Battles</h4>
+          <p style="color:var(--muted);font-size:0.92rem;line-height:1.6;margin-bottom:1.25rem">
+            Jump into timed 1v1 duels or room battles against your batchmates. Test speed, accuracy, and edge-case handling under pressure.
+          </p>
+          <a href="battles.html" class="cyntexa-explore-btn" style="font-size:0.85rem">
+            Enter Arena
+            <div class="circle-badge" style="width:32px;height:32px">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </a>
+        </div>
+
+        <div class="track-mini-card" data-aos="fade-up" data-aos-delay="200">
+          <span class="track-badge" style="background:rgba(2,132,199,0.1);color:#0284c7;border:1px solid rgba(2,132,199,0.25)">📚 Knowledge Hub</span>
+          <h4 style="font-size:1.2rem;font-weight:700;color:var(--text);margin-bottom:0.4rem;letter-spacing:-0.015em">Curated DSA Notes & Guides</h4>
+          <p style="color:var(--muted);font-size:0.92rem;line-height:1.6;margin-bottom:1.25rem">
+            Access hand-curated documentation, pattern explanations, and interview cheat-sheets across Trees, Graphs, and DP.
+          </p>
+          <a href="knowledge-hub.html" class="cyntexa-explore-btn" style="font-size:0.85rem">
+            View Hub
+            <div class="circle-badge" style="width:32px;height:32px">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 3. UNTOLD STORIES / STUDENT JOURNEYS (Inspired by Cyntexa Stories) -->
+  <!-- 3. UNTOLD STORIES / STUDENT JOURNEYS -->
+  <section class="section-wrap" id="stories" style="padding-top:0">
+    <div class="section-header-editorial" data-aos="fade-up">
+      <div class="cyntexa-kicker">
+        <span class="kicker-dot"></span>
+        Campus Voices
+      </div>
+      <h2 class="section-title-large">The Untold Stories</h2>
+      <p class="section-desc-editorial">
+        Real experiences from college coders who transformed their daily habits, conquered coding interviews, and claimed the top ranks on VidX.
+      </p>
+    </div>
+
+    <div class="stories-grid">
+      
+      <!-- Story 1 -->
+      <div class="story-card-inner" data-aos="fade-up">
+        <div>
+          <div class="story-avatar-row">
+            <div class="story-avatar">AK</div>
+            <div>
+              <div style="font-weight:700;font-size:1.05rem;color:var(--text)">Aarav K.</div>
+              <div style="font-size:0.8rem;color:var(--muted)">CSE Batch 2025 · Rank #1</div>
+            </div>
+          </div>
+          <p class="story-quote">
+            "Before VidX, coding felt like an isolated chore on random websites. Competing against people in my actual classes completely shifted my mindset. The streak system forced me to stay consistent every day."
+          </p>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:1.25rem">
+          <span style="font-size:0.85rem;color:var(--neon-purple);font-weight:700">Solved 140+ Problems · 45-Day Streak</span>
+        </div>
+      </div>
+
+      <!-- Story 2 -->
+      <div class="story-card-inner" data-aos="fade-up" data-aos-delay="100">
+        <div>
+          <div class="story-avatar-row">
+            <div class="story-avatar" style="background:linear-gradient(135deg,#f97316,#ec4899)">PS</div>
+            <div>
+              <div style="font-weight:700;font-size:1.05rem;color:var(--text)">Priya S.</div>
+              <div style="font-size:0.8rem;color:var(--muted)">IT Batch 2026 · Arena Champion</div>
+            </div>
+          </div>
+          <p class="story-quote">
+            "The live battle rooms gave me the exact adrenaline of an on-campus placement coding round. When the clock is ticking down, you learn how to debug without panicking."
+          </p>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:1.25rem">
+          <span style="font-size:0.85rem;color:var(--neon-pink);font-weight:700">Won 18/20 Battles · DP Specialist</span>
+        </div>
+      </div>
+
+      <!-- Story 3 -->
+      <div class="story-card-inner" data-aos="fade-up" data-aos-delay="200">
+        <div>
+          <div class="story-avatar-row">
+            <div class="story-avatar" style="background:linear-gradient(135deg,#10b981,#3b82f6)">RM</div>
+            <div>
+              <div style="font-weight:700;font-size:1.05rem;color:var(--text)">Rohan M.</div>
+              <div style="font-size:0.8rem;color:var(--muted)">ECE Batch 2025 · Master Tier</div>
+            </div>
+          </div>
+          <p class="story-quote">
+            "As a non-CS student, I always felt behind in Data Structures. The structured Sadhana problems and editorial walkthroughs helped me crack my dream internship interview."
+          </p>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:1.25rem">
+          <span style="font-size:0.85rem;color:var(--neon-green);font-weight:700">Internship Offer Unlocked · 3,800 XP</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 4. LEADERBOARD PREVIEW (Dynamic Supabase Data) -->
+  <section class="leaderboard-section" id="leaderboard">
+    <div class="section-wrap">
+      <div class="section-header-editorial center" data-aos="fade-up">
+        <div class="cyntexa-kicker">
+          <span class="kicker-dot"></span>
+          Live Standings
+        </div>
+        <h2 class="section-title-large">See Who's Leading Your Campus</h2>
+        <p class="section-desc-editorial">
+          Real rankings calculated directly from validated problem submissions, battle victories, and daily streak consistency.
+        </p>
+      </div>
+
+      <div class="leaderboard-grid" id="leaderboardPreview">
+        <p class="loading-text">Loading leaderboard...</p>
+      </div>
+
+      <div style="text-align:center;margin-top:3rem" data-aos="fade-up">
+        <a href="leaderboard.html" class="btn btn-ghost btn-lg">View Full Leaderboard Table →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. FREQUENTLY ASKED QUESTIONS (Interactive Filter & Accordion) -->
+  <section class="section-wrap" id="faqs">
+    <div class="section-header-editorial center" data-aos="fade-up">
+      <div class="cyntexa-kicker">
+        <span class="kicker-dot"></span>
+        Got Questions?
+      </div>
+      <h2 class="section-title-large">Frequently Asked Questions</h2>
+      <p class="section-desc-editorial">
+        Everything you need to know about competing, earning XP, climbing campus rankings, and daily discipline on VidX.
+      </p>
+    </div>
+
+    <!-- Category Filter Tabs -->
+    <div class="faq-filters" id="faqFilters" data-aos="fade-up">
+      <button class="faq-filter-btn active" onclick="filterFaqs('all', this)">All Questions</button>
+      <button class="faq-filter-btn" onclick="filterFaqs('rankings', this)">🏆 Leaderboard &amp; XP</button>
+      <button class="faq-filter-btn" onclick="filterFaqs('sadhana', this)">⚡ Daily Sadhana</button>
+      <button class="faq-filter-btn" onclick="filterFaqs('battles', this)">⚔️ Code Battles</button>
+      <button class="faq-filter-btn" onclick="filterFaqs('cohorts', this)">🎓 College Cohort</button>
+    </div>
+
+    <!-- FAQ Accordion List -->
+    <div style="max-width: 840px; margin: 0 auto;" id="faqAccordionList" data-aos="fade-up" data-aos-delay="100">
+      
+      <!-- FAQ Item 1 -->
+      <div class="cyntexa-faq-item active" data-category="rankings">
+        <button class="cyntexa-faq-trigger" onclick="toggleFaq(this)">
+          <div class="cyntexa-faq-title-wrap">
+            <span class="faq-pill-tag">Leaderboard</span>
+            <span>How does the college leaderboard ranking work?</span>
+          </div>
+          <svg class="cyntexa-faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="cyntexa-faq-content">
+          Your campus rank is calculated in real-time based on total XP earned from solved problems, active streak bonuses, and live battle victories. You can filter the rankings by your specific college department/branch, graduation year (e.g. 2024–2028), or compare against the entire student cohort.
+        </div>
+      </div>
+
+      <!-- FAQ Item 2 -->
+      <div class="cyntexa-faq-item" data-category="sadhana">
+        <button class="cyntexa-faq-trigger" onclick="toggleFaq(this)">
+          <div class="cyntexa-faq-title-wrap">
+            <span class="faq-pill-tag">Sadhana</span>
+            <span>When does the Daily Problem reset and how do streaks work?</span>
+          </div>
+          <svg class="cyntexa-faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="cyntexa-faq-content">
+          The Daily Sadhana problem resets every night at midnight (12:00 AM IST). Solving the problem before midnight preserves your daily streak and awards bonus XP with a streak multiplier. Missing a day resets your streak counter to zero, making consistency your biggest competitive edge.
+        </div>
+      </div>
+
+      <!-- FAQ Item 3 -->
+      <div class="cyntexa-faq-item" data-category="battles">
+        <button class="cyntexa-faq-trigger" onclick="toggleFaq(this)">
+          <div class="cyntexa-faq-title-wrap">
+            <span class="faq-pill-tag">Battles</span>
+            <span>What are Code Battles and how do private rooms work?</span>
+          </div>
+          <svg class="cyntexa-faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="cyntexa-faq-content">
+          Code Battles are real-time competitive matches. You can join scheduled 1v1 clashes against peers or create private battle rooms with a custom room code to challenge classmates. Both players receive the same problem simultaneously with synchronized timers and automated instant judging.
+        </div>
+      </div>
+
+      <!-- FAQ Item 4 -->
+      <div class="cyntexa-faq-item" data-category="cohorts">
+        <button class="cyntexa-faq-trigger" onclick="toggleFaq(this)">
+          <div class="cyntexa-faq-title-wrap">
+            <span class="faq-pill-tag">Access</span>
+            <span>Is VidX completely free for college students?</span>
+          </div>
+          <svg class="cyntexa-faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="cyntexa-faq-content">
+          Yes! VidX is 100% free for all college students. Simply register with your student credentials or email, select your college and graduation batch, and gain instant access to problems, leaderboards, battle arenas, and curated interview roadmaps.
+        </div>
+      </div>
+
+      <!-- FAQ Item 5 -->
+      <div class="cyntexa-faq-item" data-category="battles">
+        <button class="cyntexa-faq-trigger" onclick="toggleFaq(this)">
+          <div class="cyntexa-faq-title-wrap">
+            <span class="faq-pill-tag">Tech</span>
+            <span>What programming languages and compilers are supported?</span>
+          </div>
+          <svg class="cyntexa-faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="cyntexa-faq-content">
+          VidX supports all major competitive coding languages: C++20 (GCC), Java 17, Python 3.11, and JavaScript (Node.js). Code executions run inside high-speed sandboxed environments with strict standard I/O and time/memory limits.
+        </div>
+      </div>
+
+      <!-- FAQ Item 6 -->
+      <div class="cyntexa-faq-item" data-category="rankings">
+        <button class="cyntexa-faq-trigger" onclick="toggleFaq(this)">
+          <div class="cyntexa-faq-title-wrap">
+            <span class="faq-pill-tag">Security</span>
+            <span>How does VidX ensure fair play and prevent cheating?</span>
+          </div>
+          <svg class="cyntexa-faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="cyntexa-faq-content">
+          VidX uses automated test case randomization, execution telemetry, and plagiarism detection algorithms to inspect submission patterns. Any accounts flagged for automated AI generation or verbatim copying are automatically excluded from campus ranks.
+        </div>
+      </div>
+
+    </div>
+
+    <div style="text-align:center;margin-top:2.5rem" data-aos="fade-up">
+      <p style="color:var(--muted);font-size:0.92rem">
+        Have another question? Explore the <a href="knowledge-hub.html" style="color:var(--neon-purple);font-weight:700;text-decoration:none">Knowledge Hub</a> or connect on campus.
+      </p>
+    </div>
+  </section>
+
+  <!-- 6. MONUMENTAL FINAL CTA -->
+  <section class="cta-section">
+    <div class="cta-mesh"></div>
+    <div class="cta-inner" data-aos="fade-up">
+      <div class="cyntexa-kicker" style="margin-bottom:1.5rem">
+        <span class="kicker-dot"></span>
+        Ready to Compete?
+      </div>
+      <h2>Claim Your Rank on Campus.</h2>
+      <p>
+        Join hundreds of batchmates already grinding daily problems, climbing the leaderboard, and preparing for top-tier placements.
+      </p>
+      <div class="cta-buttons">
+        <a href="register.html" class="btn btn-primary btn-lg">Create Free Account →</a>
+        <a href="login.html" class="btn btn-ghost btn-lg">Login to VidX</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>VidX</span> © 2025 · The Premier Student Coding Platform
+  </footer>
+
+  <!-- Scripts -->
+  <script src="supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="animations.js"></script>
+
+  <script>
+    // Typed.js initialization with fallback
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof AOS !== 'undefined' && !window._vidxAosInit) {
+        AOS.init({ duration: 700, once: true, offset: 80 });
+        window._vidxAosInit = true;
+      }
+      const typedEl = document.getElementById('typed');
+      if (typeof Typed !== 'undefined' && typedEl) {
+        new Typed('#typed', {
+          strings: ['College Batch', 'Daily Problem Grind', 'Real Campus Rankings', 'High-Stakes Battles'],
+          typeSpeed: 60,
+          backSpeed: 40,
+          loop: true
+        });
+      } else if (typedEl) {
+        typedEl.textContent = 'College Batch';
+      }
+    });
+
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+      const navbar = document.getElementById('navbar');
+      if (navbar) {
+        navbar.classList.toggle('scrolled', window.scrollY > 50);
+      }
+    });
+
+    // Mobile menu toggle
+    const hamburgerBtn = document.getElementById('hamburger');
+    const mobileMenuEl = document.getElementById('mobileMenu');
+    if (hamburgerBtn && mobileMenuEl) {
+      hamburgerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = mobileMenuEl.classList.toggle('open');
+        hamburgerBtn.classList.toggle('active', isOpen);
+      });
+    }
+
+    function closeMobileMenu() {
+      const menu = document.getElementById('mobileMenu');
+      const btn = document.getElementById('hamburger');
+      if (menu) menu.classList.remove('open');
+      if (btn) btn.classList.remove('active');
+    }
+
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('mobileMenu');
+      const btn = document.getElementById('hamburger');
+      if (menu && menu.classList.contains('open')) {
+        if (!menu.contains(e.target) && (!btn || !btn.contains(e.target))) {
+          closeMobileMenu();
+        }
+      }
+    });
+
+    // FAQ Accordion Toggle
+    function toggleFaq(btn) {
+      if (!btn || !btn.parentElement) return;
+      const item = btn.parentElement;
+      const wasActive = item.classList.contains('active');
+      document.querySelectorAll('.cyntexa-faq-item').forEach(el => el.classList.remove('active'));
+      if (!wasActive) {
+        item.classList.add('active');
+      }
+    }
+
+    // FAQ Category Filter
+    function filterFaqs(category, btn) {
+      document.querySelectorAll('.faq-filter-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      const items = document.querySelectorAll('#faqAccordionList .cyntexa-faq-item');
+      let firstVisible = null;
+
+      items.forEach(item => {
+        const itemCat = item.getAttribute('data-category');
+        if (category === 'all' || itemCat === category) {
+          item.style.display = 'block';
+          if (!firstVisible) firstVisible = item;
+        } else {
+          item.style.display = 'none';
+          item.classList.remove('active');
+        }
+      });
+
+      if (firstVisible) {
+        items.forEach(i => i.classList.remove('active'));
+        firstVisible.classList.add('active');
+      }
+    }
+
+    // Safe initials helper
+    function getSafeInitials(firstName, lastName) {
+      if (typeof getInitials === 'function') {
+        try { return getInitials(firstName, lastName); } catch (_) {}
+      }
+      const f = (firstName || '')[0] || '';
+      const l = (lastName || '')[0] || '';
+      return (f + l).toUpperCase() || '?';
+    }
+
+    // Count-up animation with lock check
+    function animateCountUp(el) {
+      if (!el || el.dataset.countDone) return;
+      el.dataset.countDone = '1';
+      const target = parseInt(el.dataset.count, 10) || 0;
+      const suffix = el.dataset.suffix || '';
+      const duration = 2000;
+      const start = performance.now();
+
+      function update(now) {
+        const progress = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.floor(eased * target);
+        el.textContent = current + suffix;
+        if (progress < 1) requestAnimationFrame(update);
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    if (typeof IntersectionObserver !== 'undefined') {
+      const statsObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.querySelectorAll('[data-count]').forEach(animateCountUp);
+            statsObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.3 });
+
+      const statsBarEl = document.querySelector('.stats-bar');
+      if (statsBarEl) statsObserver.observe(statsBarEl);
+    }
+
+    // Leaderboard preview from Supabase
+    async function onDbReady() {
+      await loadLeaderboardPreview();
+      await updateDynamicStats();
+    }
+
+    // Direct fallback if window.db is already connected
+    if (window.db && typeof onDbReady === 'function') {
+      onDbReady();
+    }
+
+    async function loadLeaderboardPreview() {
+      const container = document.getElementById('leaderboardPreview');
+      if (!container) return;
+
+      try {
+        if (typeof getLeaderboard !== 'function') {
+          container.innerHTML = '<p class="loading-text">Connecting to database...</p>';
+          return;
+        }
+
+        const students = await getLeaderboard(5);
+
+        if (!students || !students.length) {
+          container.innerHTML = '<p class="loading-text">No rankings yet — be the first to solve a problem!</p>';
+          return;
+        }
+
+        const maxXP = Math.max(students[0]?.xp || 1, 1);
+
+        container.innerHTML = students.map((s, i) => {
+          const rank = i + 1;
+          const name = `${s.first_name || ''} ${s.last_name || ''}`.trim() || s.email || 'Anonymous';
+          const initials = getSafeInitials(s.first_name, s.last_name);
+          const pct = Math.min(100, Math.round(((s.xp || 0) / maxXP) * 100));
+
+          return `
+            <div class="rank-card ${rank <= 3 ? 'rank-' + rank : ''}">
+              <span class="rank-num mono">#${rank}</span>
+              <div class="rank-avatar">${initials}</div>
+              <div class="rank-info">
+                <div class="rank-name">${name}</div>
+                <div class="rank-meta">${s.rank_title || 'Newbie'} · ${s.college || 'VidX'}</div>
+              </div>
+              <div class="rank-xp-bar-wrap">
+                <div class="rank-xp mono">${(s.xp || 0).toLocaleString()} XP</div>
+                <div class="xp-bar"><div class="xp-bar-fill" style="width:${pct}%"></div></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        if (typeof AOS !== 'undefined') AOS.refresh();
+      } catch (e) {
+        console.error('loadLeaderboardPreview error:', e);
+        if (container) {
+          container.innerHTML = '<p class="loading-text">Could not load leaderboard. Check your connection.</p>';
+        }
+      }
+    }
+
+    // Direct fallback on page load
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        if (typeof getLeaderboard === 'function') {
+          loadLeaderboardPreview();
+          updateDynamicStats();
+        }
+      }, 500);
+    });
+
+    async function updateDynamicStats() {
+      try {
+        if (typeof getLeaderboard !== 'function' || typeof getAllProblems !== 'function') return;
+        const students = await getLeaderboard(1000);
+        const problems = await getAllProblems();
+
+        const studentEl = document.querySelector('[data-count="500"]');
+        const problemEl = document.querySelector('[data-count="100"]');
+
+        if (students && students.length > 0 && studentEl) {
+          studentEl.dataset.count = Math.max(students.length, 500);
+        }
+        if (problems && problems.length > 0 && problemEl) {
+          problemEl.dataset.count = Math.max(problems.length, 100);
+        }
+      } catch (e) {
+        console.error('updateDynamicStats:', e);
+      }
+    }
+
+    // ==========================================================
+    // VIDX PERSPECTIVE CODE TUNNEL BACKGROUND ANIMATION (HIGH-CONTRAST LIGHT THEME)
+    // ==========================================================
+    (() => {
+      const canvas = document.getElementById('vidxTunnelCanvas');
+      if (!canvas) return;
+
+      const heroSection = document.getElementById('home');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      let width = 0;
+      let height = 0;
+      let dpr = 1;
+      let animId = null;
+      let isHeroVisible = true;
+
+      const isMobile = window.innerWidth <= 768;
+      const COUNT = isMobile ? 24 : 48;
+      const BASE_SPEED = isMobile ? 0.0036 : 0.0050;
+      const PERSPECTIVE = 1.18;
+
+      // Sophisticated VidX Accent Palette (High-contrast on light background)
+      // Primary: Indigo (#4F46E5), Blue (#2563EB), Violet (#7C3AED)
+      // Secondary: Cyan (#0891B2), Deep Blue (#1D4ED8)
+      const BRAND_COLORS = [
+        { r: 79,  g: 70,  b: 229 }, // Indigo / Electric Blue #4F46E5 (Primary)
+        { r: 37,  g: 99,  b: 235 }, // Blue #2563EB (Primary)
+        { r: 124, g: 58,  b: 237 }, // Violet #7C3AED (Primary)
+        { r: 79,  g: 70,  b: 229 }, // Indigo #4F46E5 (Weighted)
+        { r: 37,  g: 99,  b: 235 }, // Blue #2563EB (Weighted)
+        { r: 8,   g: 145, b: 178 }, // Cyan #0891B2 (Secondary)
+        { r: 29,  g: 78,  b: 216 }  // Deep Blue #1D4ED8 (Secondary)
+      ];
+
+      // Exact developer elements + UI fragments
+      const SYMBOL_DEFS = [
+        { type: 'text', text: '</>' },
+        { type: 'text', text: '{ }' },
+        { type: 'text', text: '[ ]' },
+        { type: 'text', text: '( )' },
+        { type: 'text', text: '01' },
+        { type: 'text', text: '101' },
+        { type: 'text', text: 'JS' },
+        { type: 'text', text: 'PY' },
+        { type: 'text', text: 'C++' },
+        { type: 'text', text: 'CSS' },
+        { type: 'text', text: 'HTML' },
+        { type: 'text', text: 'API' },
+        { type: 'text', text: 'CODE' },
+        { type: 'chip', text: 'VidX' },
+        { type: 'chip', text: '200 OK' },
+        { type: 'chip', text: 'DSA' },
+        { type: 'chip', text: 'DP' },
+        { type: 'ui',   text: '' }
+      ];
+
+      const particles = [];
+
+      function resize() {
+        const rect = canvas.parentElement ? canvas.parentElement.getBoundingClientRect() : canvas.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = rect.width;
+        height = rect.height;
+
+        canvas.width = Math.floor(width * dpr);
+        canvas.height = Math.floor(height * dpr);
+
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        if (reduceMotion) {
+          drawStaticFrame();
+        }
+      }
+
+      function createParticle(initialZ) {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 0.14 + Math.random() * 0.86;
+        const symDef = SYMBOL_DEFS[Math.floor(Math.random() * SYMBOL_DEFS.length)];
+        const color = BRAND_COLORS[Math.floor(Math.random() * BRAND_COLORS.length)];
+
+        return {
+          x: Math.cos(angle) * radius,
+          y: Math.sin(angle) * radius * 0.68,
+          z: initialZ !== undefined ? initialZ : (0.08 + Math.random() * 0.92),
+          speed: BASE_SPEED * (0.8 + Math.random() * 0.55),
+          type: symDef.type,
+          text: symDef.text,
+          color: color,
+          size: symDef.type === 'chip' ? 9.5 : (symDef.type === 'ui' ? 8.5 : (9.0 + Math.random() * 5.0)),
+          rotation: (Math.random() - 0.5) * 0.15
+        };
+      }
+
+      function resetParticle(p) {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 0.14 + Math.random() * 0.86;
+        const symDef = SYMBOL_DEFS[Math.floor(Math.random() * SYMBOL_DEFS.length)];
+        const color = BRAND_COLORS[Math.floor(Math.random() * BRAND_COLORS.length)];
+
+        p.x = Math.cos(angle) * radius;
+        p.y = Math.sin(angle) * radius * 0.68;
+        p.z = 1.0;
+        p.speed = BASE_SPEED * (0.8 + Math.random() * 0.55);
+        p.type = symDef.type;
+        p.text = symDef.text;
+        p.color = color;
+        p.size = symDef.type === 'chip' ? 9.5 : (symDef.type === 'ui' ? 8.5 : (9.0 + Math.random() * 5.0));
+        p.rotation = (Math.random() - 0.5) * 0.15;
+      }
+
+      for (let i = 0; i < COUNT; i++) {
+        particles.push(createParticle((i / COUNT) * 0.94 + 0.06));
+      }
+
+      function drawStaticFrame() {
+        ctx.clearRect(0, 0, width, height);
+
+        const centerX = width * 0.50;
+        const centerY = height * 0.45;
+
+        for (const p of particles) {
+          if (p.z <= 0.08 || p.z > 0.82) continue;
+          const scale = PERSPECTIVE / p.z;
+          const x = centerX + p.x * scale * (width * 0.5);
+          const y = centerY + p.y * scale * (height * 0.5);
+          const visualSize = Math.min(22, 10 + (scale - 1) * 2.2);
+          const opacity = 0.28;
+
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.font = `700 ${visualSize}px 'JetBrains Mono', 'Plus Jakarta Sans', monospace`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${opacity})`;
+          ctx.fillText(p.text || '</>', 0, 0);
+          ctx.restore();
+        }
+      }
+
+      let lastTime = performance.now();
+
+      function draw(currentTime) {
+        if (!isHeroVisible) {
+          animId = null;
+          return;
+        }
+
+        const delta = Math.min((currentTime - lastTime) / 16.67, 2.5);
+        lastTime = currentTime;
+
+        // Clean transparent clearing: leaves light atmospheric gradient crisp & high-contrast
+        ctx.clearRect(0, 0, width, height);
+
+        const centerX = width * 0.50;
+        const centerY = height * 0.45;
+
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          const previousZ = p.z;
+
+          // Advance towards viewer
+          p.z -= p.speed * delta;
+
+          // Respawn from distant center when close or passed
+          if (p.z <= 0.035) {
+            resetParticle(p);
+            continue;
+          }
+
+          // Perspective projection
+          const scale = PERSPECTIVE / p.z;
+          const x = centerX + p.x * scale * (width * 0.5);
+          const y = centerY + p.y * scale * (height * 0.5);
+
+          // Exit boundary check
+          if (x < -70 || x > width + 70 || y < -70 || y > height + 70) {
+            resetParticle(p);
+            continue;
+          }
+
+          // Calculate previous position for dynamic motion trail
+          const trailDepth = 0.04 + (1 - p.z) * 0.035;
+          const prevZ = Math.min(1.0, p.z + trailDepth);
+          const prevScale = PERSPECTIVE / prevZ;
+          const prevX = centerX + p.x * prevScale * (width * 0.5);
+          const prevY = centerY + p.y * prevScale * (height * 0.5);
+
+          // Visual sizing: starts small (9-10px) in distance, scales up to 26-28px near viewer
+          const visualSize = Math.min(28, 9 + (scale - 1) * 2.3);
+
+          // Visibility & Opacity progression (explicitly 0.18 - 0.40 distant/mid, up to 0.45 - 0.58 close)
+          const progress = 1 - p.z;
+          let opacity = 0.18 + progress * 0.38; // 0.18 -> 0.56
+
+          // Soft exit fade near immediate foreground
+          if (p.z < 0.065) {
+            opacity *= (p.z / 0.065);
+          }
+
+          opacity = Math.min(0.58, Math.max(0.18, opacity));
+
+          // 1. Draw Motion Trail (blue/indigo, 0.15 - 0.30 opacity, brighter as it approaches)
+          if (p.z < 0.88 && p.z > 0.04) {
+            const trailOpacity = Math.min(0.30, Math.max(0.15, 0.15 + progress * 0.15));
+            ctx.beginPath();
+            ctx.moveTo(prevX, prevY);
+            ctx.lineTo(x, y);
+            ctx.strokeStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${trailOpacity})`;
+            ctx.lineWidth = Math.min(1.6, 0.8 + progress * 0.8);
+            ctx.stroke();
+          }
+
+          // 2. Render Developer Symbol / UI Fragment
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(p.rotation);
+
+          // Soft subtle indigo/blue glow
+          ctx.shadowColor = `rgba(79, 70, 229, ${opacity * 0.38})`;
+          ctx.shadowBlur = Math.min(6, visualSize * 0.24);
+
+          // Foreground optical depth blur (subtle blur when z < 0.13)
+          if (p.z < 0.13 && typeof ctx.filter !== 'undefined') {
+            const blurPx = Math.min(2.0, ((0.13 - p.z) / 0.13) * 2.0);
+            ctx.filter = `blur(${blurPx.toFixed(1)}px)`;
+          } else if (typeof ctx.filter !== 'undefined') {
+            ctx.filter = 'none';
+          }
+
+          if (p.type === 'ui') {
+            // Abstract rounded glass UI fragment
+            const blockW = visualSize * 2.0;
+            const blockH = visualSize * 1.35;
+            const radius = 4;
+
+            ctx.fillStyle = `rgba(255, 255, 255, ${opacity * 0.85})`;
+            ctx.strokeStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${opacity * 0.75})`;
+            ctx.lineWidth = 1.1;
+
+            if (typeof ctx.roundRect === 'function') {
+              ctx.beginPath();
+              ctx.roundRect(-blockW / 2, -blockH / 2, blockW, blockH, radius);
+              ctx.fill();
+              ctx.stroke();
+            } else {
+              ctx.fillRect(-blockW / 2, -blockH / 2, blockW, blockH);
+              ctx.strokeRect(-blockW / 2, -blockH / 2, blockW, blockH);
+            }
+
+            // Subtle internal wireframe lines
+            ctx.fillStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${opacity * 0.65})`;
+            ctx.fillRect(-blockW * 0.35, -blockH * 0.18, blockW * 0.42, 1.4);
+            ctx.fillRect(-blockW * 0.35, blockH * 0.14, blockW * 0.68, 1.4);
+          } else if (p.type === 'chip') {
+            // Tiny glass-like rectangular chip with code label
+            const padX = visualSize * 0.45;
+            const padY = visualSize * 0.22;
+            const chipW = visualSize * (p.text.length * 0.58) + padX * 1.6;
+            const chipH = visualSize + padY * 1.4;
+            const radius = 4;
+
+            ctx.fillStyle = `rgba(255, 255, 255, ${opacity * 0.85})`;
+            ctx.strokeStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${opacity * 0.78})`;
+            ctx.lineWidth = 1.1;
+
+            if (typeof ctx.roundRect === 'function') {
+              ctx.beginPath();
+              ctx.roundRect(-chipW / 2, -chipH / 2, chipW, chipH, radius);
+              ctx.fill();
+              ctx.stroke();
+            } else {
+              ctx.fillRect(-chipW / 2, -chipH / 2, chipW, chipH);
+              ctx.strokeRect(-chipW / 2, -chipH / 2, chipW, chipH);
+            }
+
+            ctx.font = `700 ${visualSize * 0.74}px 'JetBrains Mono', monospace`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${Math.min(0.60, opacity * 1.15)})`;
+            ctx.fillText(p.text, 0, 0);
+          } else {
+            // High-contrast developer code symbol
+            ctx.font = `700 ${visualSize}px 'JetBrains Mono', 'Plus Jakarta Sans', monospace`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${opacity})`;
+            ctx.fillText(p.text, 0, 0);
+          }
+
+          ctx.restore();
+        }
+
+        animId = requestAnimationFrame(draw);
+      }
+
+      function startAnimation() {
+        if (!animId && !reduceMotion && isHeroVisible) {
+          lastTime = performance.now();
+          animId = requestAnimationFrame(draw);
+        }
+      }
+
+      function stopAnimation() {
+        if (animId) {
+          cancelAnimationFrame(animId);
+          animId = null;
+        }
+      }
+
+      resize();
+
+      if (reduceMotion) {
+        drawStaticFrame();
+      } else {
+        startAnimation();
+      }
+
+      let resizeTimer = null;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          resize();
+        }, 120);
+      }, { passive: true });
+
+      // Performance: Pause when hero is offscreen
+      if (typeof IntersectionObserver !== 'undefined' && heroSection) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            isHeroVisible = entry.isIntersecting;
+            if (isHeroVisible) {
+              startAnimation();
+            } else {
+              stopAnimation();
+            }
+          });
+        }, { threshold: 0.05 });
+
+        observer.observe(heroSection);
+      }
+    })();
+  </script>
+</body>
+</html>
