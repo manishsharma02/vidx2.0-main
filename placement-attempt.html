@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Placement Test — VidX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f8fafc;--text:#0f172a;--text-muted:#64748b;--border:#e2e8f0;--neon-red:#ef4444;--neon-purple:#7c3aed;--neon-green:#059669;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;user-select:none}
+  .wrap{max-width:820px;margin:0 auto;padding:2rem 1.25rem 5rem}
+  .warn-bar{position:sticky;top:0;background:#fef2f2;border-bottom:2px solid var(--neon-red);color:#991b1b;padding:0.75rem 1.25rem;font-weight:700;font-size:0.9rem;z-index:100;display:none;text-align:center}
+  .warn-bar.show{display:block}
+  h1{font-size:1.6rem;margin-bottom:0.3rem}
+  .sub{color:var(--text-muted);font-size:0.9rem;margin-bottom:1.5rem}
+  .pdf-link{display:inline-block;background:#fff;border:1px solid var(--border);border-radius:12px;padding:0.8rem 1.25rem;text-decoration:none;color:var(--text);font-weight:600;margin-bottom:1.5rem}
+  .q-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.25rem}
+  .q-num{font-size:0.75rem;font-weight:800;color:var(--neon-purple);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.5rem}
+  .q-text{font-weight:600;margin-bottom:1rem}
+  .opt{display:flex;align-items:center;gap:0.6rem;padding:0.65rem 0.9rem;border:1px solid var(--border);border-radius:10px;margin-bottom:0.5rem;cursor:pointer}
+  .opt:hover{background:#f8fafc}
+  .opt input{cursor:pointer}
+  textarea{width:100%;min-height:150px;font-family:'JetBrains Mono',monospace;font-size:0.85rem;padding:1rem;border:1px solid var(--border);border-radius:10px;background:#0f172a;color:#e2e8f0}
+  .btn{padding:0.9rem 2rem;border:none;border-radius:12px;background:linear-gradient(135deg,var(--neon-red),#f97316);color:#fff;font-weight:700;font-size:1rem;cursor:pointer;width:100%}
+  .lock-screen{position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;z-index:500;text-align:center;padding:2rem}
+  .already{text-align:center;padding:3rem 1rem}
+</style>
+</head>
+<body>
+  <div class="warn-bar" id="warnBar"></div>
+  <div class="wrap" id="appWrap" style="display:none"></div>
+
+  <script src="supabase.js"></script>
+  <script>
+    const testId = new URLSearchParams(window.location.search).get('id');
+    let currentUser=null, test=null, questions=[], answers={}, violations=0;
+    const MAX_VIOLATIONS = 3;
+
+    async function onDbReady(){
+      currentUser = await requireAuth();
+      if (!currentUser) return;
+      if (!testId) { showMessage('No test selected.'); return; }
+
+      const attempt = await hasAttemptedPlacementTest(testId, currentUser.id);
+      if (attempt && attempt.submitted_at) {
+        showMessage('✅ You have already submitted this test. Each test can only be taken once.');
+        return;
+      }
+
+      const result = await getPlacementTestForStudent(testId, currentUser.id);
+      if (result.error) { showMessage('⚠️ ' + result.error); return; }
+      test = result.test; questions = result.questions;
+      renderTest();
+      setupProctor();
+    }
+
+    function showMessage(msg){
+      document.getElementById('appWrap').style.display='block';
+      document.getElementById('appWrap').innerHTML = `<div class="already"><h2>${msg}</h2><br><a href="battles.html" style="color:var(--neon-purple);font-weight:700">← Back to Battles</a></div>`;
+    }
+
+    function renderTest(){
+      const wrap = document.getElementById('appWrap');
+      wrap.style.display='block';
+      let html = `<h1>${esc(test.title)}</h1><div class="sub">${esc(test.description||'')}</div>`;
+      if (test.pdf_data) {
+        html += `<a class="pdf-link" href="data:application/pdf;base64,${test.pdf_data}" target="_blank" rel="noopener">📄 Open Question Paper (PDF)</a>`;
+      }
+      questions.forEach((q,i) => {
+        html += `<div class="q-card"><div class="q-num">Question ${i+1} · ${q.points} pts</div><div class="q-text">${esc(q.question_text)}</div>`;
+        if (q.question_type === 'mcq') {
+          (q.options||[]).forEach((opt,oi) => {
+            html += `<label class="opt"><input type="radio" name="q_${q.id}" value="${esc(opt)}" onchange="setAnswer('${q.id}', this.value)"> ${esc(opt)}</label>`;
+          });
+        } else {
+          html += `<textarea placeholder="Write your code here..." oninput="setAnswer('${q.id}', this.value)" onpaste="return false">${esc(q.code_starter||'')}</textarea>`;
+        }
+        html += `</div>`;
+      });
+      html += `<button class="btn" onclick="handleSubmit()">Submit Test</button>`;
+      wrap.innerHTML = html;
+      if (test.pdf_data) document.querySelector('.pdf-link') && 0;
+    }
+
+    function setAnswer(qId, val){ answers[qId] = val; }
+
+    function setupProctor(){
+      // Request fullscreen
+      const el = document.documentElement;
+      if (el.requestFullscreen) el.requestFullscreen().catch(()=>{});
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) registerViolation('Tab switch detected');
+      });
+      document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement) registerViolation('Exited fullscreen');
+      });
+      document.addEventListener('copy', e => e.preventDefault());
+      document.addEventListener('paste', e => e.preventDefault());
+      document.addEventListener('contextmenu', e => e.preventDefault());
+    }
+
+    function registerViolation(reason){
+      violations++;
+      const bar = document.getElementById('warnBar');
+      bar.textContent = `⚠️ Warning ${violations}/${MAX_VIOLATIONS}: ${reason}. Test will auto-submit after ${MAX_VIOLATIONS} warnings.`;
+      bar.classList.add('show');
+      if (violations >= MAX_VIOLATIONS) {
+        handleSubmit(true);
+      }
+    }
+
+    async function handleSubmit(auto){
+      if (!auto && !confirm('Submit the test? You cannot retake it after this.')) return;
+      const r = await submitPlacementAttempt(testId, currentUser.id, answers, violations);
+      if (!r.success) { alert(r.error || 'Could not submit.'); return; }
+      if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+      showMessage(auto ? '🚫 Test auto-submitted due to repeated violations.' : `✅ Test submitted! MCQ score: ${r.score}/${r.maxScore} (code answers will be reviewed by the placement cell).`);
+    }
+  </script>
+</body>
+</html>

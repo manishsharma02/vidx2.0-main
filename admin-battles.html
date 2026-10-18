@@ -291,7 +291,7 @@
       font-size: 2.4rem;
       font-weight: 800;
       letter-spacing: -0.02em;
-      color: #fff;
+      color: #803636;
       line-height: 1.15;
     }
 
@@ -407,7 +407,7 @@
       font-weight: 800;
       font-size: 1.15rem;
       margin-bottom: 1rem;
-      color: #fff;
+      color: var(--text);
     }
     .tab-row {
       display: flex;
@@ -423,7 +423,7 @@
       padding: 0.55rem 1.15rem;
       background: rgba(255, 255, 255, 0.03);
       padding: 0.55rem 1.25rem;
-      background: rgba(13, 18, 32, 0.6);
+      background: #f1f5f9;
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 0.5rem 1rem;
@@ -1113,12 +1113,24 @@
           </div>
           <div class="battle-card-actions">
             ${liveBtn}${publishBtn}${endBtn}${cancelBtn}
+                        <button class="btn btn-sm btn-ghost" onclick="shareBattle('${b.id}')">🔗 Share</button>
             <button class="btn btn-sm btn-ghost" onclick="viewParticipants('${b.id}')">👥</button>
             <button class="btn btn-sm btn-ghost" onclick="editBattle('${b.id}')">✏️</button>
             <button class="btn btn-sm btn-danger" onclick="deleteBattle('${b.id}')">🗑</button>
           </div>
         </div>`;
       }).join('');
+    }
+        function shareBattle(id){
+      const b=allBattles.find(x=>x.id===id);
+      if(!b) return;
+      if(b.status==='draft'){ alert('Publish the battle first. A draft battle is not visible to students.'); return; }
+      openShareModal({
+        title:b.title,
+        subtitle:'Battle · scan QR or open link, login/signup, then register',
+        url:buildShareUrl('battles.html',{battle:b.id}),
+        message:'⚔️ VidX Battle: '+b.title+'\nOpen this link to join:'
+      });
     }
 
     function openCreateModal(){

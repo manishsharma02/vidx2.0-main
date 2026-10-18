@@ -113,7 +113,7 @@
     .panel-left {
       border-right: 1px solid var(--border);
       background: var(--bg);
-      background: rgba(4, 7, 15, 0.65);
+      
     }
 
     .panel-header {
@@ -702,10 +702,15 @@
     <!-- Right IDE Panel -->
     <div class="panel-right">
       <div class="editor-toolbar">
-        <select class="lang-select" id="langSelect" onchange="loadTemplate()">
+      <select class="lang-select" id="langSelect" onchange="loadTemplate()">
           <option value="python">Python 3</option>
           <option value="java">Java (OpenJDK)</option>
           <option value="cpp">C++ (GCC)</option>
+          <option value="c">C (GCC)</option>
+          <option value="csharp">C#</option>
+          <option value="kotlin">Kotlin</option>
+          <option value="go">Go</option>
+          <option value="php">PHP</option>
           <option value="javascript">JavaScript (Node.js)</option>
         </select>
         <button class="btn-run" id="runBtn" onclick="runCode()">▶ Run Test</button>
@@ -745,10 +750,15 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="animations.js"></script>
   <script>
-    const TEMPLATES={
+   const TEMPLATES={
       python:'# Write your solution here\nimport sys\ndata = sys.stdin.read().split()\n\n',
       java:'import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        // Write your solution here\n    }\n}',
       cpp:'#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    // Write your solution here\n    return 0;\n}',
+      c:'#include <stdio.h>\n\nint main() {\n    // Write your solution here\n    return 0;\n}',
+      csharp:'using System;\n\nclass Main {\n    static void Main() {\n        // Write your solution here\n    }\n}',
+      kotlin:'fun main() {\n    // Write your solution here\n}',
+      go:'package main\n\nimport "fmt"\n\nfunc main() {\n    // Write your solution here\n    _ = fmt.Println\n}',
+      php:'<?php\n// Write your solution here\n',
       javascript:'const fs=require("fs");\nconst input=fs.readFileSync(0,"utf8").trim();\n// Write your solution here\n'
     };
     let currentUser=null,problem=null,stats={successRate:0,totalAttempts:0,totalAccepted:0},related=[],bookmarked=false,liked=false,activeTab='problem',_allCache=[];
@@ -759,6 +769,9 @@
       const id=params.get('id');
       problem=id?await getProblemById(id):await getDailyProblem();
       if(!problem){document.getElementById('leftContent').innerHTML='<p style="color:var(--neon-pink)">No problem found.</p>';return;}
+      window._probLocked=diffTier(problem.difficulty)>levelTier(currentUser.experience_level);
+      window._probNoXp=diffTier(problem.difficulty)<levelTier(currentUser.experience_level);
+      applyLevelLock();
       document.title=problem.title+' — VidX';
       document.querySelectorAll('#tabBar .tab').forEach(t=>t.addEventListener('click',()=>showTab(t.dataset.tab)));
       // show the problem immediately; load the extras in the background
@@ -907,6 +920,19 @@
     });
     // ─────────────────────────────────────────────────────────────────────────
  
+    function applyLevelLock(){
+      if(window._probLocked){
+        document.getElementById('runBtn').disabled=true;
+        document.getElementById('submitBtn').disabled=true;
+        document.getElementById('codeEditor').disabled=true;
+        document.getElementById('output').textContent='🔒 This problem is locked for your level ('+(currentUser.experience_level||'newbie')+'). Earn more XP to unlock '+normDifficulty(problem.difficulty)+' problems.';
+        document.getElementById('output').className='output-text error';
+      }else if(window._probNoXp){
+        document.getElementById('output').textContent='ℹ️ This is a lower-level problem for your account — you can solve it, but no XP will be awarded.';
+      }
+    }
+
+   
 
     function getTestCases(){
       var visible=[],hidden=[];
@@ -921,6 +947,7 @@
  
 
     async function runCode(){
+      if(window._probLocked){alert('This problem is locked for your level.');return;}
       var btn=document.getElementById('runBtn'),out=document.getElementById('output'),meta=document.getElementById('outputMeta');
       btn.disabled=true;out.textContent='Running...';out.className='output-text';meta.textContent='';
       btn.disabled=true;out.textContent='Running test case execution...';out.className='output-text';meta.textContent='';
@@ -938,6 +965,7 @@
  
 
     async function submitCode(){
+      if(window._probLocked){alert('This problem is locked for your level.');return;}
       var btn=document.getElementById('submitBtn'),out=document.getElementById('output'),meta=document.getElementById('outputMeta');
       btn.disabled=true;out.textContent='Judging...';out.className='output-text';meta.textContent='';
       btn.disabled=true;out.textContent='Judging submission...';out.className='output-text';meta.textContent='';
@@ -950,7 +978,7 @@
         var judge=await judgeSubmission(lang,code,testCases,8000,function(cur,total){out.textContent='Judging test case '+cur+' of '+total+'...';});
         var timeTaken=Math.max(1,Math.round((Date.now()-submitStartTime)/60000));
         var submissionMode=pasteMode?'paste':'code';
-        var res=await submitSolution(currentUser.id,problem.id,{verdict:judge.verdict,language:lang,timeTaken:timeTaken,code:code,passedCases:judge.passed,totalCases:judge.total,runtimeMs:judge.runtimeMs,submissionMode:submissionMode});
+        var res=await submitSolution(currentUser.id,problem.id,{verdict:judge.verdict,language:lang,timeTaken:timeTaken,code:code,passedCases:judge.passed,totalCases:judge.total,runtimeMs:judge.runtimeMs,submissionMode:submissionMode,noXp:window._probNoXp});
         if(res.error){out.textContent='Submission saved with errors: '+res.error;out.className='output-text error';meta.textContent='Verdict: '+judge.verdict;return;}
         if(judge.verdict==='Accepted'){
           showResult('🎉','Accepted!',res);refreshStats();
@@ -967,9 +995,10 @@
     }
  
 
-    async function submitAnswerOnly(){
+   async function submitAnswerOnly(){
+      if(window._probLocked){alert('This problem is locked for your level.');return;}
       if(!confirm('Submit answer only? You will earn only +1 XP.'))return;
-      var res=await submitSolution(currentUser.id,problem.id,{verdict:'Answer Only',language:'none',timeTaken:0,submissionMode:'answer'});
+      var res=await submitSolution(currentUser.id,problem.id,{verdict:'Answer Only',language:'none',timeTaken:0,submissionMode:'answer',noXp:window._probNoXp});
       showResult('📝','Answer Recorded',res);
     }
  

@@ -434,13 +434,13 @@
       <div data-aos="fade-up">
         <div class="cyntexa-kicker" style="color:var(--neon-red)"><span class="cyntexa-kicker-dot" style="background:var(--neon-red)"></span>RANKING CONTROLLER</div>
         <h1 class="page-title">Manage <span style="font-style:italic;font-weight:400;color:var(--neon-purple)">Leaderboard.</span></h1>
-        <p class="page-subtitle">Edit student XP inline and commit modifications per row. Rank titles automatically update according to milestone thresholds.</p>
+        <p class="page-subtitle">Read-only leaderboard view. Rank titles automatically update according to milestone thresholds — admins cannot edit XP or rank here.</p>
       </div>
 
       <div class="table-wrap" data-aos="fade-up">
         <table>
           <thead>
-            <tr><th>Rank</th><th>Student</th><th>XP (edit)</th><th>Streak</th><th>Rank Title</th><th>Override</th><th>Action</th></tr>
+           <tr><th>Rank</th><th>Student</th><th>XP</th><th>Streak</th><th>Rank Title</th></tr>
           </thead>
           <tbody id="lbTable"><tr><td colspan="7" style="text-align:center;color:var(--text-muted)">Loading leaderboard records...</td></tr></tbody>
         </table>
@@ -465,11 +465,9 @@
         return `<tr id="row-${s.id}">
           <td class="mono" style="font-weight:700;color:${i === 0 ? '#d97706' : i === 1 ? '#64748b' : i === 2 ? '#b45309' : 'var(--text-muted)'}">#${i+1}</td>
           <td style="font-weight:600;color:var(--text)">${esc(name)}</td>
-          <td><input type="number" class="xp-input" id="xp-${s.id}" value="${s.xp||0}"></td>
+          <td class="mono" style="color:var(--neon-purple);font-weight:700">${(s.xp||0).toLocaleString()} XP</td>
           <td>${(s.streak||0) > 0 ? `🔥 <span class="mono" style="color:#d97706;font-weight:700">${s.streak}</span>` : '<span style="color:var(--text-muted)">0</span>'}</td>
           <td><span style="display:inline-block;padding:0.2rem 0.6rem;border-radius:9999px;font-size:0.75rem;font-weight:700;background:rgba(124,58,237,0.08);color:var(--neon-purple);border:1px solid rgba(124,58,237,0.2)">${esc(s.rank_title||'Newbie')}</span></td>
-          <td><input type="number" class="rank-input" id="rank-${s.id}" placeholder="#" value="${i+1}"></td>
-          <td><button class="save-btn" onclick="saveRow('${s.id}')">💾 Save</button></td>
         </tr>`;
       }).join(''):'<tr><td colspan="7" style="text-align:center;color:var(--text-muted)">No students recorded</td></tr>';
     }

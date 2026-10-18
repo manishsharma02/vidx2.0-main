@@ -110,6 +110,14 @@ function normDiff(d) {
   if (x === 'hard' || x === 'advanced') return 'hard';
   return x;
 }
+function diffTier(d) {
+  const x = normDiff(d);
+  return x === 'hard' ? 3 : x === 'medium' ? 2 : 1;
+}
+function levelTier(level) {
+  const x = (level || 'newbie').toLowerCase();
+  return x === 'advanced' ? 3 : x === 'intermediate' ? 2 : 1;
+}
 
 function todayStr() { return new Date().toISOString().split('T')[0]; }
 
@@ -332,6 +340,27 @@ async function insertProblem(problemData) {
   }
 }
 
+async function updateProblem(id, problemData) {
+  try {
+    if (problemData.is_daily) {
+      try { await window.db.from('problems').update({ is_daily: false }).eq('is_daily', true).neq('id', id); }
+      catch (e) { console.warn('[VidX] clear daily flag:', e); }
+    }
+    let lastError = null;
+    for (let tier = 2; tier >= 0; tier--) {
+      const payload = buildProblemInsertPayload(problemData, tier);
+      const { data, error } = await window.db.from('problems').update(payload).eq('id', id).select().maybeSingle();
+      if (!error) { _problemsCache = null; return data; }
+      lastError = error;
+      if (!isSchemaOrRlsError(error)) throw error;
+    }
+    throw lastError || new Error('Could not update problem. Run vidx-setup.sql in Supabase SQL Editor.');
+  } catch (e) {
+    console.error('updateProblem:', e);
+    throw e;
+  }
+}
+
 // ─── LEADERBOARD ────────────────────────────────────────────────────────────
 
 async function getLeaderboard(limit = 50) {
@@ -373,8 +402,13 @@ async function getUserRank(userId, knownXp = null) {
 function getRankTitle(xp) {
   if (xp >= 5000) return 'Legend';
   if (xp >= 2000) return 'Code Samurai';
-  if (xp >= 500) return 'Debug Warrior';
+  if (xp >= 800) return 'Debug Warrior';
   return 'Newbie';
+}
+function getExperienceLevel(xp, currentLevel) {
+  if (xp >= 2000) return 'advanced';
+  if (xp >= 800) return 'intermediate';
+  return currentLevel || 'newbie';
 }
 
 async function giveXP(userId, amount) {
@@ -383,10 +417,13 @@ async function giveXP(userId, amount) {
     if (!profile) throw new Error('User not found');
     const newXP = (profile.xp || 0) + amount;
     const rankTitle = getRankTitle(newXP);
-    const { error } = await _safeUpdate('users', { xp: newXP, rank_title: rankTitle }, q => q.eq('id', userId));
+    const newLevel = getExperienceLevel(newXP, profile.experience_level);
+    const updates = { xp: newXP, rank_title: rankTitle };
+    if (newLevel !== profile.experience_level) updates.experience_level = newLevel;
+    const { error } = await _safeUpdate('users', updates, q => q.eq('id', userId));
     if (error) throw error;
     invalidateProfileCache(userId);
-    return { newXP, rankTitle };
+    return { newXP, rankTitle, newLevel };
   } catch (e) {
     console.error('giveXP:', e);
     return null;
@@ -451,6 +488,22 @@ async function hasUserSolvedProblem(userId, problemId) {
     return (data || []).length > 0;
   } catch (e) { return false; }
 }
+async function hasUserAttemptedWrong(userId, problemId) {
+  try {
+    const { data } = await window.db.from('submissions').select('id')
+      .eq('user_id', userId).eq('problem_id', problemId)
+      .eq('status', 'wrong').limit(1);
+    return (data || []).length > 0;
+  } catch (e) { return false; }
+}
+function diffTier(d) {
+  const x = normDiff(d);
+  return x === 'hard' ? 3 : x === 'medium' ? 2 : 1;
+}
+function levelTier(level) {
+  const x = (level || 'newbie').toLowerCase();
+  return x === 'advanced' ? 3 : x === 'intermediate' ? 2 : 1;
+}
 
 async function submitSolution(userId, problemId, options = {}) {
   try {
@@ -464,8 +517,9 @@ async function submitSolution(userId, problemId, options = {}) {
     const isAccepted = verdict === 'Accepted';
     let xpGained = 0, position = null, streakBonus = 0;
 
-    const [alreadySolved, problem] = await Promise.all([
+    const [alreadySolved, alreadyWrong, problem] = await Promise.all([
       hasUserSolvedProblem(userId, problemId),
+      hasUserAttemptedWrong(userId, problemId),
       getProblemById(problemId)
     ]);
     const xpReward = problem?.xp_reward || 100;
@@ -491,11 +545,9 @@ async function submitSolution(userId, problemId, options = {}) {
         _problemsCache = null;
       }
     } else if (verdict === 'Answer Only') {
-      xpGained = XP_ANSWER_ONLY;
-      await giveXP(userId, xpGained);
+      if (!alreadySolved) { xpGained = XP_ANSWER_ONLY; await giveXP(userId, xpGained); }
     } else {
-      xpGained = XP_WRONG;
-      await giveXP(userId, xpGained);
+      if (!alreadyWrong && !alreadySolved) { xpGained = XP_WRONG; await giveXP(userId, xpGained); }
     }
 
     const row = {
@@ -720,6 +772,17 @@ async function adminResetStreak(userId) {
     return { success: true };
   } catch (e) { console.error('adminResetStreak:', e); return { success: false, error: e.message }; }
 }
+async function adminDeleteStudent(userId) {
+  try {
+    const { data, error } = await window.db.from('users').delete().eq('id', userId).select();
+    if (error) throw error;
+    if (!data || data.length === 0) {
+      return { success: false, error: 'Nothing was deleted — this is a database permission (RLS) issue, not a code issue. Re-run the DELETE policy SQL for the "users" table in Supabase.' };
+    }
+    invalidateProfileCache(userId);
+    return { success: true };
+  } catch (e) { console.error('adminDeleteStudent:', e); return { success: false, error: e.message }; }
+}
 
 // ─── AUTH GUARDS (location.replace so Back button never traps the user) ─────
 
@@ -731,7 +794,9 @@ async function requireAuth() {
     // Clear it locally so the next login starts clean instead of repeatedly failing silently.
     if (error) { try { await window.db.auth.signOut({ scope: 'local' }); } catch (e2) {} }
   } catch (e) { console.error('requireAuth:', e); }
-  window.location.replace('login.html');
+    const _here = window.location.pathname.split('/').pop() + window.location.search;
+  saveNext(_here);
+  window.location.replace('login.html?next=' + encodeURIComponent(_here));
   return null;
 }
 
@@ -917,6 +982,40 @@ async function toggleLike(userId, problemId) {
 // ─── CODE EXECUTION ─────────────────────────────────────────────────────────
 // Judge0 CE → Judge0 Extra → Glot. Judge0 tries wait=true first, then async token polling.
 
+const JDOODLE_CLIENT_ID = 'a83e0e423cd60aa903b1b95991ef26c9';
+const JDOODLE_CLIENT_SECRET = '7bd72030fe22e22720f7dfd8be13da6af396566930ce2ff983f545e7417bcb2e'; // ← isko khud apne secret se replace karo
+
+const JDOODLE_LANG = {
+  python:     { language: 'python3', versionIndex: '4' },
+  java:       { language: 'java',    versionIndex: '4' },
+  cpp:        { language: 'cpp17',   versionIndex: '1' },
+  javascript: { language: 'nodejs',  versionIndex: '4' },
+  c:          { language: 'c',       versionIndex: '5' },
+  csharp:     { language: 'csharp',  versionIndex: '3' },
+  kotlin:     { language: 'kotlin',  versionIndex: '3' },
+  go:         { language: 'go',      versionIndex: '4' },
+  php:        { language: 'php',     versionIndex: '4' }
+};
+
+async function executeViaJDoodle(langKey, code, stdin) {
+  const cfg = JDOODLE_LANG[langKey];
+  if (!cfg) throw new Error('Unsupported language for JDoodle');
+  if (!JDOODLE_CLIENT_SECRET || JDOODLE_CLIENT_SECRET.includes('YAHAN_')) throw new Error('JDoodle not configured');
+  const res = await fetch('https://api.jdoodle.com/v1/execute', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      clientId: JDOODLE_CLIENT_ID, clientSecret: JDOODLE_CLIENT_SECRET,
+      script: code, language: cfg.language, versionIndex: cfg.versionIndex, stdin: stdin || ''
+    })
+  });
+  if (!res.ok) throw new Error(`JDoodle HTTP ${res.status}`);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return {
+    stdout: data.output || '', stderr: '',
+    code: 0, runtimeMs: Math.round((parseFloat(data.cpuTime) || 0) * 1000), memoryKb: data.memory || 0
+  };
+}
 const JUDGE0_BASES = ['https://ce.judge0.com', 'https://extra.judge0.com'];
 const GLOT_URL = 'https://glot.io/api/run';
 
@@ -924,7 +1023,12 @@ const LANG_CONFIG = {
   python:     { language_id: 71, label: 'Python 3',   glot: { language: 'python',     version: 'latest', filename: 'main.py' } },
   java:       { language_id: 62, label: 'Java',       glot: { language: 'java',       version: 'latest', filename: 'Main.java' } },
   cpp:        { language_id: 54, label: 'C++',        glot: { language: 'cpp',        version: 'latest', filename: 'main.cpp' } },
-  javascript: { language_id: 63, label: 'JavaScript', glot: { language: 'javascript', version: 'latest', filename: 'main.js' } }
+  javascript: { language_id: 63, label: 'JavaScript', glot: { language: 'javascript', version: 'latest', filename: 'main.js' } },
+  c:          { language_id: 50, label: 'C',          glot: { language: 'c',          version: 'latest', filename: 'main.c' } },
+  csharp:     { language_id: 51, label: 'C#',         glot: { language: 'csharp',     version: 'latest', filename: 'main.cs' } },
+  kotlin:     { language_id: 78, label: 'Kotlin',     glot: { language: 'kotlin',     version: 'latest', filename: 'main.kt' } },
+  go:         { language_id: 60, label: 'Go',         glot: { language: 'go',         version: 'latest', filename: 'main.go' } },
+  php:        { language_id: 68, label: 'PHP',        glot: { language: 'php',        version: 'latest', filename: 'main.php' } }
 };
 
 async function executeViaGlot(langKey, code, stdin) {
@@ -993,6 +1097,8 @@ async function executeCode(langKey, code, stdin = '', timeoutMs = 10000) {
     try { return await executeViaJudge0(base, langKey, code, stdin, timeoutMs); }
     catch (e) { console.warn('[VidX Execute]', base, 'failed:', e.message); }
   }
+  try { return await executeViaJDoodle(langKey, code, stdin); }
+  catch (e) { console.warn('[VidX Execute] JDoodle failed:', e.message); }
   try { return await executeViaGlot(langKey, code, stdin); }
   catch (e) { console.warn('[VidX Execute] Glot failed:', e.message); }
   throw new Error('All code execution services are currently unavailable. Please try again in a moment.');
@@ -1041,7 +1147,10 @@ async function judgeSubmission(langKey, code, testCases, timeoutMs = 8000, onPro
       passed++;
     } catch (e) {
       const msg = e.message || 'Runtime Error';
-      return { verdict: msg.includes('Time Limit') ? 'Time Limit Exceeded' : 'Runtime Error', passed, total: cases.length,
+      let verdict = 'Runtime Error';
+      if (msg.includes('Time Limit')) verdict = 'Time Limit Exceeded';
+      else if (msg.includes('unavailable')) verdict = 'Judge Unavailable';
+      return { verdict, passed, total: cases.length,
         failedCase: { index: i + 1, error: msg }, runtimeMs: totalRuntime };
     }
   }
@@ -1115,3 +1224,465 @@ function dateStr(d) {
 }
 
 const getUserSubmissionActivity = (userId, days = 112) => getUserActivity(userId, days);
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SHARE LINK + QR  and  "next page after login" helpers
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ---------- "go to this page after login/signup" ----------
+const NEXT_KEY = 'vidx_next';
+const NEXT_MAX_AGE_MS = 24 * 3600 * 1000;
+
+// Only our own student pages are allowed (never external URLs, login/register or admin pages)
+function isSafeNext(p) {
+  if (typeof p !== 'string' || p.length > 300) return false;
+  if (!/^[a-z0-9_-]+\.html(\?[^#\s]*)?$/i.test(p)) return false;
+  return !/^(login|register|reset-password|index|admin[a-z0-9_-]*)\.html/i.test(p);
+}
+function saveNext(p) {
+  if (!isSafeNext(p)) return false;
+  try { localStorage.setItem(NEXT_KEY, JSON.stringify({ p: p, t: Date.now() })); } catch (e) {}
+  return true;
+}
+function readNext() {
+  try {
+    const o = JSON.parse(localStorage.getItem(NEXT_KEY) || 'null');
+    if (o && isSafeNext(o.p) && Date.now() - o.t < NEXT_MAX_AGE_MS) return o.p;
+  } catch (e) {}
+  return null;
+}
+function clearNext() { try { localStorage.removeItem(NEXT_KEY); } catch (e) {} }
+
+function getPostAuthTarget(defaultPage) {
+  let t = readNext();
+  if (!t) {
+    try { const n = new URLSearchParams(location.search).get('next'); if (isSafeNext(n)) t = n; } catch (e) {}
+  }
+  clearNext();
+  return t || defaultPage;
+}
+function goAfterAuth(defaultPage) {
+  window.location.replace(getPostAuthTarget(defaultPage || 'dashboard.html'));
+}
+
+// Remember ?next=... as soon as any page is opened with it (login/register pick it up later)
+(function () {
+  try {
+    const n = new URLSearchParams(location.search).get('next');
+    if (n) saveNext(n);
+  } catch (e) {}
+})();
+
+// ---------- share links ----------
+function siteBaseUrl() {
+  return window.location.href.replace(/[?#].*$/, '').replace(/[^\/]*$/, '');
+}
+function buildShareUrl(page, params) {
+  const q = new URLSearchParams(params || {}).toString();
+  return siteBaseUrl() + page + (q ? '?' + q : '');
+}
+function isLocalShareUrl(url) {
+  return /^(file:|https?:\/\/(localhost|127\.|0\.0\.0\.0|192\.168\.|10\.|\[::1\]))/i.test(url);
+}
+
+// ---------- QR library loader (cdnjs first, jsdelivr as backup) ----------
+let _qrLibPromise = null;
+function loadQrLib() {
+  if (window.QRCode) return Promise.resolve();
+  if (_qrLibPromise) return _qrLibPromise;
+  const urls = [
+    'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',
+    'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js'
+  ];
+  _qrLibPromise = new Promise(function (resolve, reject) {
+    let i = 0;
+    (function next() {
+      if (i >= urls.length) { _qrLibPromise = null; reject(new Error('QR library failed to load')); return; }
+      const s = document.createElement('script');
+      s.src = urls[i++];
+      s.onload = function () { window.QRCode ? resolve() : next(); };
+      s.onerror = next;
+      document.head.appendChild(s);
+    })();
+  });
+  return _qrLibPromise;
+}
+
+// ---------- Share popup (QR + copy link + WhatsApp + download) ----------
+function _vxShareStyles() {
+  if (document.getElementById('vxShareStyle')) return;
+  const st = document.createElement('style');
+  st.id = 'vxShareStyle';
+  st.textContent =
+    '#vxShareOv{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:1rem}' +
+    '#vxShareCard{background:#fff;color:#0f172a;border-radius:18px;width:100%;max-width:360px;padding:1.25rem;box-shadow:0 24px 60px rgba(0,0,0,.35);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;position:relative;max-height:92vh;overflow:auto}' +
+    '#vxShareCard h3{margin:0 0 .15rem;font-size:1.05rem;padding-right:1.8rem;word-break:break-word}' +
+    '#vxShareCard .vxSub{color:#64748b;font-size:.8rem;margin-bottom:.8rem}' +
+    '#vxShareX{position:absolute;top:.6rem;right:.75rem;border:0;background:none;font-size:1.4rem;cursor:pointer;color:#64748b}' +
+    '#vxShareWarn{display:none;background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;border-radius:10px;padding:.5rem .65rem;font-size:.75rem;margin-bottom:.75rem}' +
+    '#vxShareQr{display:flex;justify-content:center;background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:12px;min-height:120px;align-items:center;margin-bottom:.75rem}' +
+    '#vxShareQr img{width:220px;height:220px;display:block}' +
+    '#vxShareUrl{width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:10px;padding:.5rem .6rem;font-size:.75rem;color:#334155;margin-bottom:.75rem}' +
+    '#vxShareBtns{display:flex;flex-wrap:wrap;gap:.5rem}' +
+    '#vxShareBtns button{flex:1 1 45%;border:1px solid #cbd5e1;background:#f8fafc;color:#0f172a;border-radius:10px;padding:.55rem .5rem;font-size:.8rem;font-weight:600;cursor:pointer}' +
+    '#vxShareBtns button.vxWa{background:#16a34a;border-color:#16a34a;color:#fff}' +
+    '#vxShareBtns button.vxPri{background:#2563eb;border-color:#2563eb;color:#fff}';
+  document.head.appendChild(st);
+}
+
+function _vxQrCanvas(box) {
+  const c = box.querySelector('canvas');
+  if (c && c.width) return c;
+  const img = box.querySelector('img');
+  if (img && img.src && (img.naturalWidth || img.width)) {
+    const cv = document.createElement('canvas');
+    cv.width = img.naturalWidth || img.width; cv.height = img.naturalHeight || img.height;
+    cv.getContext('2d').drawImage(img, 0, 0);
+    return cv;
+  }
+  return null;
+}
+
+// QR image with white border and the title written under it (good for WhatsApp / printing)
+function _vxQrBlob(box, title) {
+  return new Promise(function (resolve) {
+    const src = _vxQrCanvas(box);
+    if (!src) { resolve(null); return; }
+    const pad = 32, extra = title ? 64 : 0;
+    const cv = document.createElement('canvas');
+    cv.width = src.width + pad * 2; cv.height = src.height + pad * 2 + extra;
+    const ctx = cv.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.drawImage(src, pad, pad);
+    if (title) {
+      ctx.fillStyle = '#0f172a'; ctx.textAlign = 'center';
+      let size = 28, t = title;
+      ctx.font = 'bold ' + size + 'px sans-serif';
+      while (ctx.measureText(t).width > cv.width - 40 && t.length > 4) t = t.slice(0, -2);
+      if (t !== title) t = t.trim() + '…';
+      ctx.fillText(t, cv.width / 2, src.height + pad * 2 + 30);
+    }
+    cv.toBlob(function (b) { resolve(b); }, 'image/png');
+  });
+}
+
+async function openShareModal(opts) {
+  const title = opts.title || 'Share';
+  const url = opts.url;
+  const message = opts.message || title;
+  _vxShareStyles();
+  const old = document.getElementById('vxShareOv'); if (old) old.remove();
+
+  const ov = document.createElement('div');
+  ov.id = 'vxShareOv';
+  ov.innerHTML =
+    '<div id="vxShareCard" role="dialog" aria-modal="true">' +
+      '<button id="vxShareX" aria-label="Close">×</button>' +
+      '<h3></h3><div class="vxSub"></div>' +
+      '<div id="vxShareWarn">⚠️ This link points to your own computer (localhost), so students cannot open it. Deploy the site online first, then share from the deployed admin panel.</div>' +
+      '<div id="vxShareQr">Generating QR…</div>' +
+      '<input id="vxShareUrl" readonly>' +
+      '<div id="vxShareBtns">' +
+        '<button id="vxCopy" class="vxPri">📋 Copy link</button>' +
+        '<button id="vxWa" class="vxWa">💬 WhatsApp</button>' +
+        '<button id="vxDl">⬇️ Download QR</button>' +
+        '<button id="vxNative" style="display:none">📤 Share image</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(ov);
+  ov.querySelector('h3').textContent = title;
+  ov.querySelector('.vxSub').textContent = opts.subtitle || '';
+  const urlEl = ov.querySelector('#vxShareUrl'); urlEl.value = url;
+  if (isLocalShareUrl(url)) ov.querySelector('#vxShareWarn').style.display = 'block';
+
+  const close = function () { ov.remove(); document.removeEventListener('keydown', onKey); };
+  const onKey = function (e) { if (e.key === 'Escape') close(); };
+  document.addEventListener('keydown', onKey);
+  ov.querySelector('#vxShareX').onclick = close;
+  ov.addEventListener('click', function (e) { if (e.target === ov) close(); });
+
+  ov.querySelector('#vxCopy').onclick = async function () {
+    const btn = this;
+    try { await navigator.clipboard.writeText(url); }
+    catch (e) { urlEl.select(); try { document.execCommand('copy'); } catch (e2) {} }
+    btn.textContent = '✓ Copied!';
+    setTimeout(function () { btn.textContent = '📋 Copy link'; }, 1500);
+  };
+  ov.querySelector('#vxWa').onclick = function () {
+    window.open('https://wa.me/?text=' + encodeURIComponent(message + '\n' + url), '_blank', 'noopener');
+  };
+
+  const qrBox = ov.querySelector('#vxShareQr');
+  try {
+    await loadQrLib();
+    qrBox.innerHTML = '';
+    new window.QRCode(qrBox, { text: url, width: 480, height: 480, colorDark: '#000000', colorLight: '#ffffff', correctLevel: window.QRCode.CorrectLevel.M });
+  } catch (e) {
+    qrBox.textContent = 'QR could not be generated (no internet?). You can still copy the link.';
+    ov.querySelector('#vxDl').disabled = true;
+  }
+
+  const fileName = (title.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase() || 'qr') + '-qr.png';
+  ov.querySelector('#vxDl').onclick = async function () {
+    const blob = await _vxQrBlob(qrBox, title);
+    if (!blob) { alert('QR is not ready yet. Wait a second and try again.'); return; }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = fileName;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+  };
+
+  // On phones: send the QR image straight to WhatsApp / any app
+  try {
+    if (navigator.canShare && navigator.share && window.File) {
+      const test = new File([new Blob(['x'], { type: 'image/png' })], 'x.png', { type: 'image/png' });
+      if (navigator.canShare({ files: [test] })) {
+        const nb = ov.querySelector('#vxNative'); nb.style.display = '';
+        nb.onclick = async function () {
+          const blob = await _vxQrBlob(qrBox, title);
+          if (!blob) return;
+          try { await navigator.share({ files: [new File([blob], fileName, { type: 'image/png' })], text: message + '\n' + url }); } catch (e) {}
+        };
+      }
+    }
+  } catch (e) {}
+}
+// ─── PLACEMENT CELL ──────────────────────────────────────────────────────────
+function _randomHex(bytes) {
+  const arr = new Uint8Array(bytes);
+  crypto.getRandomValues(arr);
+  return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function _sha256Hex(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf), b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function _hashPlacementPassword(password, salt) {
+  return _sha256Hex(salt + ':' + password);
+}
+
+async function getPlacementLockStatus() {
+  try {
+    const { data, error } = await window.db.from('placement_settings').select('id,password_hash').eq('id', 1).maybeSingle();
+    if (error) throw error;
+    return { isSet: !!(data && data.password_hash) };
+  } catch (e) { console.error('getPlacementLockStatus:', e); return { isSet: false }; }
+}
+
+async function setupPlacementPassword(newPassword) {
+  try {
+    if (!newPassword || newPassword.length < 4) return { success: false, error: 'Password must be at least 4 characters.' };
+    const status = await getPlacementLockStatus();
+    if (status.isSet) return { success: false, error: 'A password is already set. Use change password instead.' };
+    const salt = _randomHex(16);
+    const hash = await _hashPlacementPassword(newPassword, salt);
+    const { error } = await window.db.from('placement_settings').upsert({ id: 1, password_hash: hash, password_salt: salt, updated_at: new Date().toISOString() });
+    if (error) throw error;
+    return { success: true };
+  } catch (e) { console.error('setupPlacementPassword:', e); return { success: false, error: e.message }; }
+}
+
+async function verifyPlacementPassword(password) {
+  try {
+    const { data, error } = await window.db.from('placement_settings').select('password_hash,password_salt').eq('id', 1).maybeSingle();
+    if (error) throw error;
+    if (!data || !data.password_hash) return { success: false, error: 'No password set yet.' };
+    const hash = await _hashPlacementPassword(password || '', data.password_salt);
+    if (hash !== data.password_hash) return { success: false, error: 'Incorrect password.' };
+    sessionStorage.setItem('vidx_placement_unlocked', 'true');
+    return { success: true };
+  } catch (e) { console.error('verifyPlacementPassword:', e); return { success: false, error: e.message }; }
+}
+
+async function changePlacementPassword(currentPassword, newPassword) {
+  try {
+    if (!newPassword || newPassword.length < 4) return { success: false, error: 'New password must be at least 4 characters.' };
+    const check = await verifyPlacementPassword(currentPassword);
+    if (!check.success) return { success: false, error: 'Current password is incorrect.' };
+    const salt = _randomHex(16);
+    const hash = await _hashPlacementPassword(newPassword, salt);
+    const { error } = await window.db.from('placement_settings').update({ password_hash: hash, password_salt: salt, updated_at: new Date().toISOString() }).eq('id', 1);
+    if (error) throw error;
+    return { success: true };
+  } catch (e) { console.error('changePlacementPassword:', e); return { success: false, error: e.message }; }
+}
+
+function isPlacementUnlocked() { return sessionStorage.getItem('vidx_placement_unlocked') === 'true'; }
+function lockPlacement() { sessionStorage.removeItem('vidx_placement_unlocked'); }
+
+async function adminGetPlacementTests() {
+  try {
+    const { data, error } = await window.db.from('placement_tests').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  } catch (e) { console.error('adminGetPlacementTests:', e); return []; }
+}
+
+async function adminCreatePlacementTest(title, description) {
+  try {
+    if (!title || !title.trim()) return { success: false, error: 'Title is required.' };
+    const { error } = await window.db.from('placement_tests').insert({ title: title.trim(), description: (description || '').trim(), status: 'draft' });
+    if (error) throw error;
+    return { success: true };
+  } catch (e) { console.error('adminCreatePlacementTest:', e); return { success: false, error: e.message }; }
+}
+
+async function adminDeletePlacementTest(id) {
+  try {
+    const { error } = await window.db.from('placement_tests').delete().eq('id', id);
+    if (error) throw error;
+    return { success: true };
+  } catch (e) { console.error('adminDeletePlacementTest:', e); return { success: false, error: e.message }; }
+}
+
+async function adminGetPlacementTest(id) {
+  try {
+    const { data, error } = await window.db.from('placement_tests').select('*').eq('id', id).maybeSingle();
+    if (error) throw error;
+    return data;
+  } catch (e) { console.error('adminGetPlacementTest:', e); return null; }
+}
+
+async function adminUploadPlacementPdf(testId, base64Data, fileName) {
+  try {
+    if (!base64Data) return { success: false, error: 'No file data received.' };
+    const sizeBytes = Math.ceil((base64Data.length * 3) / 4);
+    if (sizeBytes > 4 * 1024 * 1024) return { success: false, error: 'PDF is larger than 4MB — please use a smaller/compressed file.' };
+    const { error } = await window.db.from('placement_tests').update({ pdf_name: fileName, pdf_data: base64Data, pdf_uploaded_at: new Date().toISOString() }).eq('id', testId);
+    if (error) throw error;
+    return { success: true };
+  } catch (e) { console.error('adminUploadPlacementPdf:', e); return { success: false, error: e.message }; }
+}
+
+async function adminRemovePlacementPdf(testId) {
+  try {
+    const { error } = await window.db.from('placement_tests').update({ pdf_name: null, pdf_data: null, pdf_uploaded_at: null }).eq('id', testId);
+    if (error) throw error;
+    return { success: true };
+  } catch (e) { console.error('adminRemovePlacementPdf:', e); return { success: false, error: e.message }; }
+}
+
+async function adminGetPlacementQuestions(testId) {
+  try {
+    const { data, error } = await window.db.from('placement_questions').select('*').eq('test_id', testId).order('question_order', { ascending: true });
+    if (error) throw error;
+    return data || [];
+  } catch (e) { console.error('adminGetPlacementQuestions:', e); return []; }
+}
+
+async function adminAddPlacementQuestion(testId, q) {
+  try {
+    if (!q || !q.question_text || !q.question_text.trim()) return { success: false, error: 'Question text is required.' };
+    const existing = await adminGetPlacementQuestions(testId);
+    const nextOrder = existing.length ? Math.max(...existing.map(x => x.question_order || 0)) + 1 : 1;
+    const row = {
+      test_id: testId,
+      question_type: q.question_type === 'code' ? 'code' : 'mcq',
+      question_text: q.question_text.trim(),
+      options: q.question_type === 'code' ? null : (q.options || []),
+      correct_answer: (q.correct_answer || '').trim(),
+      code_starter: q.question_type === 'code' ? (q.code_starter || '') : null,
+      code_language: q.question_type === 'code' ? (q.code_language || 'javascript') : null,
+      points: q.points && !isNaN(q.points) ? parseInt(q.points) : 10,
+      question_order: nextOrder
+    };
+    const { error } = await window.db.from('placement_questions').insert(row);
+    if (error) throw error;
+    return { success: true };
+  } catch (e) { console.error('adminAddPlacementQuestion:', e); return { success: false, error: e.message }; }
+}
+
+async function adminDeletePlacementQuestion(id) {
+  try {
+    const { error } = await window.db.from('placement_questions').delete().eq('id', id);
+    if (error) throw error;
+    return { success: true };
+  } catch (e) { console.error('adminDeletePlacementQuestion:', e); return { success: false, error: e.message }; }
+}
+async function adminGetEligibleStudentIds(testId) {
+  try {
+    const { data, error } = await window.db.from('placement_eligibility').select('student_id').eq('test_id', testId);
+    if (error) throw error;
+    return (data || []).map(r => r.student_id);
+  } catch (e) { console.error('adminGetEligibleStudentIds:', e); return []; }
+}
+
+async function adminSetEligibleStudents(testId, studentIds) {
+  try {
+    await window.db.from('placement_eligibility').delete().eq('test_id', testId);
+    if (studentIds.length) {
+      const rows = studentIds.map(id => ({ test_id: testId, student_id: id }));
+      const { error } = await window.db.from('placement_eligibility').insert(rows);
+      if (error) throw error;
+    }
+    return { success: true };
+  } catch (e) { console.error('adminSetEligibleStudents:', e); return { success: false, error: e.message }; }
+}
+
+async function adminTogglePublishTest(testId, publish) {
+  try {
+    const { error } = await window.db.from('placement_tests').update({ status: publish ? 'published' : 'draft' }).eq('id', testId);
+    if (error) throw error;
+    return { success: true };
+  } catch (e) { console.error('adminTogglePublishTest:', e); return { success: false, error: e.message }; }
+}
+
+async function getMyPlacementTests(userId) {
+  try {
+    const { data: elig, error: e1 } = await window.db.from('placement_eligibility').select('test_id').eq('student_id', userId);
+    if (e1) throw e1;
+    const testIds = (elig || []).map(r => r.test_id);
+    if (!testIds.length) return [];
+    const { data, error } = await window.db.from('placement_tests').select('*').in('id', testIds).eq('status', 'published').order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  } catch (e) { console.error('getMyPlacementTests:', e); return []; }
+}
+async function isEligibleForPlacementTest(testId, userId) {
+  try {
+    const { data } = await window.db.from('placement_eligibility').select('id').eq('test_id', testId).eq('student_id', userId).limit(1);
+    return (data || []).length > 0;
+  } catch (e) { return false; }
+}
+
+async function hasAttemptedPlacementTest(testId, userId) {
+  try {
+    const { data } = await window.db.from('placement_attempts').select('id,submitted_at').eq('test_id', testId).eq('student_id', userId).maybeSingle();
+    return data || null;
+  } catch (e) { return null; }
+}
+
+async function getPlacementTestForStudent(testId, userId) {
+  try {
+    const eligible = await isEligibleForPlacementTest(testId, userId);
+    if (!eligible) return { error: 'You are not eligible for this test.' };
+    const { data: test, error: e1 } = await window.db.from('placement_tests').select('*').eq('id', testId).eq('status', 'published').maybeSingle();
+    if (e1 || !test) return { error: 'Test not found or not published.' };
+    const { data: questions, error: e2 } = await window.db.from('placement_questions').select('*').eq('test_id', testId).order('question_order', { ascending: true });
+    if (e2) throw e2;
+    return { test, questions: questions || [] };
+  } catch (e) { console.error('getPlacementTestForStudent:', e); return { error: e.message }; }
+}
+
+async function submitPlacementAttempt(testId, userId, answers, violations) {
+  try {
+    const { data: questions } = await window.db.from('placement_questions').select('*').eq('test_id', testId);
+    let score = 0, maxScore = 0;
+    (questions || []).forEach(q => {
+      maxScore += q.points || 0;
+      if (q.question_type === 'mcq' && answers[q.id] && answers[q.id] === q.correct_answer) {
+        score += q.points || 0;
+      }
+      // code-type questions are not auto-graded — teacher reviews manually
+    });
+    const { error } = await window.db.from('placement_attempts').upsert({
+      test_id: testId, student_id: userId, answers, score, max_score: maxScore,
+      violations: violations || 0, submitted_at: new Date().toISOString()
+    }, { onConflict: 'test_id,student_id' });
+    if (error) throw error;
+    return { success: true, score, maxScore };
+  } catch (e) { console.error('submitPlacementAttempt:', e); return { success: false, error: e.message }; }
+}

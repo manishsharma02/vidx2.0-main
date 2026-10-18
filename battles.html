@@ -1064,13 +1064,13 @@
           </div>
         </div>
  
-
         <div class="tab-row" data-aos="fade-up">
           <div class="tab active" onclick="switchTab('upcoming',this)">⏳ Upcoming</div>
           <div class="tab" onclick="switchTab('live',this)">🔴 Live</div>
           <div class="tab" onclick="switchTab('completed',this)">✅ Completed</div>
           <div class="tab" onclick="switchTab('recent',this)">🕒 Recent</div>
           <div class="tab" onclick="switchTab('history',this)">📋 My History</div>
+          <div class="tab" onclick="switchTab('placement',this)">🎓 Placement</div>
         </div>
  
 
@@ -1103,7 +1103,7 @@
  
 
         <!-- MY HISTORY -->
-        <div id="tab-history" style="display:none">
+              <div id="tab-history" style="display:none">
           <div class="section-title">📋 My Battle History</div>
           <div class="table-wrap">
             <table class="history-table">
@@ -1123,10 +1123,15 @@
             </table>
           </div>
         </div>
+
+        <!-- PLACEMENT TESTS -->
+        <div id="tab-placement" style="display:none">
+          <div class="section-title">🎓 Placement Tests</div>
+          <div class="battle-grid" id="placementTests"><p style="color:var(--muted)">Loading...</p></div>
+        </div>
       </div>
     </div>
   </div>
- 
 
   <script src="supabase.js"></script>
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
@@ -1152,13 +1157,26 @@
  
 
     function switchTab(tab,el){
-      ['upcoming','live','completed','recent','history'].forEach(t=>{
+      ['upcoming','live','completed','recent','history','placement'].forEach(t=>{
         document.getElementById('tab-'+t).style.display='none';
       });
       document.getElementById('tab-'+tab).style.display='block';
       document.querySelectorAll('.tab-row .tab').forEach(t=>t.classList.remove('active'));
       el.classList.add('active');
+      if(tab==='placement') loadPlacementTests();
     }
+
+    async function loadPlacementTests(){
+      const tests = await getMyPlacementTests(currentUser.id);
+      const el = document.getElementById('placementTests');
+      if (!tests.length) { el.innerHTML = '<p style="color:var(--muted)">No placement tests assigned to you yet.</p>'; return; }
+          el.innerHTML = tests.map(t => `
+        <div class="battle-card">
+          <h3>${esc(t.title)}</h3>
+          <p style="color:var(--muted);font-size:0.88rem">${esc(t.description||'')}</p>
+          <a class="btn" style="margin-top:0.75rem;display:inline-block;text-decoration:none" href="placement-attempt.html?id=${t.id}">Start Test</a>
+        </div>`).join('');
+      }
  
 
     async function onDbReady(){
@@ -1171,10 +1189,32 @@
         document.getElementById('sidebarRank').textContent=profile.rank_title||'Newbie';
       }
       await loadBattles();
+            handleDeepLink();
       setInterval(loadBattles,60000);
     }
  
-
+    // Opened from an admin-shared link / QR:  battles.html?battle=<id>
+    function handleDeepLink(){
+      const id=new URLSearchParams(location.search).get('battle');
+      if(!id) return;
+      history.replaceState(null,'','battles.html'); // refresh / Back will not re-trigger it
+      const b=allBattles.find(x=>x.id===id);
+      if(!b){ alert('This battle is not available. It may not be published yet, or it was removed.'); return; }
+      const openTab=function(tab){
+        const el=document.querySelector('.tab-row .tab[onclick*="\''+tab+'\'"]');
+        if(el) switchTab(tab,el);
+      };
+      if(b.status==='completed'){ location.replace('battle-room.html?id='+encodeURIComponent(id)+'&view=results'); return; }
+      if(b.status==='cancelled'){ openTab('completed'); alert('This battle was cancelled.'); return; }
+      if(b.status==='live'){
+        if(myRegistrations.has(id)){ location.replace('battle-room.html?id='+encodeURIComponent(id)); return; }
+        openTab('live'); alert('This battle has already started, so registration is closed.'); return;
+      }
+      openTab('upcoming');
+      if(myRegistrations.has(id)){ alert('You are already registered for this battle. See you at the start!'); return; }
+      if(b.registration_deadline&&new Date(b.registration_deadline)<new Date()){ alert('Registration for this battle is closed.'); return; }
+      openRegModal(id);
+    }
     async function loadBattles(){
       try{
         const {data:battles,error:bErr}=await window.db

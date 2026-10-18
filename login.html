@@ -1038,7 +1038,7 @@
         if (result.success) {
           showAlert('Welcome back! Redirecting...', 'success');
           setTimeout(() => {
-            window.location.replace('dashboard.html');
+                        goAfterAuth('dashboard.html');
           }, 800);
         } else {
           showAlert(result.error || 'Login failed. Please check your credentials.', 'error');

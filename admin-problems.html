@@ -619,7 +619,8 @@
               <input type="date" id="dailyDate">
             </div>
           </div>
-          <button type="submit" class="btn" style="margin-top:1.5rem">Add Problem +</button>
+          <button type="submit" class="btn" id="formSubmitBtn" style="margin-top:1.5rem">Add Problem +</button>
+          <button type="button" class="btn-ghost" id="cancelEditBtn" style="margin-top:1.5rem;margin-left:0.75rem;display:none" onclick="cancelEdit()">Cancel Edit</button>
         </form>
       </div>
 
@@ -645,6 +646,7 @@
     function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show');}
     function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');}
     let allProblems=[];
+    let editingId=null;
     function onDbReady(){ if(!requireAdmin())return; loadProblems(); }
     async function loadProblems(){
       allProblems=await getAllProblems(true);
@@ -663,13 +665,46 @@
           <td><span style="font-size:0.82rem;color:var(--neon-cyan);font-weight:600">${esc(p.topic||'')}</span></td>
           <td class="mono">${p.solve_count||0}</td>
           <td>${p.is_daily?'<span style="color:#059669;font-weight:600">● Daily</span>':'<span style="color:var(--text-muted)">—</span>'}</td>
-          <td><button class="action-btn" onclick="deleteProblem('${p.id}')" title="Delete">🗑️</button></td>
-        </tr>`;
+                    <td><button class="action-btn" onclick="shareProblem('${p.id}')" title="Share link / QR">🔗</button> <td>
+            <button class="action-btn" onclick="editProblem('${p.id}')" title="Edit">✏️</button>
+            <button class="action-btn" onclick="deleteProblem('${p.id}')" title="Delete">🗑️</button>
+          </td>
+                            </tr>`;
       }).join(''):'<tr><td colspan="7" style="text-align:center;color:var(--text-muted)">No problems found</td></tr>';
     }
     function filterTable(){
       const q=document.getElementById('searchBar').value.toLowerCase();
       renderTable(allProblems.filter(p=>(p.title||'').toLowerCase().includes(q)));
+    }
+    function editProblem(id){
+      const p=allProblems.find(x=>x.id===id);
+      if(!p){alert('Problem not found.');return;}
+      editingId=id;
+      document.getElementById('title').value=p.title||'';
+      document.getElementById('difficulty').value=p.difficulty||'Easy';
+      document.getElementById('topic').value=p.topic||'Arrays';
+      document.getElementById('xpReward').value=p.xp_reward||50;
+      document.getElementById('description').value=p.description||'';
+      document.getElementById('constraints').value=p.constraints||'';
+      document.getElementById('hint').value=p.hint||'';
+      document.getElementById('editorial').value=p.editorial||'';
+      document.getElementById('sampleInput').value=p.sample_input||'';
+      document.getElementById('sampleOutput').value=p.sample_output||'';
+      document.getElementById('testCases').value=p.test_cases?JSON.stringify(p.test_cases,null,2):'';
+      document.getElementById('hiddenTestCases').value=p.hidden_test_cases?JSON.stringify(p.hidden_test_cases,null,2):'';
+      document.getElementById('isDaily').checked=!!p.is_daily;
+      document.getElementById('dailyDate').value=p.daily_date||'';
+      const companies=p.companies||[];
+      document.querySelectorAll('.checkbox-group input').forEach(c=>{c.checked=companies.includes(c.value);});
+      document.getElementById('formSubmitBtn').textContent='Update Problem ✓';
+      document.getElementById('cancelEditBtn').style.display='inline-block';
+      document.getElementById('problemForm').scrollIntoView({behavior:'smooth'});
+    }
+    function cancelEdit(){
+      editingId=null;
+      document.getElementById('problemForm').reset();
+      document.getElementById('formSubmitBtn').textContent='Add Problem +';
+      document.getElementById('cancelEditBtn').style.display='none';
     }
     document.getElementById('problemForm').addEventListener('submit',async(e)=>{
       e.preventDefault();
@@ -698,8 +733,15 @@
       };
       if(submitBtn) submitBtn.disabled=true;
       try{
-        await insertProblem(data);
-        alert('Problem added!');document.getElementById('problemForm').reset();loadProblems();
+        if(editingId){
+          await updateProblem(editingId,data);
+          alert('Problem updated!');
+          cancelEdit();
+        }else{
+          await insertProblem(data);
+          alert('Problem added!');document.getElementById('problemForm').reset();
+        }
+        loadProblems();
       }catch(err){
         const msg=err.message||String(err);
         if(isSchemaOrRlsError(err)){
@@ -708,6 +750,16 @@
       }
       if(submitBtn) submitBtn.disabled=false;
     });
+        function shareProblem(id){
+      const p=allProblems.find(x=>x.id===id);
+      if(!p) return;
+      openShareModal({
+        title:p.title,
+        subtitle:'Problem · scan QR or open link, then login/signup',
+        url:buildShareUrl('problem.html',{id:p.id}),
+        message:'💻 VidX Problem: '+p.title+'\nSolve it here:'
+      });
+    }
     async function deleteProblem(id){
       if(!confirm('Delete this problem?'))return;
       const {error}=await window.db.from('problems').delete().eq('id',id);

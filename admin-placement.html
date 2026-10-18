@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Placement Cell — VidX Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+  <link rel="stylesheet" href="animations.css">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-card: #ffffff;
+      --bg-card-hover: #ffffff;
+      --bg-input: #f8fafc;
+      --neon-red: #ef4444;
+      --neon-purple: #7c3aed;
+      --neon-blue: #2563eb;
+      --neon-cyan: #0891b2;
+      --neon-green: #059669;
+      --glow-red: rgba(239, 68, 68, 0.2);
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --dim: #94a3b8;
+      --border: #e2e8f0;
+      --border-glow: rgba(239, 68, 68, 0.25);
+      --sidebar-w: 264px;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--neon-red); }
+
+    .layout { display: flex; min-height: 100vh; position: relative; }
+
+    .sidebar {
+      position: fixed; left: 0; top: 0; bottom: 0; width: var(--sidebar-w);
+      background: #ffffff; border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; padding: 1.75rem 0; z-index: 100;
+      overflow-y: auto; transition: transform 0.35s var(--ease);
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.02);
+    }
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 0.85rem; padding: 0 1.75rem 1.75rem;
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem;
+      text-decoration: none; color: var(--text); border-bottom: 1px solid var(--border);
+      letter-spacing: -0.02em;
+    }
+    .logo-icon {
+      width: 36px; height: 36px; background: linear-gradient(135deg, var(--neon-red), #f97316);
+      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 0.82rem; font-weight: 800; color: #fff; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    .admin-badge {
+      display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.35rem 0.8rem;
+      font-size: 0.72rem; color: #dc2626; background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.28); border-radius: 100px; font-weight: 800;
+      margin: 1.2rem 1.75rem 0.5rem; width: fit-content; text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .nav-section { padding: 0.75rem 0; }
+    .nav-label {
+      padding: 0 1.75rem; font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.12em; color: var(--dim); margin-bottom: 0.5rem;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 0.85rem; padding: 0.72rem 1.75rem;
+      color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.88rem;
+      border-left: 3px solid transparent; transition: all 0.2s ease;
+    }
+    .nav-item:hover { color: var(--text); background: #f8fafc; padding-left: 1.95rem; }
+    .nav-item.active {
+      color: var(--neon-red); border-left-color: var(--neon-red);
+      background: linear-gradient(90deg, rgba(239, 68, 68, 0.08) 0%, transparent 100%); font-weight: 700;
+    }
+    .sidebar-user { margin-top: auto; padding: 1.25rem 1.75rem; border-top: 1px solid var(--border); background: #f8fafc; }
+
+    .main { margin-left: var(--sidebar-w); flex: 1; padding: 2.75rem 3.5rem 4rem; min-width: 0; max-width: 1440px; }
+    .mobile-topbar {
+      display: none; align-items: center; gap: 1rem; padding: 1rem 1.25rem; background: #ffffff;
+      border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 90;
+      margin: -2.75rem -3.5rem 2rem -3.5rem;
+    }
+    .hamburger {
+      background: #ffffff; border: 1px solid var(--border); border-radius: 8px; color: var(--text);
+      font-size: 1.25rem; cursor: pointer; width: 38px; height: 38px; display: flex;
+      align-items: center; justify-content: center;
+    }
+    .page-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1.25rem; }
+    .page-title { font-family: 'Syne', sans-serif; font-size: 2.4rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; color: var(--text); }
+    .cyntexa-kicker { display:flex; align-items:center; gap:0.5rem; font-size:0.78rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.5rem; }
+    .cyntexa-kicker-dot { width:6px; height:6px; border-radius:50%; }
+
+    .btn {
+      padding: 0.85rem 1.6rem; border: none; border-radius: 12px; font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700; font-size: 0.92rem; cursor: pointer; background: linear-gradient(135deg, var(--neon-red), #f97316);
+      color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;
+      transition: all 0.2s var(--ease); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); white-space: nowrap;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(239, 68, 68, 0.45); }
+    .btn-ghost { background: #ffffff; color: var(--text); border: 1px solid var(--border); box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+    .btn-ghost:hover { border-color: #cbd5e1; background: #f8fafc; transform: translateY(-1px); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .lock-wrap { min-height: 80vh; display: flex; align-items: center; justify-content: center; }
+    .lock-card {
+      width: 100%; max-width: 420px; background: #ffffff; border: 1px solid var(--border); border-radius: 20px;
+      padding: 2.5rem; box-shadow: 0 12px 36px rgba(0,0,0,0.06); text-align: center;
+    }
+    .lock-icon {
+      width: 60px; height: 60px; border-radius: 16px; background: rgba(239,68,68,0.1); color: var(--neon-red);
+      display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin: 0 auto 1.25rem;
+    }
+    .lock-card h2 { font-family: 'Syne', sans-serif; font-size: 1.4rem; margin-bottom: 0.4rem; }
+    .lock-card p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .field { text-align: left; margin-bottom: 1rem; }
+    .field label { display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.4rem; }
+    .field input {
+      width: 100%; padding: 0.85rem 1rem; border: 1px solid var(--border); border-radius: 12px;
+      font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.95rem; outline: none; transition: all 0.2s ease;
+      background: #f8fafc;
+    }
+    .field input:focus { border-color: var(--neon-purple); box-shadow: 0 0 0 3px rgba(124,58,237,0.15); }
+    .lock-msg { font-size: 0.85rem; margin-top: 1rem; min-height: 1.2rem; font-weight: 600; }
+    .lock-msg.error { color: var(--neon-red); }
+    .lock-msg.ok { color: var(--neon-green); }
+    .lock-card .btn { width: 100%; justify-content: center; }
+
+    .card { background: #ffffff; border: 1px solid var(--border); border-radius: 18px; padding: 1.75rem; box-shadow: 0 4px 18px rgba(0,0,0,0.03); }
+    .card + .card { margin-top: 1.5rem; }
+    .card h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; margin-bottom: 1rem; }
+    .toolbar { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+
+    .table-wrap { background: #ffffff; border: 1px solid var(--border); border-radius: 20px; overflow-x: auto; box-shadow: 0 4px 18px rgba(0,0,0,0.03); }
+    table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    th, td { padding: 1.1rem 1.25rem; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    th { background: #f8fafc; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+    tbody tr:hover { background: #f8fafc; }
+    .status-pill { display:inline-block; padding:0.2rem 0.6rem; border-radius:9999px; font-size:0.75rem; font-weight:700; background:rgba(124,58,237,0.08); color:var(--neon-purple); border:1px solid rgba(124,58,237,0.2); text-transform:capitalize; }
+    .action-btn {
+      background: #f1f5f9; border: 1px solid var(--border); border-radius: 8px; padding: 0.4rem 0.75rem;
+      cursor: pointer; font-size: 0.78rem; color: var(--text); margin-right: 0.35rem; font-weight: 600;
+      font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.2s ease;
+    }
+    .action-btn:hover { background: #e2e8f0; border-color: #cbd5e1; transform: translateY(-1px); }
+
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.4); backdrop-filter: blur(4px); z-index: 999; }
+    .overlay.show { display: block; }
+    .modal { display:none; position:fixed; inset:0; z-index:1000; align-items:center; justify-content:center; padding:1rem; }
+    .modal.show { display:flex; }
+    .modal-card { width:100%; max-width:420px; background:#fff; border-radius:18px; padding:2rem; box-shadow:0 20px 50px rgba(0,0,0,0.2); }
+    .modal-card h3 { font-family:'Syne', sans-serif; margin-bottom:1.25rem; }
+
+    .note-box { background: rgba(8, 145, 178, 0.06); border: 1px solid rgba(8, 145, 178, 0.2); border-radius: 14px; padding: 1rem 1.25rem; font-size: 0.85rem; color: #0e7490; margin-bottom: 1.5rem; }
+
+    @media(max-width: 768px) {
+      .sidebar { transform: translateX(-100%); z-index: 1000; }
+      .sidebar.open { transform: translateX(0); z-index: 1001; }
+      .main { margin-left: 0; padding: 1.25rem 1rem 2.5rem; }
+      .mobile-topbar { display: flex; margin: -1.25rem -1rem 1.25rem -1rem; }
+      .page-title { font-size: 1.8rem; }
+      .toolbar { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <a href="admin-dashboard.html" class="sidebar-logo"><div class="logo-icon">VX</div>VidX</a>
+      <div class="admin-badge">🔴 Command System</div>
+      <div class="nav-section">
+        <div class="nav-label">Control Center</div>
+        <a href="admin-dashboard.html" class="nav-item">📊 Dashboard</a>
+        <a href="admin-problems.html" class="nav-item">📝 Manage Problems</a>
+        <a href="admin-students.html" class="nav-item">👥 Manage Students</a>
+        <a href="admin-battles.html" class="nav-item">⚔️ Manage Battles</a>
+        <a href="admin-leaderboard.html" class="nav-item">🏆 Manage Leaderboard</a>
+        <a href="admin-placement.html" class="nav-item active">🎯 Placement Cell</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Student View</div>
+        <a href="index.html" class="nav-item">🌐 Landing Page</a>
+        <a href="dashboard.html" class="nav-item">👁 Campus Terminal</a>
+      </div>
+      <div class="sidebar-user">
+        <div style="font-weight:700;color:var(--text)">Administrator</div>
+        <div style="font-size:.8rem;color:var(--neon-red);font-weight:600">Super Admin Access</div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="mobile-topbar"><button class="hamburger" onclick="toggleSidebar()">☰</button><strong>Placement Cell</strong></div>
+
+      <div id="lockScreen" class="lock-wrap" style="display:none">
+        <div class="lock-card">
+          <div class="lock-icon">🔒</div>
+          <h2 id="lockTitle">Placement Section Locked</h2>
+          <p id="lockSubtitle">Enter the placement-cell password to continue.</p>
+
+          <div id="unlockForm">
+            <div class="field">
+              <label>Password</label>
+              <input type="password" id="unlockPassword" placeholder="Enter placement password" autocomplete="current-password">
+            </div>
+            <button class="btn" onclick="handleUnlock()">Unlock →</button>
+          </div>
+
+          <div id="setupForm" style="display:none">
+            <div class="field">
+              <label>Create Password</label>
+              <input type="password" id="setupPassword" placeholder="Choose a password (min 4 chars)" autocomplete="new-password">
+            </div>
+            <div class="field">
+              <label>Confirm Password</label>
+              <input type="password" id="setupPasswordConfirm" placeholder="Re-enter password" autocomplete="new-password">
+            </div>
+            <button class="btn" onclick="handleSetup()">Create & Unlock →</button>
+          </div>
+
+          <div id="lockMsg" class="lock-msg"></div>
+        </div>
+      </div>
+
+      <div id="placementContent" style="display:none">
+        <div class="page-header" data-aos="fade-up">
+          <div>
+            <div class="cyntexa-kicker" style="color:var(--neon-red)"><span class="cyntexa-kicker-dot" style="background:var(--neon-red)"></span>PLACEMENT CELL</div>
+            <h1 class="page-title">Placement <span style="font-style:italic;font-weight:400;color:var(--neon-purple)">Section.</span></h1>
+          </div>
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+            <button class="btn btn-ghost" onclick="openChangePassword()">🔑 Change Password</button>
+            <button class="btn btn-ghost" onclick="handleLock()">🔒 Lock Section</button>
+          </div>
+        </div>
+
+        <div class="note-box">
+          Base structure ready: password lock + test list. Paper (PDF) upload and manual question builder are included below.
+        </div>
+
+        <div class="card" data-aos="fade-up">
+          <div class="toolbar" style="margin-bottom:1rem">
+            <h3 style="margin:0">Placement Tests</h3>
+            <button class="btn" onclick="openCreateTest()">+ New Test</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Title</th><th>Description</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+              <tbody id="testsTable"><tr><td colspan="5" style="text-align:center;color:var(--text-muted)">Loading tests...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="changePwModal">
+    <div class="modal-card">
+      <h3>Change Placement Password</h3>
+      <div class="field">
+        <label>Current Password</label>
+        <input type="password" id="cpCurrent" autocomplete="current-password">
+      </div>
+      <div class="field">
+        <label>New Password</label>
+        <input type="password" id="cpNew" autocomplete="new-password">
+      </div>
+      <div class="field">
+        <label>Confirm New Password</label>
+        <input type="password" id="cpConfirm" autocomplete="new-password">
+      </div>
+      <div id="cpMsg" class="lock-msg"></div>
+      <div style="display:flex;gap:0.75rem;margin-top:0.5rem">
+        <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closeModal('changePwModal')">Cancel</button>
+        <button class="btn" style="flex:1;justify-content:center" onclick="handleChangePassword()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="createTestModal">
+    <div class="modal-card">
+      <h3>New Placement Test</h3>
+      <div class="field">
+        <label>Test Title</label>
+        <input type="text" id="ctTitle" placeholder="e.g. TechMark Aptitude Round 1">
+      </div>
+      <div class="field">
+        <label>Description (optional)</label>
+        <input type="text" id="ctDesc" placeholder="Short note about this test">
+      </div>
+      <div id="ctMsg" class="lock-msg"></div>
+      <div style="display:flex;gap:0.75rem;margin-top:0.5rem">
+        <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closeModal('createTestModal')">Cancel</button>
+        <button class="btn" style="flex:1;justify-content:center" onclick="handleCreateTest()">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="supabase.js"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="animations.js"></script>
+  <script>
+    function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show');}
+    function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');}
+
+    async function onDbReady(){
+      if (!requireAdmin()) return;
+      await initPlacementGate();
+    }
+
+    async function initPlacementGate(){
+      if (isPlacementUnlocked()) { showContent(); return; }
+      document.getElementById('lockScreen').style.display = 'flex';
+      const status = await getPlacementLockStatus();
+      if (status.isSet) {
+        document.getElementById('unlockForm').style.display = 'block';
+        document.getElementById('setupForm').style.display = 'none';
+      } else {
+        document.getElementById('lockTitle').textContent = 'Set Up Placement Password';
+        document.getElementById('lockSubtitle').textContent = 'No password exists yet — create one now. Share it only with the placement cell.';
+        document.getElementById('unlockForm').style.display = 'none';
+        document.getElementById('setupForm').style.display = 'block';
+      }
+    }
+
+    function showLockMsg(text, type){
+      const el = document.getElementById('lockMsg');
+      el.textContent = text; el.className = 'lock-msg ' + (type || '');
+    }
+
+    async function handleUnlock(){
+      const pw = document.getElementById('unlockPassword').value;
+      if (!pw) { showLockMsg('Enter the password.', 'error'); return; }
+      const r = await verifyPlacementPassword(pw);
+      if (!r.success) { showLockMsg(r.error || 'Incorrect password.', 'error'); return; }
+      showLockMsg('Unlocked!', 'ok');
+      setTimeout(showContent, 300);
+    }
+
+    async function handleSetup(){
+      const pw = document.getElementById('setupPassword').value;
+      const pw2 = document.getElementById('setupPasswordConfirm').value;
+      if (!pw || pw.length < 4) { showLockMsg('Password must be at least 4 characters.', 'error'); return; }
+      if (pw !== pw2) { showLockMsg('Passwords do not match.', 'error'); return; }
+      const r = await setupPlacementPassword(pw);
+      if (!r.success) { showLockMsg(r.error || 'Could not set password.', 'error'); return; }
+      const v = await verifyPlacementPassword(pw);
+      if (!v.success) { showLockMsg(v.error || 'Something went wrong, try unlocking again.', 'error'); return; }
+      showLockMsg('Password created!', 'ok');
+      setTimeout(showContent, 300);
+    }
+
+    function showContent(){
+      document.getElementById('lockScreen').style.display = 'none';
+      document.getElementById('placementContent').style.display = 'block';
+      loadTests();
+    }
+
+    function handleLock(){
+      lockPlacement();
+      document.getElementById('placementContent').style.display = 'none';
+      document.getElementById('unlockPassword').value = '';
+      showLockMsg('', '');
+      initPlacementGate();
+    }
+
+    function openModal(id){ document.getElementById(id).classList.add('show'); }
+    function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+
+    function openChangePassword(){
+      document.getElementById('cpCurrent').value = '';
+      document.getElementById('cpNew').value = '';
+      document.getElementById('cpConfirm').value = '';
+      document.getElementById('cpMsg').textContent = '';
+      openModal('changePwModal');
+    }
+
+    async function handleChangePassword(){
+      const cur = document.getElementById('cpCurrent').value;
+      const next = document.getElementById('cpNew').value;
+      const confirm = document.getElementById('cpConfirm').value;
+      const msgEl = document.getElementById('cpMsg');
+      if (!cur || !next) { msgEl.textContent = 'Fill in all fields.'; msgEl.className = 'lock-msg error'; return; }
+      if (next !== confirm) { msgEl.textContent = 'New passwords do not match.'; msgEl.className = 'lock-msg error'; return; }
+      const r = await changePlacementPassword(cur, next);
+      if (!r.success) { msgEl.textContent = r.error || 'Could not change password.'; msgEl.className = 'lock-msg error'; return; }
+      msgEl.textContent = 'Password updated!'; msgEl.className = 'lock-msg ok';
+      setTimeout(() => closeModal('changePwModal'), 700);
+    }
+
+    function openCreateTest(){
+      document.getElementById('ctTitle').value = '';
+      document.getElementById('ctDesc').value = '';
+      document.getElementById('ctMsg').textContent = '';
+      openModal('createTestModal');
+    }
+
+    async function handleCreateTest(){
+      const title = document.getElementById('ctTitle').value;
+      const desc = document.getElementById('ctDesc').value;
+      const msgEl = document.getElementById('ctMsg');
+      const r = await adminCreatePlacementTest(title, desc);
+      if (!r.success) { msgEl.textContent = r.error || 'Could not create test.'; msgEl.className = 'lock-msg error'; return; }
+      closeModal('createTestModal');
+      loadTests();
+    }
+
+    async function loadTests(){
+      const tests = await adminGetPlacementTests();
+      const tbody = document.getElementById('testsTable');
+      if (!tests.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted)">No placement tests yet. Click "+ New Test" to create one.</td></tr>'; return; }
+      tbody.innerHTML = tests.map(t => `
+        <tr>
+          <td style="font-weight:600">${esc(t.title)}</td>
+          <td style="color:var(--text-muted)">${esc(t.description || '—')}</td>
+          <td><span class="status-pill">${esc(t.status || 'draft')}</span></td>
+          <td class="mono" style="color:var(--text-muted)">${new Date(t.created_at).toLocaleDateString()}</td>
+          <td>
+            <a class="action-btn" href="admin-placement-test.html?id=${t.id}" style="text-decoration:none;display:inline-block">📄 Manage</a>
+            <button class="action-btn" onclick="deleteTest('${t.id}')">🗑️ Delete</button>
+          </td>
+        </tr>`).join('');
+    }
+
+    async function deleteTest(id){
+      if (!confirm('Delete this placement test?')) return;
+      const r = await adminDeletePlacementTest(id);
+      if (!r.success) alert(r.error || 'Could not delete.');
+      loadTests();
+    }
+  </script>
+</body>
+</html>

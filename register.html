@@ -920,7 +920,7 @@
           } else if (result && result.success) {
             showToast('✅ Account created successfully! Redirecting...');
             setTimeout(() => {
-              window.location.replace('dashboard.html');
+                           goAfterAuth('dashboard.html');
             }, 1200);
           } else {
             showAlert((result && result.error) || 'Registration failed. Please check your inputs.', 'error');

@@ -521,8 +521,8 @@
           <td>${(s.streak||0) > 0 ? `🔥 <span class="mono" style="color:#d97706;font-weight:700">${s.streak}</span>` : '<span style="color:var(--text-muted)">0</span>'}</td>
           <td><span style="display:inline-block;padding:0.2rem 0.6rem;border-radius:9999px;font-size:0.75rem;font-weight:700;background:rgba(124,58,237,0.08);color:var(--neon-purple);border:1px solid rgba(124,58,237,0.2)">${esc(s.rank_title||'Newbie')}</span></td>
           <td>
-            <button class="action-btn" onclick="editXP('${s.id}',${s.xp||0})">✏️ Edit XP</button>
             <button class="action-btn" onclick="resetStreak('${s.id}')">🔄 Reset Streak</button>
+            <button class="action-btn" style="color:#dc2626" onclick="deleteStudent('${s.id}','${esc(name)}')">🗑️ Delete</button>
           </td>
         </tr>`;
       }).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--text-muted)">No students found</td></tr>';
@@ -544,6 +544,13 @@
       if(!confirm('Reset streak for this student?'))return;
       const r=await adminResetStreak(id);
       if(!r.success)alert(r.error);
+      loadStudents();
+    }
+    async function deleteStudent(id,name){
+      if(!confirm(`Delete "${name}" permanently? This cannot be undone.`))return;
+      const r=await adminDeleteStudent(id);
+      if(!r.success){alert(r.error);return;}
+      alert('Student deleted.');
       loadStudents();
     }
     function exportCSV(){
